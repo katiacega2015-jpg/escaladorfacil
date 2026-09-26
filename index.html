@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<title>Tarot Místico</title>
+<title>Oráculo das 52 Lâminas</title>
 <style>
   :root{
     --bg-1:#150a2e;
@@ -40,11 +40,12 @@
     text-align:center;
     padding:18px 16px 10px;
     flex-shrink:0;
+    position:relative;
   }
   header h1{
     font-family:Georgia, "Times New Roman", serif;
-    letter-spacing:2px;
-    font-size:22px;
+    letter-spacing:1px;
+    font-size:20px;
     margin:0;
     color:var(--gold-soft);
     text-shadow:0 0 12px rgba(217,184,108,.4);
@@ -116,9 +117,14 @@
     color:#2b1a05;
     flex-direction:column; padding:8px; text-align:center; gap:4px;
   }
-  .card-front.reversed{transform:rotateY(180deg) rotate(180deg);}
+  .card-front.sombra{
+    background:linear-gradient(160deg,#2a1620,#150a12);
+    border:1px solid var(--danger);
+    color:#f3d8d8;
+  }
   .card-front .name{font-family:Georgia, serif; font-weight:700; font-size:12.5px; line-height:1.15;}
   .card-front .tag{font-size:9px; letter-spacing:.5px; text-transform:uppercase; color:#7a5a1e;}
+  .card-front.sombra .tag{color:#c98a8a;}
   .empty-slot{
     width:100%; height:100%; border-radius:10px;
     border:1.5px dashed rgba(217,184,108,.3);
@@ -177,7 +183,7 @@
 <div id="app">
   <header>
     <button class="icon-btn" id="historyBtn" aria-label="Histórico">☰</button>
-    <h1>✦ Tarot Místico ✦</h1>
+    <h1>✦ Oráculo das 52 Lâminas ✦</h1>
     <p>Respire fundo e escolha sua tiragem</p>
   </header>
 
@@ -204,70 +210,125 @@
 (function(){
   "use strict";
 
-  /* ---------- Deck data ---------- */
+  /* ---------- Deck data: baralho autoral de 52 cartas ---------- */
+
+  // Parte I — Arcanos Maiores (22 cartas, sem posição invertida)
   var MAJOR = [
-    ["O Louco","início, espontaneidade, fé, potencial ilimitado","imprudência, risco, distração, atraso"],
-    ["O Mago","manifestação, poder pessoal, ação, recursos","manipulação, talentos desperdiçados, planos mal feitos"],
-    ["A Sacerdotisa","intuição, mistério, sabedoria interior, subconsciente","segredos escondidos, desconexão da intuição, confusão"],
-    ["A Imperatriz","abundância, fertilidade, natureza, nutrição","dependência, bloqueio criativo, negligência"],
-    ["O Imperador","autoridade, estrutura, controle, liderança","rigidez, dominação, falta de disciplina"],
-    ["O Hierofante","tradição, conformidade, ensino, instituições","rebeldia, caminho não convencional, restrição"],
-    ["Os Enamorados","amor, harmonia, escolhas, relacionamentos","desequilíbrio, escolha errada, conflito de valores"],
-    ["O Carro","vontade, determinação, vitória, controle","falta de direção, agressão, obstáculos"],
-    ["A Força","coragem, paciência, compaixão, força interior","insegurança, fraqueza, dúvida"],
-    ["O Eremita","introspecção, solidão, busca interior, orientação","isolamento excessivo, solidão, retraimento"],
-    ["A Roda da Fortuna","ciclos, destino, mudança, sorte","revés, resistência à mudança, má sorte"],
-    ["A Justiça","verdade, equilíbrio, lei, causa e efeito","injustiça, desonestidade, falta de responsabilidade"],
-    ["O Enforcado","pausa, novo ponto de vista, sacrifício","resistência, atraso, estagnação"],
-    ["A Morte","fim, transformação, transição, mudança","resistência à mudança, estagnação, medo do fim"],
-    ["A Temperança","equilíbrio, moderação, paciência, propósito","excesso, desequilíbrio, falta de visão de longo prazo"],
-    ["O Diabo","apego, vícios, materialismo, restrição","libertação, romper padrões, reconquistar o controle"],
-    ["A Torre","ruptura súbita, caos, revelação, despertar","medo de mudança, desastre evitado, adiamento"],
-    ["A Estrela","esperança, fé, propósito, renovação","desespero, falta de fé, desconexão"],
-    ["A Lua","ilusão, medo, subconsciente, intuição","confusão liberada, medo superado, clareza"],
-    ["O Sol","sucesso, vitalidade, alegria, positividade","otimismo excessivo, atraso temporário, ofuscamento"],
-    ["O Julgamento","renascimento, ajuste de contas, despertar","autocrítica, dúvida, redenção negada"],
-    ["O Mundo","realização, plenitude, viagem, conclusão","incompletude, atalhos, falta de encerramento"]
-  ].map(function(a){ return {name:a[0], arcana:"Arcano Maior", suitInfo:null, upright:a[1], reversed:a[2]}; });
+    ["O Errante","O salto de fé rumo ao desconhecido, sem bagagens ou medos. A liberdade absoluta de quem confia na própria jornada.","Indica um momento de arriscar, iniciar algo totalmente novo e abandonar a necessidade de controle. Pede espontaneidade e coragem para ser autêntico."],
+    ["O Alquimista","O poder da manifestação. Aquele que domina os elementos ao seu redor e transforma ideias intangíveis em realidade material.","Mostra que você possui todos os recursos, contatos e habilidades necessárias para resolver o problema. Aja com foco e determinação."],
+    ["O Oráculo","A intuição pura e os mistérios ocultos. A voz silenciosa do subconsciente que guarda sabedorias ancestrais.","O momento não exige ação física, mas escuta interior. Segredos podem ser revelados. Confie em seus pressentimentos e preste atenção aos sonhos."],
+    ["A Matriz","A fonte criadora, a fertilidade e a abundância. A energia acolhedora que nutre e dá vida a tudo que toca.","Sinaliza crescimento, prosperidade, gravidez (física ou de projetos) e uma fase de grande força criativa. Conecte-se com a natureza e com o prazer de viver."],
+    ["O Arquiteto","A autoridade que traz ordem ao caos. A força estrutural que estabelece limites, regras e fundações duradouras.","Pede organização, disciplina e liderança. É hora de agir com razão, assumir o controle da situação e não ceder a chantagens emocionais."],
+    ["O Mentor","A tradição, a ética e a ponte entre o humano e o divino. O conhecimento estruturado passado através de gerações.","Busque aconselhamento com alguém mais experiente ou siga os métodos tradicionais. Indica também instituições, cursos acadêmicos e compromissos formais."],
+    ["O Pacto","O alinhamento profundo de valores. As encruzilhadas da vida que exigem escolhas morais e uniões verdadeiras.","Um momento de decisão importante que deve ser feita com o coração, não apenas com a lógica. Pode indicar grandes parcerias, sociedades ou o encontro de um amor genuíno."],
+    ["O Conquistador","O domínio sobre os próprios instintos conflitantes para avançar com determinação em uma única direção.","Movimento rápido, viagens ou a superação de obstáculos através da pura força de vontade e foco implacável. Você está no controle e a vitória é certa se não desviar a rota."],
+    ["O Domínio","A coragem compassiva. A capacidade de domar as \"feras\" interiores e exteriores não com brutalidade, mas com amor e firmeza.","Pede paciência, resiliência e persuasão. Enfrente seus medos ou uma pessoa difícil usando a doçura e a diplomacia, controlando seus impulsos nervosos."],
+    ["O Buscador","A jornada solitária para dentro. O uso da própria luz como farol para encontrar respostas longe do barulho do mundo.","Necessidade vital de isolamento, reflexão e autopreservação. Não tome decisões apressadas; afaste-se temporariamente para enxergar o quadro geral."],
+    ["O Ciclo","A roda inescapável do destino. A impermanência da vida, onde altos e baixos se alternam continuamente.","Mudanças inesperadas (frequentemente positivas, de \"sorte\") estão a caminho. Aceite que algumas coisas estão fora do seu controle e adapte-se ao movimento do universo."],
+    ["A Balança","A verdade nua e crua que corta ilusões. A lei universal de causa e efeito, onde cada ação encontra sua justa reação.","Assuntos legais, assinaturas de contratos e necessidade de imparcialidade. Você colherá exatamente o que plantou. Seja ético e exija justiça."],
+    ["A Suspensão","O sacrifício voluntário e a iluminação alcançada ao olhar o mundo por um ângulo invertido e desconfortável.","Situações estagnadas. Pare de forçar as coisas a acontecerem. Aceite a pausa obrigatória, mude sua perspectiva e faça concessões para destravar a energia."],
+    ["A Passagem","A transformação profunda e a transição inescapável. A morte de velhas formas para adubar o terreno do novo.","Finais definitivos e cortes radicais (um emprego, um relacionamento, um hábito). Aceite o luto e o desapego, pois esta limpeza é essencial para sua renovação."],
+    ["A Síntese","O equilíbrio alquímico. A mistura harmoniosa de opostos e a paciência para deixar o tempo agir como agente curador.","Pede moderação, meio-termo e calma. Não vá a extremos. Bom presságio para a saúde, harmonização de conflitos e reconciliações."],
+    ["As Correntes","O reino das sombras, dos desejos densos, da sexualidade, dos vícios e das ilusões de aprisionamento.","Alerta para relações tóxicas, obsessões, ambição desmedida ou dependências emocionais/financeiras. Lembre-se: as correntes estão soltas, você só está preso pelo próprio medo ou comodismo."],
+    ["O Colapso","O raio que destrói as fundações falsas. A crise inevitável que liberta a verdade aprisionada pelo orgulho.","Ruptura repentina de estruturas que já não serviam (divórcios repentinos, demissões, quebra de paradigmas). O choque é doloroso, mas traz libertação total."],
+    ["A Aurora","A luz da esperança brilhando após a tempestade. A renovação da fé, a inspiração celestial e a pura cura espiritual.","Um momento de grande proteção cósmica, alívio e otimismo. Deixe sua luz brilhar, invista em seus talentos e acredite no futuro. O pior já passou."],
+    ["O Labirinto","As águas profundas do inconsciente. O reino dos medos, das projeções, das paranoias e das emoções flutuantes.","Cuidado com ilusões, fofocas, traições ou autoenganos. As coisas não são o que parecem. Enfrente suas inseguranças e não deixe a ansiedade guiar seus passos."],
+    ["O Zênite","O triunfo absoluto da luz. A clareza, a vitalidade inesgotável, a alegria de viver e o sucesso radiante.","Excelente presságio. Confirmação de vitória, resolução de todos os problemas, saúde plena, energia infantil e sucesso público. Diga \"sim\" para a vida."],
+    ["O Chamado","O soar da trombeta para uma nova consciência. O momento de autoavaliação final, o despertar e a absolvição.","Uma vocação se apresenta. Perdoe os erros do passado (seus e dos outros) e abrace uma nova chance. Retorno de pessoas ou situações para um encerramento definitivo."],
+    ["O Cosmos","A totalidade, a integração do microcosmo com o macrocosmo e a conclusão gloriosa da longa jornada da alma.","O ápice da realização. Projetos concluídos com sucesso, viagens internacionais, expansão de limites e a sensação de estar exatamente onde deveria estar."]
+  ].map(function(a, i){
+    return {name:a[0], group:"Arcano Maior", groupTheme:null, number:i, text:a[1] + " — " + a[2], special:false};
+  });
 
-  var SUITS = [
-    {key:"bastoes", name:"Bastões", theme:"ação, energia, criatividade, paixão"},
-    {key:"copas", name:"Copas", theme:"emoções, relacionamentos, intuição, amor"},
-    {key:"espadas", name:"Espadas", theme:"intelecto, conflito, verdade, comunicação"},
-    {key:"ouros", name:"Ouros", theme:"material, trabalho, dinheiro, corpo"}
-  ];
-
-  var RANKS = [
-    {label:"Ás", up:"novo começo, potencial puro", rev:"oportunidade perdida, atraso"},
-    {label:"Dois", up:"equilíbrio, parceria, escolha", rev:"indecisão, desequilíbrio"},
-    {label:"Três", up:"crescimento, colaboração, expansão", rev:"desalinhamento, atraso no crescimento"},
-    {label:"Quatro", up:"estabilidade, estrutura, pausa", rev:"estagnação, instabilidade"},
-    {label:"Cinco", up:"conflito, perda, desafio", rev:"recuperação, aceitação da perda"},
-    {label:"Seis", up:"harmonia, generosidade, progresso", rev:"desequilíbrio, egoísmo"},
-    {label:"Sete", up:"reflexão, estratégia, avaliação", rev:"falta de progresso, ilusão"},
-    {label:"Oito", up:"movimento, mudança rápida, foco", rev:"estagnação, frustração"},
-    {label:"Nove", up:"quase lá, resiliência, cautela", rev:"exaustão, ansiedade"},
-    {label:"Dez", up:"conclusão, culminação, excesso", rev:"fim de ciclo, alívio"},
-    {label:"Pajem", up:"mensagem, curiosidade, novo aprendizado", rev:"imaturidade, notícia atrasada"},
-    {label:"Cavaleiro", up:"ação, impulso, busca", rev:"impulsividade, imprudência"},
-    {label:"Rainha", up:"maturidade emocional, nutrição, domínio", rev:"insegurança, dependência emocional"},
-    {label:"Rei", up:"maestria, autoridade, controle", rev:"tirania, rigidez, abuso de poder"}
+  // Parte II — Arcanos Menores: 4 elementos x 7 graus (28 cartas, sem posição invertida)
+  var ELEMENTS = [
+    {
+      key:"agua", name:"Água", theme:"Emoção, Relacionamentos, Intuição",
+      graus:[
+        ["O Vínculo","O nascimento do afeto e da atração.","Indica o início de um romance, uma nova amizade ou uma reconciliação promissora. Abra-se para a troca emocional."],
+        ["O Oásis","O equilíbrio entre a festa e o retiro.","Comemore as pequenas vitórias com quem você ama, mas saiba quando se afastar para recarregar as energias emocionais."],
+        ["A Saudade","O bálsamo das memórias curando a dor da perda.","Resgate a pureza do passado para curar tristezas presentes. O retorno de alguém antigo, ou a necessidade de perdoar uma decepção emocional."],
+        ["A Miragem","A intuição rompendo as ilusões reconfortantes.","Abandone um sonho que não tem base na realidade. Hora de deixar para trás uma relação ou ambiente que não preenche mais a sua alma."],
+        ["A Plenitude","O ápice da harmonia familiar e emocional.","Alegria duradoura, paz no lar e desejos profundos do coração sendo atendidos. Você chegou a um estado de contentamento absoluto."],
+        ["O Sonhador","O impulso romântico, sensível e idealista.","Uma pessoa amorosa e poética (ou essa energia em você). Siga a sua intuição, faça uma declaração, ou dedique-se a uma expressão artística."],
+        ["O Guardião das Marés","A maestria emocional, o conselheiro profundo.","Exerça a empatia e o acolhimento sem se perder nas emoções dos outros. Indica maturidade nos relacionamentos e capacidade de curar as próprias feridas."]
+      ]
+    },
+    {
+      key:"fogo", name:"Fogo", theme:"Ação, Criatividade, Vontade",
+      graus:[
+        ["A Centelha","A ideia inicial, o planejamento e o ímpeto de mudar.","É o momento de dar o primeiro passo e sair da zona de conforto. Você tem o plano; agora precisa ter a ousadia de executá-lo."],
+        ["A Fogueira","A primeira expansão, o calor do apoio mútuo.","Indica boas parcerias, consolidação de um projeto e a chegada de bons resultados. Você está em um ambiente que incentiva e celebra o seu crescimento."],
+        ["A Forja","O atrito das competições lapidando o metal da vontade.","Haverá conflitos, oposição ou disputas de ego. Mantenha-se confiante; os desafios trarão reconhecimento público e vitória se você não recuar."],
+        ["O Ímpeto","A energia acelerada e a defesa inabalável do próprio espaço.","As coisas acontecerão muito rápido. Comunique-se com clareza, defenda suas posições e aproveite o momento para resolver pendências com velocidade."],
+        ["A Brasa","A resistência sob pressão extrema, carregando fardos.","Você está sobrecarregado, mas muito perto da linha de chegada. Aguente firme, mas delegue responsabilidades assim que o ciclo terminar."],
+        ["O Desbravador","O pioneiro enérgico, impaciente e passional.","Aja com coragem, entusiasmo e espírito de aventura. Uma viagem inesperada, uma mudança de rota ou uma atitude ousada trará excelentes resultados."],
+        ["O Soberano da Chama","A liderança magnética, o poder de inspiração.","Assuma o comando. Use o seu carisma e a sua autoconfiança para mobilizar pessoas. Seja a figura de autoridade visionária e generosa da situação."]
+      ]
+    },
+    {
+      key:"terra", name:"Terra", theme:"Matéria, Segurança, Concretização",
+      graus:[
+        ["A Semente","O surgimento do recurso material aliado ao malabarismo diário.","Uma nova oportunidade de ganhos está disponível, mas exigirá adaptação, jogo de cintura e flexibilidade na gestão do tempo ou dinheiro."],
+        ["O Alicerce","A edificação cautelosa e a união de competências técnicas.","Trabalhe em equipe para construir algo sólido. Cuidado com a avareza; proteja seus bens, mas não paralise o fluxo financeiro pelo medo de perder."],
+        ["A Providência","O balanço da balança material: escassez e ajuda.","Se estiver em dificuldade, engula o orgulho e peça socorro (um empréstimo, um favor). Se estiver próspero, seja generoso e retribua as bênçãos ao mundo."],
+        ["O Ofício","A repetição metódica, o foco nos detalhes e na produção.","Concentre-se no trabalho e nos estudos práticos. Aprimore suas habilidades. O sucesso chegará não por sorte, mas pelo esforço diário contínuo e bem feito."],
+        ["O Legado","O conforto definitivo, a herança e o patrimônio acumulado.","Desfrute do conforto material, da aposentadoria ou dos lucros de um longo esforço. Indica segurança estrutural, enriquecimento e fortes bases familiares."],
+        ["O Construtor","O avanço pragmático, teimoso e eficiente.","Não procure atalhos. Faça o que precisa ser feito com método, lealdade e perseverança. Cada passo pragmático pavimentará um caminho duradouro."],
+        ["O Soberano da Terra","A abundância instintiva, o provedor rico e próspero.","Aja com visão administrativa e pragmatismo, garantindo o conforto, a saúde física e o sucesso financeiro. Administre seus recursos visando luxo e qualidade."]
+      ]
+    },
+    {
+      key:"ar", name:"Ar", theme:"Mente, Verdade, Conflito",
+      graus:[
+        ["A Lucidez","O \"insight\" cortante que resolve impasses.","Tire as vendas. Use o intelecto frio para tomar a decisão que está sendo evitada. Uma conversa franca, lógica e direta resolverá a questão pendente."],
+        ["A Trégua","O descanso estratégico da mente, a pausa obrigatória para cura.","Pare de pensar excessivamente no problema. Você precisa descansar, meditar ou dormir para cicatrizar uma dor antes de voltar para a vida agitada."],
+        ["A Travessia","O abandono de vitórias inúteis em busca de paz.","Afaste-se da confusão. Aceite a perda, perdoe o agravante e mude fisicamente ou mentalmente de cenário. A paz é mais importante que estar certo."],
+        ["A Armadilha","As prisões criadas pelas crenças limitantes e pela ansiedade.","Você está refém dos seus próprios pensamentos. Pare de criar obstáculos imaginários. A saída é simples: encare o problema de frente e liberte-se."],
+        ["O Abismo","O fim inescapável da negação, o colapso dos esquemas mentais.","Aceite o pior cenário, chore, desabafe. A resistência só prolonga a dor mental. Quando você aceita o fundo do poço, a mente desocupa espaço e o renascimento começa."],
+        ["O Desafiante","A mente inquiridora, o discurso cortante, a pressa em debater.","Exija fatos e verdades. Esteja pronto para argumentar e cortar a manipulação alheia pela raiz. Cuidado apenas para não se tornar excessivamente agressivo ou frio."],
+        ["O Soberano do Ar","A imparcialidade suprema do intelecto refinado, o estratega.","Adote uma postura distanciada e analítica. Julgue a situação de forma ética, clara e sem sentimentalismos. Suas palavras têm o poder de sentenciar o futuro."]
+      ]
+    }
   ];
 
   var MINOR = [];
-  SUITS.forEach(function(suit){
-    RANKS.forEach(function(r){
+  ELEMENTS.forEach(function(el){
+    el.graus.forEach(function(g, idx){
       MINOR.push({
-        name: r.label + " de " + suit.name,
-        arcana: "Arcano Menor",
-        suitInfo: suit,
-        upright: r.up,
-        reversed: r.rev
+        name: g[0],
+        group: "Elemento " + el.name,
+        groupTheme: el.theme,
+        grau: idx + 1,
+        text: g[1] + " — " + g[2],
+        special:false
       });
     });
   });
 
-  var DECK = MAJOR.concat(MINOR); // 78 cards
+  // Parte III — Cartas Especiais (2 cartas, dualidade Luz/Sombra em vez de invertida)
+  var SPECIAL = [
+    {
+      name:"A Paixão",
+      group:"Carta Especial",
+      groupTheme:null,
+      description:"O magnetismo, o desejo absoluto e a necessidade de fusão.",
+      light:"O amor que devota, fortalece e gera milagres. A conexão íntima curadora, o carisma magnético. A força de dar a própria vida por algo sagrado.",
+      dark:"O ciúme possessivo, o apego tóxico e o vazio existencial. A obsessão, a chantagem emocional e a atração perigosa por algo que consumirá sua energia.",
+      special:true
+    },
+    {
+      name:"A Ambição",
+      group:"Carta Especial",
+      groupTheme:null,
+      description:"O instinto de ascensão, o orgulho e a fome de poder.",
+      light:"A superação admirável de limites, o ímpeto de vencer a miséria ou o ostracismo. A liderança que inspira e ergue os oprimidos, construindo um grande legado.",
+      dark:"A ganância insaciável, a tirania, e a política do \"os fins justificam os meios\". O ego que pisa nos outros e acaba governando, solitário, um império de cinzas.",
+      special:true
+    }
+  ];
+
+  var DECK = MAJOR.concat(MINOR).concat(SPECIAL); // 22 + 28 + 2 = 52
 
   /* ---------- Spreads ---------- */
   var SPREADS = [
@@ -297,7 +358,7 @@
       var card = shuffled[i];
       state.drawn.push({
         card: card,
-        reversed: Math.random() < 0.3,
+        polarity: card.special ? (Math.random() < 0.5 ? "luz" : "sombra") : null,
         revealed: false
       });
     }
@@ -308,6 +369,13 @@
     return state.drawn.every(function(d){ return d.revealed; });
   }
 
+  function cardMeaning(d){
+    if(d.card.special){
+      return d.polarity === "sombra" ? d.card.dark : d.card.light;
+    }
+    return d.card.text;
+  }
+
   function saveToHistory(){
     try{
       var list = JSON.parse(localStorage.getItem("tarot_history") || "[]");
@@ -315,7 +383,7 @@
         date: new Date().toISOString(),
         spread: state.spread.label,
         cards: state.drawn.map(function(d){
-          return d.card.name + (d.reversed ? " (invertida)" : "");
+          return d.card.name + (d.polarity ? " (" + (d.polarity === "sombra" ? "Sombra" : "Luz") + ")" : "");
         })
       });
       list = list.slice(0, 30);
@@ -351,15 +419,16 @@
       label.textContent = state.spread.positions[idx] || "";
       slot.appendChild(label);
 
+      var isSombra = d.polarity === "sombra";
       var cardEl = document.createElement("div");
       cardEl.className = "card" + (d.revealed ? " flipped" : "");
       cardEl.innerHTML =
         '<div class="card-inner">' +
           '<div class="card-face card-back"></div>' +
-          '<div class="card-face card-front' + (d.reversed ? " reversed" : "") + '">' +
-            '<div class="tag">' + (d.card.suitInfo ? d.card.suitInfo.name : d.card.arcana) + '</div>' +
+          '<div class="card-face card-front' + (isSombra ? " sombra" : "") + '">' +
+            '<div class="tag">' + d.card.group + '</div>' +
             '<div class="name">' + d.card.name + '</div>' +
-            (d.reversed ? '<div class="tag">Invertida</div>' : '') +
+            (d.polarity ? '<div class="tag">' + (isSombra ? "Sombra" : "Luz") + '</div>' : '') +
           '</div>' +
         '</div>';
       cardEl.onclick = function(){
@@ -380,15 +449,15 @@
     state.drawn.forEach(function(d, idx){
       if(!d.revealed) return;
       any = true;
+      var isSombra = d.polarity === "sombra";
       var box = document.createElement("div");
       box.className = "card-detail";
-      var meaning = d.reversed ? d.card.reversed : d.card.upright;
       box.innerHTML =
         '<h3>' + d.card.name +
-          '<span class="orient' + (d.reversed ? " rev" : "") + '">' + (d.reversed ? "Invertida" : "Normal") + '</span>' +
+          (d.polarity ? '<span class="orient' + (isSombra ? " rev" : "") + '">' + (isSombra ? "Sombra" : "Luz") + '</span>' : '') +
         '</h3>' +
-        '<p class="meaning"><strong>' + (state.spread.positions[idx] || "") + ':</strong> ' + meaning + '</p>' +
-        (d.card.suitInfo ? '<div class="suitline">Naipe ' + d.card.suitInfo.name + ' — ' + d.card.suitInfo.theme + '</div>' : '');
+        '<p class="meaning"><strong>' + (state.spread.positions[idx] || "") + ':</strong> ' + cardMeaning(d) + '</p>' +
+        (d.card.groupTheme ? '<div class="suitline">' + d.card.group + ' — ' + d.card.groupTheme + '</div>' : '');
       infoEl.appendChild(box);
     });
     hintEl.style.display = any ? "none" : "block";
