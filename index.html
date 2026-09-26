@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1a1030">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<title>Tarot Místico</title>
+<style>
+  :root{
+    --bg-1:#150a2e;
+    --bg-2:#2b1055;
+    --gold:#d9b86c;
+    --gold-soft:#f0dca4;
+    --card-back-1:#3a1c71;
+    --card-back-2:#7c2ae8;
+    --ink:#f3ecff;
+    --ink-dim:#c7b8e8;
+    --danger:#e05f5f;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:radial-gradient(ellipse at 50% -10%, var(--bg-2), var(--bg-1) 60%);
+    color:var(--ink);
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overscroll-behavior:none;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  #app{
+    min-height:100vh;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    display:flex; flex-direction:column;
+  }
+  header{
+    text-align:center;
+    padding:18px 16px 10px;
+    flex-shrink:0;
+  }
+  header h1{
+    font-family:Georgia, "Times New Roman", serif;
+    letter-spacing:2px;
+    font-size:22px;
+    margin:0;
+    color:var(--gold-soft);
+    text-shadow:0 0 12px rgba(217,184,108,.4);
+  }
+  header p{margin:4px 0 0; font-size:12px; color:var(--ink-dim);}
+  .icon-btn{
+    position:absolute; top:calc(18px + env(safe-area-inset-top)); right:16px;
+    background:none; border:1px solid rgba(217,184,108,.4); color:var(--gold);
+    border-radius:50%; width:36px; height:36px; font-size:16px; line-height:1;
+    touch-action:manipulation; cursor:pointer;
+  }
+  main{
+    flex:1; display:flex; flex-direction:column; align-items:center;
+    padding:8px 16px 24px; overflow-y:auto;
+  }
+  .spreads{
+    display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+    margin:10px 0 18px;
+  }
+  .spread-btn{
+    background:linear-gradient(160deg, rgba(217,184,108,.15), rgba(217,184,108,.03));
+    border:1px solid rgba(217,184,108,.35);
+    color:var(--gold-soft);
+    padding:10px 16px; border-radius:20px;
+    font-size:13px; touch-action:manipulation; cursor:pointer;
+  }
+  .spread-btn.active{
+    background:var(--gold); color:#2b1055; font-weight:600;
+    box-shadow:0 0 16px rgba(217,184,108,.5);
+  }
+  .board{
+    display:flex; gap:16px; justify-content:center; flex-wrap:wrap;
+    width:100%; margin-bottom:18px;
+  }
+  .slot{display:flex; flex-direction:column; align-items:center; gap:8px; width:104px;}
+  .slot-label{font-size:11px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:1px; min-height:14px;}
+  .card{
+    width:100px; height:168px;
+    perspective:1000px;
+    touch-action:manipulation;
+  }
+  .card-inner{
+    position:relative; width:100%; height:100%;
+    transition:transform .6s cubic-bezier(.2,.8,.2,1);
+    transform-style:preserve-3d;
+  }
+  .card.flipped .card-inner{transform:rotateY(180deg);}
+  .card-face{
+    position:absolute; inset:0; border-radius:10px;
+    backface-visibility:hidden;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 18px rgba(0,0,0,.45);
+  }
+  .card-back{
+    background:
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,.06) 0, transparent 55%),
+      repeating-linear-gradient(45deg, rgba(217,184,108,.08) 0 6px, transparent 6px 12px),
+      linear-gradient(160deg, var(--card-back-2), var(--card-back-1));
+    border:1px solid rgba(217,184,108,.5);
+  }
+  .card-back::after{
+    content:"✦"; color:var(--gold-soft); font-size:26px;
+    text-shadow:0 0 10px rgba(240,220,164,.6);
+  }
+  .card-front{
+    transform:rotateY(180deg);
+    background:linear-gradient(160deg,#fff8ea,#f0e2c0);
+    border:1px solid var(--gold);
+    color:#2b1a05;
+    flex-direction:column; padding:8px; text-align:center; gap:4px;
+  }
+  .card-front.reversed{transform:rotateY(180deg) rotate(180deg);}
+  .card-front .name{font-family:Georgia, serif; font-weight:700; font-size:12.5px; line-height:1.15;}
+  .card-front .tag{font-size:9px; letter-spacing:.5px; text-transform:uppercase; color:#7a5a1e;}
+  .empty-slot{
+    width:100%; height:100%; border-radius:10px;
+    border:1.5px dashed rgba(217,184,108,.3);
+  }
+  .reading-info{
+    width:100%; max-width:520px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .card-detail{
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(217,184,108,.25);
+    border-radius:12px; padding:12px 14px;
+  }
+  .card-detail h3{
+    margin:0 0 4px; font-family:Georgia, serif; font-size:15px; color:var(--gold-soft);
+    display:flex; align-items:center; gap:6px;
+  }
+  .card-detail .orient{font-size:10px; padding:2px 7px; border-radius:8px; background:rgba(217,184,108,.2); color:var(--gold-soft); text-transform:uppercase;}
+  .card-detail .orient.rev{background:rgba(224,95,95,.25); color:#f3b8b8;}
+  .card-detail .meaning{font-size:13px; color:var(--ink-dim); line-height:1.5; margin:0;}
+  .card-detail .suitline{font-size:11px; color:#8a7ab8; margin-top:4px;}
+  .hint{font-size:12px; color:var(--ink-dim); text-align:center; margin:14px 0;}
+  .actions{
+    display:flex; gap:10px; justify-content:center; margin:16px 0 4px; flex-wrap:wrap;
+  }
+  .btn{
+    background:var(--gold); color:#2b1a05; border:none;
+    padding:12px 22px; border-radius:24px; font-size:14px; font-weight:600;
+    touch-action:manipulation; cursor:pointer;
+  }
+  .btn.secondary{
+    background:none; border:1px solid rgba(217,184,108,.4); color:var(--gold-soft);
+  }
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(10,4,25,.85);
+    display:none; align-items:flex-end; justify-content:center; z-index:20;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    width:100%; max-width:560px; max-height:80vh; overflow-y:auto;
+    background:var(--bg-2); border-radius:18px 18px 0 0;
+    padding:18px 18px calc(18px + env(safe-area-inset-bottom));
+    border-top:1px solid rgba(217,184,108,.4);
+  }
+  .modal h2{margin:0 0 12px; font-family:Georgia, serif; color:var(--gold-soft); font-size:17px;}
+  .history-item{
+    border-bottom:1px solid rgba(255,255,255,.08); padding:10px 0; font-size:13px;
+  }
+  .history-item .h-date{color:var(--ink-dim); font-size:11px;}
+  .history-item .h-cards{color:var(--gold-soft); margin-top:2px;}
+  .modal .close-btn{float:right; background:none; border:none; color:var(--ink-dim); font-size:18px; cursor:pointer;}
+  .empty-history{color:var(--ink-dim); font-size:13px; text-align:center; padding:20px 0;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <button class="icon-btn" id="historyBtn" aria-label="Histórico">☰</button>
+    <h1>✦ Tarot Místico ✦</h1>
+    <p>Respire fundo e escolha sua tiragem</p>
+  </header>
+
+  <main>
+    <div class="spreads" id="spreadPicker"></div>
+    <div class="board" id="board"></div>
+    <div class="reading-info" id="readingInfo"></div>
+    <div class="hint" id="hint">Toque nas cartas para revelá-las</div>
+    <div class="actions">
+      <button class="btn" id="newReadingBtn">Nova leitura</button>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="historyOverlay">
+  <div class="modal">
+    <button class="close-btn" id="closeHistory">✕</button>
+    <h2>Histórico de leituras</h2>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- Deck data ---------- */
+  var MAJOR = [
+    ["O Louco","início, espontaneidade, fé, potencial ilimitado","imprudência, risco, distração, atraso"],
+    ["O Mago","manifestação, poder pessoal, ação, recursos","manipulação, talentos desperdiçados, planos mal feitos"],
+    ["A Sacerdotisa","intuição, mistério, sabedoria interior, subconsciente","segredos escondidos, desconexão da intuição, confusão"],
+    ["A Imperatriz","abundância, fertilidade, natureza, nutrição","dependência, bloqueio criativo, negligência"],
+    ["O Imperador","autoridade, estrutura, controle, liderança","rigidez, dominação, falta de disciplina"],
+    ["O Hierofante","tradição, conformidade, ensino, instituições","rebeldia, caminho não convencional, restrição"],
+    ["Os Enamorados","amor, harmonia, escolhas, relacionamentos","desequilíbrio, escolha errada, conflito de valores"],
+    ["O Carro","vontade, determinação, vitória, controle","falta de direção, agressão, obstáculos"],
+    ["A Força","coragem, paciência, compaixão, força interior","insegurança, fraqueza, dúvida"],
+    ["O Eremita","introspecção, solidão, busca interior, orientação","isolamento excessivo, solidão, retraimento"],
+    ["A Roda da Fortuna","ciclos, destino, mudança, sorte","revés, resistência à mudança, má sorte"],
+    ["A Justiça","verdade, equilíbrio, lei, causa e efeito","injustiça, desonestidade, falta de responsabilidade"],
+    ["O Enforcado","pausa, novo ponto de vista, sacrifício","resistência, atraso, estagnação"],
+    ["A Morte","fim, transformação, transição, mudança","resistência à mudança, estagnação, medo do fim"],
+    ["A Temperança","equilíbrio, moderação, paciência, propósito","excesso, desequilíbrio, falta de visão de longo prazo"],
+    ["O Diabo","apego, vícios, materialismo, restrição","libertação, romper padrões, reconquistar o controle"],
+    ["A Torre","ruptura súbita, caos, revelação, despertar","medo de mudança, desastre evitado, adiamento"],
+    ["A Estrela","esperança, fé, propósito, renovação","desespero, falta de fé, desconexão"],
+    ["A Lua","ilusão, medo, subconsciente, intuição","confusão liberada, medo superado, clareza"],
+    ["O Sol","sucesso, vitalidade, alegria, positividade","otimismo excessivo, atraso temporário, ofuscamento"],
+    ["O Julgamento","renascimento, ajuste de contas, despertar","autocrítica, dúvida, redenção negada"],
+    ["O Mundo","realização, plenitude, viagem, conclusão","incompletude, atalhos, falta de encerramento"]
+  ].map(function(a){ return {name:a[0], arcana:"Arcano Maior", suitInfo:null, upright:a[1], reversed:a[2]}; });
+
+  var SUITS = [
+    {key:"bastoes", name:"Bastões", theme:"ação, energia, criatividade, paixão"},
+    {key:"copas", name:"Copas", theme:"emoções, relacionamentos, intuição, amor"},
+    {key:"espadas", name:"Espadas", theme:"intelecto, conflito, verdade, comunicação"},
+    {key:"ouros", name:"Ouros", theme:"material, trabalho, dinheiro, corpo"}
+  ];
+
+  var RANKS = [
+    {label:"Ás", up:"novo começo, potencial puro", rev:"oportunidade perdida, atraso"},
+    {label:"Dois", up:"equilíbrio, parceria, escolha", rev:"indecisão, desequilíbrio"},
+    {label:"Três", up:"crescimento, colaboração, expansão", rev:"desalinhamento, atraso no crescimento"},
+    {label:"Quatro", up:"estabilidade, estrutura, pausa", rev:"estagnação, instabilidade"},
+    {label:"Cinco", up:"conflito, perda, desafio", rev:"recuperação, aceitação da perda"},
+    {label:"Seis", up:"harmonia, generosidade, progresso", rev:"desequilíbrio, egoísmo"},
+    {label:"Sete", up:"reflexão, estratégia, avaliação", rev:"falta de progresso, ilusão"},
+    {label:"Oito", up:"movimento, mudança rápida, foco", rev:"estagnação, frustração"},
+    {label:"Nove", up:"quase lá, resiliência, cautela", rev:"exaustão, ansiedade"},
+    {label:"Dez", up:"conclusão, culminação, excesso", rev:"fim de ciclo, alívio"},
+    {label:"Pajem", up:"mensagem, curiosidade, novo aprendizado", rev:"imaturidade, notícia atrasada"},
+    {label:"Cavaleiro", up:"ação, impulso, busca", rev:"impulsividade, imprudência"},
+    {label:"Rainha", up:"maturidade emocional, nutrição, domínio", rev:"insegurança, dependência emocional"},
+    {label:"Rei", up:"maestria, autoridade, controle", rev:"tirania, rigidez, abuso de poder"}
+  ];
+
+  var MINOR = [];
+  SUITS.forEach(function(suit){
+    RANKS.forEach(function(r){
+      MINOR.push({
+        name: r.label + " de " + suit.name,
+        arcana: "Arcano Menor",
+        suitInfo: suit,
+        upright: r.up,
+        reversed: r.rev
+      });
+    });
+  });
+
+  var DECK = MAJOR.concat(MINOR); // 78 cards
+
+  /* ---------- Spreads ---------- */
+  var SPREADS = [
+    {id:"one", label:"Carta do Dia", count:1, positions:["Mensagem"]},
+    {id:"three", label:"Passado · Presente · Futuro", count:3, positions:["Passado","Presente","Futuro"]},
+    {id:"five", label:"Situação · Ação", count:5, positions:["Situação","Obstáculo","Conselho","Fator externo","Resultado"]}
+  ];
+
+  /* ---------- State ---------- */
+  var state = { spread: SPREADS[1], drawn: [] };
+
+  /* ---------- Helpers ---------- */
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+
+  function drawNewReading(spread){
+    var shuffled = shuffle(DECK);
+    state.spread = spread;
+    state.drawn = [];
+    for(var i=0;i<spread.count;i++){
+      var card = shuffled[i];
+      state.drawn.push({
+        card: card,
+        reversed: Math.random() < 0.3,
+        revealed: false
+      });
+    }
+    render();
+  }
+
+  function allRevealed(){
+    return state.drawn.every(function(d){ return d.revealed; });
+  }
+
+  function saveToHistory(){
+    try{
+      var list = JSON.parse(localStorage.getItem("tarot_history") || "[]");
+      list.unshift({
+        date: new Date().toISOString(),
+        spread: state.spread.label,
+        cards: state.drawn.map(function(d){
+          return d.card.name + (d.reversed ? " (invertida)" : "");
+        })
+      });
+      list = list.slice(0, 30);
+      localStorage.setItem("tarot_history", JSON.stringify(list));
+    }catch(e){ /* localStorage indisponível: ignora silenciosamente */ }
+  }
+
+  /* ---------- Render ---------- */
+  var boardEl = document.getElementById("board");
+  var spreadPickerEl = document.getElementById("spreadPicker");
+  var infoEl = document.getElementById("readingInfo");
+  var hintEl = document.getElementById("hint");
+
+  function renderSpreadPicker(){
+    spreadPickerEl.innerHTML = "";
+    SPREADS.forEach(function(s){
+      var btn = document.createElement("button");
+      btn.className = "spread-btn" + (s.id === state.spread.id ? " active" : "");
+      btn.textContent = s.label;
+      btn.onclick = function(){ drawNewReading(s); };
+      spreadPickerEl.appendChild(btn);
+    });
+  }
+
+  function renderBoard(){
+    boardEl.innerHTML = "";
+    state.drawn.forEach(function(d, idx){
+      var slot = document.createElement("div");
+      slot.className = "slot";
+
+      var label = document.createElement("div");
+      label.className = "slot-label";
+      label.textContent = state.spread.positions[idx] || "";
+      slot.appendChild(label);
+
+      var cardEl = document.createElement("div");
+      cardEl.className = "card" + (d.revealed ? " flipped" : "");
+      cardEl.innerHTML =
+        '<div class="card-inner">' +
+          '<div class="card-face card-back"></div>' +
+          '<div class="card-face card-front' + (d.reversed ? " reversed" : "") + '">' +
+            '<div class="tag">' + (d.card.suitInfo ? d.card.suitInfo.name : d.card.arcana) + '</div>' +
+            '<div class="name">' + d.card.name + '</div>' +
+            (d.reversed ? '<div class="tag">Invertida</div>' : '') +
+          '</div>' +
+        '</div>';
+      cardEl.onclick = function(){
+        if(!d.revealed){
+          d.revealed = true;
+          render();
+          if(allRevealed()) saveToHistory();
+        }
+      };
+      slot.appendChild(cardEl);
+      boardEl.appendChild(slot);
+    });
+  }
+
+  function renderInfo(){
+    infoEl.innerHTML = "";
+    var any = false;
+    state.drawn.forEach(function(d, idx){
+      if(!d.revealed) return;
+      any = true;
+      var box = document.createElement("div");
+      box.className = "card-detail";
+      var meaning = d.reversed ? d.card.reversed : d.card.upright;
+      box.innerHTML =
+        '<h3>' + d.card.name +
+          '<span class="orient' + (d.reversed ? " rev" : "") + '">' + (d.reversed ? "Invertida" : "Normal") + '</span>' +
+        '</h3>' +
+        '<p class="meaning"><strong>' + (state.spread.positions[idx] || "") + ':</strong> ' + meaning + '</p>' +
+        (d.card.suitInfo ? '<div class="suitline">Naipe ' + d.card.suitInfo.name + ' — ' + d.card.suitInfo.theme + '</div>' : '');
+      infoEl.appendChild(box);
+    });
+    hintEl.style.display = any ? "none" : "block";
+  }
+
+  function render(){
+    renderSpreadPicker();
+    renderBoard();
+    renderInfo();
+  }
+
+  /* ---------- History modal ---------- */
+  var overlay = document.getElementById("historyOverlay");
+  var historyList = document.getElementById("historyList");
+
+  function renderHistory(){
+    var list = [];
+    try{ list = JSON.parse(localStorage.getItem("tarot_history") || "[]"); }catch(e){}
+    if(list.length === 0){
+      historyList.innerHTML = '<div class="empty-history">Nenhuma leitura salva ainda.</div>';
+      return;
+    }
+    historyList.innerHTML = list.map(function(item){
+      var d = new Date(item.date);
+      var dateStr = d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
+      return '<div class="history-item">' +
+        '<div class="h-date">' + dateStr + ' · ' + item.spread + '</div>' +
+        '<div class="h-cards">' + item.cards.join(" · ") + '</div>' +
+      '</div>';
+    }).join("");
+  }
+
+  document.getElementById("historyBtn").onclick = function(){
+    renderHistory();
+    overlay.classList.add("open");
+  };
+  document.getElementById("closeHistory").onclick = function(){
+    overlay.classList.remove("open");
+  };
+  overlay.onclick = function(e){
+    if(e.target === overlay) overlay.classList.remove("open");
+  };
+
+  document.getElementById("newReadingBtn").onclick = function(){
+    drawNewReading(state.spread);
+  };
+
+  /* ---------- Init ---------- */
+  drawNewReading(state.spread);
+})();
+</script>
+</body>
+</html>
