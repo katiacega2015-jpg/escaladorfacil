@@ -43,7 +43,7 @@ tools/           scripts de desenvolvimento (folhas de contato)
 ### Como adicionar ou mudar uma carta
 
 1. Texto: edite `src/domain/deck.ts`.
-2. Arte: edite a função da carta em `src/art/<grupo>.ts`. Ela desenha nas camadas `b` (fundo), `gb` (brilho de fundo), `s` (sprite, ganha contorno e rim light automáticos), `gf` (brilho frontal) e `fg` (primeiro plano). Use `human()` para divindades e `L.f` (0–3) para animar.
+2. Arte: edite a função da carta em `src/art/<grupo>.ts`. Ela desenha nas camadas `b` (fundo), `gb` (brilho de fundo), `s` (sprite, ganha contorno e rim light automáticos), `gf` (brilho frontal) e `fg` (primeiro plano). Use `human()` para divindades (com `detail: true` para silhueta com cintura, drapeado, rosto completo, joias e padrões no tecido) e `L.f` (0–3) para animar.
 3. Rode `npm run sheets` e confira os PNGs em `tools/out/`.
 4. `npm test` garante que toda carta tem arte, renderiza opaca e é determinística.
 
