@@ -7,7 +7,7 @@ import { crescent, flame } from "./primitives";
 /* Tipos                                                              */
 /* ------------------------------------------------------------------ */
 
-export type ArmPose = "down" | "open" | "up" | "chest" | "hold" | "fwd" | "high" | "side";
+export type ArmPose = "down" | "open" | "up" | "chest" | "hold" | "fwd" | "high" | "side" | "low";
 export type BodyPose = "stand" | "seat" | "step" | "run" | "dance";
 export type HeadStyle =
   | "hair" | "bald" | "ibis" | "jackal" | "straw" | "hood" | "veil" | "triple" | "half"
@@ -73,6 +73,21 @@ export interface HumanOpts {
   armR?: ArmPose;
   l?: ItemKind;
   r?: ItemKind;
+  /**
+   * Acabamento refinado: silhueta com cintura, drapeado em 3 tons com dobras,
+   * rosto com esclera/sobrancelhas/nariz/boca e brilho no cabelo.
+   */
+  detail?: boolean;
+  /** Textura aplicada ao tecido no modo detalhado. */
+  pattern?: "dots" | "stripes" | "stars" | "scales" | "diamonds";
+  patternCol?: Color;
+  necklace?: Color;
+  bracelets?: Color;
+  earrings?: Color;
+  /** Faixa diagonal do ombro esquerdo ao quadril direito. */
+  sash?: Color;
+  lips?: Color;
+  brow?: Color;
   /** Desenhado antes do corpo (atrás da figura). */
   back?: FigureHook;
   /** Desenhado depois de tudo (na frente da figura). */
@@ -214,12 +229,36 @@ function multiArms(L: Layers, cx: number, T: number, skin: Color): void {
 function head(L: Layers, cx: number, T: number, o: HumanOpts): void {
   const { s, gf, f } = L, hy = T + 7;
   const sk = o.skin ?? "#c68a5a", hr = o.hair ?? "#1a1210", ey = o.eye ?? "#140c08", style = o.head ?? "hair";
-  const hairBase = () => { s.circ(cx, hy - 1, 7, hr); s.ell(cx, hy + 1, 5, 5, sk); };
+  const hairBase = () => {
+    s.circ(cx, hy - 1, 7, hr);
+    if (o.detail) for (const [dx, dy] of [[-5, -4], [-4, -5], [-3, -6], [-1, -7], [0, -7]] as const) s.px(cx + dx, hy + dy, mix(hr, "#FFFFFF", 0.3));
+    s.ell(cx, hy + 1, 5, 5, sk);
+    if (o.detail) faceShade();
+  };
+  /** Sombra do lado direito do rosto e do queixo (luz vem da esquerda). */
+  const faceShade = () => {
+    const dk = shade(sk, 0.8);
+    for (let j = -3; j <= 5; j++) for (let i = 3; i <= 5; i++) if ((i * i) / 25 + ((j - 1) * (j - 1)) / 25 <= 1.05) s.px(cx + i, hy + j, dk);
+    s.px(cx - 1, hy + 6, dk); s.px(cx, hy + 6, dk); s.px(cx + 1, hy + 6, dk);
+  };
   const eyes = () => {
     if (o.oneEye) { s.px(cx - 2, hy, o.oneEye); s.rect(cx + 1, hy - 1, 3, 2, "#111111"); gf.circ(cx - 2, hy, 2, o.oneEye, 0.35); }
-    else {
+    else if (o.detail) {
+      const white = "#F4F0EA", brow = o.brow ?? shade(hr, 0.8);
+      s.px(cx - 3, hy, white); s.px(cx - 2, hy, ey); s.px(cx + 2, hy, ey); s.px(cx + 3, hy, shade(white, 0.85));
+      s.px(cx - 3, hy - 1, shade(sk, 0.62)); s.px(cx - 2, hy - 1, shade(sk, 0.62)); s.px(cx + 2, hy - 1, shade(sk, 0.62)); s.px(cx + 3, hy - 1, shade(sk, 0.62));
+      s.px(cx - 4, hy - 2, brow); s.px(cx - 3, hy - 2, brow); s.px(cx + 3, hy - 2, brow); s.px(cx + 4, hy - 2, brow);
+      if (o.eyeGlow) { gf.circ(cx - 2, hy, 1.5, o.eyeGlow, 0.5); gf.circ(cx + 2, hy, 1.5, o.eyeGlow, 0.5); }
+    } else {
       s.px(cx - 2, hy, ey); s.px(cx + 2, hy, ey);
       if (o.eyeGlow) { gf.circ(cx - 2, hy, 1.5, o.eyeGlow, 0.5); gf.circ(cx + 2, hy, 1.5, o.eyeGlow, 0.5); }
+    }
+    if (o.detail) {
+      s.px(cx, hy + 2, shade(sk, 0.72));
+      const lips = o.lips ?? shade(mix(sk, "#B03040", 0.35), 0.8);
+      if (!o.beard) { s.px(cx - 1, hy + 4, lips); s.px(cx, hy + 4, lips); s.px(cx + 1, hy + 4, shade(lips, 0.85)); }
+      s.px(cx - 3, hy + 3, mix(sk, "#FF7A7A", 0.25));
+      if (o.earrings) { s.px(cx - 6, hy + 3, o.earrings); s.px(cx + 6, hy + 3, o.earrings); }
     }
     if (o.smile) { const m = shade(sk, 0.55); s.px(cx - 1, hy + 3, m); s.px(cx, hy + 4, m); s.px(cx + 1, hy + 3, m); }
   };
@@ -352,8 +391,40 @@ function head(L: Layers, cx: number, T: number, o: HumanOpts): void {
 /* ------------------------------------------------------------------ */
 
 const HAND_POS: Record<ArmPose, Pt> = {
-  down: [13, 42], open: [21, 26], up: [14, 2], chest: [4, 27], hold: [12, 32], fwd: [16, 24], high: [12, -6], side: [18, 38],
+  down: [13, 42], open: [21, 26], up: [14, 2], chest: [4, 27], hold: [12, 32], fwd: [16, 24], high: [12, -6], side: [18, 38], low: [18, 50],
 };
+
+/** Túnica refinada: ombro → cintura → barra, luz à esquerda, sombra à direita, dobras e textura. */
+function drapedRobe(L: Layers, o: HumanOpts, { cx, T }: FigureFrame, hemY: number, hw: number, sw: number, robe: Color, trim: Color): void {
+  const s = L.s, dk = shade(robe, 0.68), lt = mix(robe, "#FFFFFF", 0.22), fold = shade(robe, 0.78), sheen = mix(robe, "#FFFFFF", 0.14);
+  const waist = T + 33;
+  s.poly([[cx - 9, T + 15], [cx + 9, T + 15], [cx + 8, T + 25], [cx + 7, waist], [cx + hw + sw, hemY], [cx - hw + sw, hemY], [cx - 7, waist], [cx - 8, T + 25]], robe);
+  s.poly([[cx + 3, T + 15], [cx + 9, T + 15], [cx + 8, T + 25], [cx + 7, waist], [cx + hw + sw, hemY], [cx + 4 + sw, hemY], [cx + 2, waist]], dk, 0.6);
+  s.poly([[cx - 8, T + 16], [cx - 6, T + 16], [cx - 5, waist], [cx - hw + 3 + sw, hemY], [cx - hw + 1 + sw, hemY], [cx - 7, waist]], lt, 0.8);
+  for (const [x0, x1] of [[-4, -7], [0, -1], [4, 6]] as const) {
+    s.line(cx + x0, waist + 3, cx + x1 + sw, hemY - 2, fold);
+    s.line(cx + x0 - 1, waist + 4, cx + x1 - 1 + sw, hemY - 2, sheen);
+  }
+  if (o.pattern) {
+    const pc = o.patternCol ?? mix(trim, robe, 0.3);
+    for (let y = waist + 5, row = 0; y < hemY - 3; y += 5, row++) {
+      const t = (y - waist) / (hemY - waist), half = 7 + (hw - 7) * t - 2;
+      for (let x = -half + (row % 2) * 2; x <= half; x += 4) {
+        const px = Math.round(cx + x + sw * t), py = y;
+        switch (o.pattern) {
+          case "dots": s.px(px, py, pc); break;
+          case "stripes": s.px(px, py, pc); s.px(px + 1, py, pc); s.px(px + 2, py, pc); break;
+          case "stars": s.px(px, py, pc); s.px(px - 1, py, pc, 0.5); s.px(px + 1, py, pc, 0.5); s.px(px, py - 1, pc, 0.5); s.px(px, py + 1, pc, 0.5); break;
+          case "scales": s.px(px - 1, py, pc); s.px(px, py + 1, pc); s.px(px + 1, py, pc); break;
+          case "diamonds": s.px(px, py - 1, pc); s.px(px - 1, py, pc); s.px(px + 1, py, pc); s.px(px, py + 1, pc); break;
+        }
+      }
+    }
+  }
+  s.line(cx - hw + sw, hemY - 1, cx + hw + sw, hemY - 1, trim, 1, 2);
+  s.line(cx - hw + 1 + sw, hemY - 3, cx + hw - 1 + sw, hemY - 3, shade(trim, 0.75));
+  s.line(cx - 3, T + 16, cx - 2, T + 24, sheen);
+}
 
 /** Desenha uma divindade humanoide no sprite e devolve a posição das mãos. */
 export function human(L: Layers, o: HumanOpts): Hands {
@@ -384,6 +455,16 @@ export function human(L: Layers, o: HumanOpts): Hands {
     s.ell(cx, B - 5, 17, 6, robe); s.rect(cx - 16, B - 5, 33, 1, trim);
     s.poly([[cx - 9, T + 15], [cx + 9, T + 15], [cx + 11, B - 6], [cx - 11, B - 6]], robe);
     s.poly([[cx + 3, T + 15], [cx + 9, T + 15], [cx + 11, B - 6], [cx + 4, B - 6]], dk, 0.5);
+    if (o.detail) {
+      const lt = mix(robe, "#FFFFFF", 0.22);
+      s.line(cx - 8, T + 16, cx - 10, B - 7, lt);
+      for (const dx of [-12, -5, 3, 10]) s.line(cx + dx, B - 9, cx + dx + (dx < 0 ? -3 : 3), B - 2, shade(robe, 0.75));
+      s.ell(cx, B - 1, 16, 1.5, trim);
+      s.line(cx - 15, B - 6, cx + 15, B - 6, shade(robe, 0.8));
+    }
+  } else if (o.detail) {
+    drapedRobe(L, o, fig, hemY, tunic ? 11 : 13, sw, robe, trim);
+    if (!tunic && !o.noFeet) { const ft = o.feet ?? shade(skin, 0.7); s.rect(cx - 6 + sw, B, 4, 2, ft); s.rect(cx + 3 + sw, B, 4, 2, ft); }
   } else {
     const hw = tunic ? 11 : 13;
     s.poly([[cx - 9, T + 15], [cx + 9, T + 15], [cx + hw + sw, hemY], [cx - hw + sw, hemY]], robe);
@@ -407,9 +488,16 @@ export function human(L: Layers, o: HumanOpts): Hands {
     const ac = o.bareArms ? skin : (o.sleeve ?? robe);
     const ex = (sx + hx) / 2 + sg * 2, ey = (sy + hy) / 2 + 2;
     s.line(sx, sy, ex, ey, ac, 1, 3); s.line(ex, ey, hx, hy, ac, 1, 3);
+    if (o.detail && !o.bareArms) s.line(ex + (hx - ex) * 0.8, ey + (hy - ey) * 0.8, hx - (hx - ex) * 0.08, hy - (hy - ey) * 0.08, trim, 1, 2);
     s.rect(hx - 1, hy - 1, 3, 3, skin);
+    if (o.bracelets) s.rect(hx - 1, hy - 2, 3, 1, o.bracelets);
     hands[side] = [hx, hy];
   }
+  if (o.necklace) {
+    s.line(cx - 5, T + 15, cx, T + 19, o.necklace); s.line(cx, T + 19, cx + 5, T + 15, o.necklace);
+    s.px(cx, T + 20, mix(o.necklace, "#FFFFFF", 0.4));
+  }
+  if (o.sash) s.line(cx - 8, T + 16, cx + 7, T + 33, o.sash, 1, 2);
   if (o.multi) multiArms(L, cx, T, skin);
   head(L, cx, T, o);
   if (o.l) drawItem(L, o.l, hands.L[0], hands.L[1], -1, fig);
