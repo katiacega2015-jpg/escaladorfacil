@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#1a1030">
+<meta name="theme-color" content="#080D1A">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,261 +11,150 @@
 <title>Oráculo das 52 Lâminas</title>
 <style>
   :root{
-    --bg-1:#150a2e;
-    --bg-2:#2b1055;
-    --gold:#d9b86c;
-    --gold-soft:#f0dca4;
-    --card-back-1:#3a1c71;
-    --card-back-2:#7c2ae8;
-    --ink:#f3ecff;
-    --ink-dim:#c7b8e8;
-    --danger:#e05f5f;
+    --bg:#080D1A; --panel:#140c28; --line:#3a2a60;
+    --gold:#F7D070; --gold-d:#8A6818;
+    --ink:#F3ECFF; --ink-dim:#B8AEDC; --red:#FF3A5A;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{
-    margin:0; padding:0; height:100%;
-    background:radial-gradient(ellipse at 50% -10%, var(--bg-2), var(--bg-1) 60%);
+    margin:0; padding:0; min-height:100%;
+    background-color:var(--bg);
+    background-image:radial-gradient(#1F1133 1px, transparent 1px);
+    background-size:6px 6px;
     color:var(--ink);
-    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    overscroll-behavior:none;
-    user-select:none;
-    -webkit-user-select:none;
+    font-family:ui-monospace, "SFMono-Regular", Menlo, "Courier New", monospace;
+    overscroll-behavior:none; user-select:none; -webkit-user-select:none;
   }
   #app{
     min-height:100vh;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     display:flex; flex-direction:column;
   }
-  header{
-    text-align:center;
-    padding:18px 16px 10px;
-    flex-shrink:0;
-    position:relative;
-  }
-  header h1{
-    font-family:Georgia, "Times New Roman", serif;
-    letter-spacing:1px;
-    font-size:20px;
-    margin:0;
-    color:var(--gold-soft);
-    text-shadow:0 0 12px rgba(217,184,108,.4);
-  }
-  header p{margin:4px 0 0; font-size:12px; color:var(--ink-dim);}
+  header{text-align:center; padding:16px 56px 8px; position:relative;}
+  header h1{margin:0; font-size:15px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); text-shadow:2px 2px 0 #000;}
+  header p{margin:6px 0 0; font-size:11px; color:var(--ink-dim);}
   .icon-btn{
-    position:absolute; top:calc(18px + env(safe-area-inset-top)); right:16px;
-    background:none; border:1px solid rgba(217,184,108,.4); color:var(--gold);
-    border-radius:50%; width:36px; height:36px; font-size:16px; line-height:1;
-    touch-action:manipulation; cursor:pointer;
+    position:absolute; top:calc(12px + env(safe-area-inset-top));
+    width:38px; height:38px; font-size:15px; line-height:1;
+    background:#1F1133; color:var(--gold); border:2px solid var(--gold);
+    box-shadow:3px 3px 0 #000; cursor:pointer; touch-action:manipulation; font-family:inherit;
   }
-  main{
-    flex:1; display:flex; flex-direction:column; align-items:center;
-    padding:8px 16px 24px; overflow-y:auto;
+  .icon-btn.left{left:12px;} .icon-btn.right{right:12px;}
+  main{flex:1; display:flex; flex-direction:column; align-items:center; padding:6px 12px 28px;}
+  .spreads{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:8px 0 12px; max-width:520px;}
+  .pbtn{
+    background:#1F1133; color:var(--gold); border:2px solid var(--gold);
+    box-shadow:3px 3px 0 #000; border-radius:0;
+    font-family:inherit; font-size:11px; text-transform:uppercase; letter-spacing:.5px;
+    padding:8px 10px; cursor:pointer; touch-action:manipulation;
   }
-  .spreads{
-    display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
-    margin:10px 0 18px;
+  .pbtn.active{background:var(--gold); color:#1F1133; font-weight:700;}
+  .pbtn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 #000;}
+  .pbtn.big{font-size:13px; padding:12px 18px;}
+  .spread-desc{font-size:11px; color:var(--ink-dim); text-align:center; max-width:420px; margin:0 0 12px; line-height:1.5;}
+  .row-block{width:100%; display:flex; flex-direction:column; align-items:center; margin-bottom:12px;}
+  .row-header{font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:6px;}
+  .row-cards{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .slot{display:flex; flex-direction:column; align-items:center; gap:5px; width:92px;}
+  .slot-label{font-size:9px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.5px; text-align:center; min-height:22px; line-height:1.2; display:flex; align-items:flex-end;}
+  .slot-name{font-size:9px; color:var(--gold); text-align:center; line-height:1.2; min-height:11px;}
+  canvas.cv{
+    width:90px; height:160px; display:block;
+    image-rendering:pixelated; image-rendering:crisp-edges;
+    box-shadow:3px 3px 0 #000; cursor:pointer; touch-action:manipulation;
   }
-  .spread-btn{
-    background:linear-gradient(160deg, rgba(217,184,108,.15), rgba(217,184,108,.03));
-    border:1px solid rgba(217,184,108,.35);
-    color:var(--gold-soft);
-    padding:10px 16px; border-radius:20px;
-    font-size:13px; touch-action:manipulation; cursor:pointer;
-  }
-  .spread-btn.active{
-    background:var(--gold); color:#2b1055; font-weight:600;
-    box-shadow:0 0 16px rgba(217,184,108,.5);
-  }
-  .board{
-    display:flex; gap:16px; justify-content:center; flex-wrap:wrap;
-    width:100%; margin-bottom:18px;
-  }
-  .slot{display:flex; flex-direction:column; align-items:center; gap:8px; width:104px;}
-  .slot-label{font-size:11px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:1px; min-height:14px;}
-  /* Paletas 16-bit por categoria: p1/p2 = cor primária/secundária, hi = luz de destaque, sh = sombra */
-  .cat-major{ --p1:#3A1F5D; --p2:#F7D070; --hi:#FFFFFF; --sh:#0E091C; }
-  .cat-agua { --p1:#1B4965; --p2:#62B6CB; --hi:#BEE9E8; --sh:#0B1A24; }
-  .cat-fogo { --p1:#9E2A2B; --p2:#E07A5F; --hi:#F4F1DE; --sh:#2B1717; }
-  .cat-terra{ --p1:#386641; --p2:#A25A38; --hi:#DDA15E; --sh:#1B2418; }
-  .cat-ar   { --p1:#3d5568; --p2:#D9DCD6; --hi:#F8F9FA; --sh:#212529; }
-  .cat-special{ --p1:#1C1C1C; --p2:#ADB5BD; --hi:#FFFFFF; --sh:#050505; }
-
-  .card{
-    width:100px; height:168px;
-    perspective:1000px;
-    touch-action:manipulation;
-    image-rendering:pixelated;
-  }
-  .card-inner{
-    position:relative; width:100%; height:100%;
-    transition:transform .6s cubic-bezier(.2,.8,.2,1);
-    transform-style:preserve-3d;
-  }
-  .card.flipped .card-inner{transform:rotateY(180deg);}
-  .card-face{
-    position:absolute; inset:0; border-radius:3px;
-    backface-visibility:hidden;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 6px 18px rgba(0,0,0,.45);
-    overflow:hidden;
-  }
-  /* ---- Verso: astrolábio 16-bit ---- */
-  .card-back{
-    background:#080D1A;
-    border:4px solid #453205;
-    box-shadow:inset 0 0 0 1px #D4AF37, inset 0 0 0 3px #8A6818, 0 6px 18px rgba(0,0,0,.45);
-  }
-  .card-back .stars{position:absolute; inset:0;}
-  .card-back .nebula{
-    position:absolute; inset:0;
-    background:radial-gradient(circle at 30% 25%, rgba(31,17,51,.9), transparent 55%),
-               radial-gradient(circle at 70% 75%, rgba(31,17,51,.7), transparent 50%);
-  }
-  .card-back svg{position:relative; width:76%; height:76%;}
-  /* ---- Frente: moldura chanfrada 3 tons + HUD ---- */
-  .card-front{
-    transform:rotateY(180deg);
-    background:linear-gradient(160deg, var(--p1), var(--sh));
-    border:4px solid var(--p2);
-    box-shadow:inset 0 0 0 1px var(--hi), inset 0 0 0 3px var(--sh), 0 6px 18px rgba(0,0,0,.45);
-    color:var(--hi);
-    flex-direction:column; padding:0; text-align:center;
-  }
-  .card-front .numeral{
-    margin-top:6px; font-family:Georgia, serif; font-weight:700; font-size:11px;
-    color:var(--p2); text-shadow:1px 1px 0 var(--sh), -1px -1px 0 var(--sh);
-    letter-spacing:1px;
-  }
-  .card-front .glyph{
-    position:absolute; width:13px; height:13px; color:var(--p2);
-    filter:drop-shadow(0 0 2px rgba(0,0,0,.6));
-    animation:breathe 2.4s ease-in-out infinite;
-  }
-  .card-front .glyph.tl{top:4px; left:4px;}
-  .card-front .glyph.br{bottom:calc(30% + 4px); right:4px;}
-  .card-front .footer{
-    position:absolute; left:0; right:0; bottom:0; height:30%;
-    background:rgba(0,0,0,.85);
-    display:flex; align-items:center; justify-content:center; padding:2px 4px;
-  }
-  .card-front .name{
-    font-family:Georgia, serif; font-weight:700; font-size:11px; line-height:1.15;
-    color:#FFFFFF; text-shadow:1px 1px 0 #1A1A1A;
-  }
-  .card-front .polarity-tag{
-    position:absolute; top:4px; right:4px; font-size:8px; letter-spacing:.5px;
-    text-transform:uppercase; color:var(--hi); background:rgba(0,0,0,.4);
-    padding:1px 4px; border-radius:4px;
-  }
-  .card.flipped .card-front{ animation:glowPulse 2.2s ease-in-out infinite; }
-  .card.flipped .card-front::after{
-    content:""; position:absolute; inset:0; pointer-events:none;
-    background-image:repeating-conic-gradient(#000 0% 25%, transparent 0% 50%);
-    background-size:8px 8px;
-    animation:ditherFade .5s steps(5) forwards;
-  }
-  @keyframes ditherFade{ from{opacity:.85;} to{opacity:0;} }
-  @keyframes breathe{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.18);} }
-  @keyframes glowPulse{
-    0%,100%{ box-shadow:inset 0 0 0 1px var(--hi), inset 0 0 0 3px var(--sh), 0 6px 18px rgba(0,0,0,.45); }
-    50%{ box-shadow:inset 0 0 0 1px var(--hi), inset 0 0 0 3px var(--sh), 0 0 16px 2px var(--p2), 0 6px 18px rgba(0,0,0,.45); }
-  }
-  .empty-slot{
-    width:100%; height:100%; border-radius:10px;
-    border:1.5px dashed rgba(217,184,108,.3);
-  }
-  .card.locked{opacity:.35; pointer-events:none;}
-  .spread-desc{font-size:11px; color:var(--ink-dim); text-align:center; max-width:420px; margin:0 0 14px;}
-  .row-block{width:100%; display:flex; flex-direction:column; align-items:center; margin-bottom:14px;}
-  .row-header{font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px; opacity:.85;}
-  .row-cards{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+  canvas.cv.locked{opacity:.35; cursor:default;}
   .choice-panel{
     display:flex; flex-direction:column; align-items:center; gap:10px;
-    margin:6px 0 16px; padding:14px; border:1px dashed rgba(217,184,108,.4); border-radius:12px;
-    max-width:420px;
+    margin:4px 0 14px; padding:12px; max-width:420px;
+    background:var(--panel); border:2px dashed var(--gold-d);
   }
-  .choice-panel p{margin:0; font-size:12px; color:var(--ink-dim); text-align:center;}
+  .choice-panel p{margin:0; font-size:11px; color:var(--ink-dim); text-align:center; line-height:1.5;}
   .choice-row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
-  .choice-btn{
-    background:linear-gradient(160deg, rgba(217,184,108,.2), rgba(217,184,108,.05));
-    border:1px solid rgba(217,184,108,.45); color:var(--gold-soft);
-    padding:10px 16px; border-radius:18px; font-size:13px; touch-action:manipulation; cursor:pointer;
-  }
-  .reading-info{
-    width:100%; max-width:520px;
-    display:flex; flex-direction:column; gap:10px;
-  }
+  .reading-info{width:100%; max-width:520px; display:flex; flex-direction:column; gap:10px; margin-top:4px;}
   .card-detail{
-    background:rgba(255,255,255,.05);
-    border:1px solid rgba(217,184,108,.25);
-    border-left:4px solid var(--p2, rgba(217,184,108,.6));
-    border-radius:12px; padding:12px 14px;
+    background:var(--panel); border:2px solid var(--line); border-left:6px solid var(--acc, var(--gold));
+    box-shadow:3px 3px 0 #000; padding:10px 12px; cursor:pointer;
   }
-  .card-detail h3{
-    margin:0 0 4px; font-family:Georgia, serif; font-size:15px; color:var(--gold-soft);
-    display:flex; align-items:center; gap:6px;
+  .card-detail h3{margin:0 0 4px; font-size:13px; color:var(--gold); display:flex; align-items:center; gap:8px; flex-wrap:wrap; text-transform:uppercase; letter-spacing:.5px;}
+  .tagp{font-size:9px; padding:2px 6px; background:#000; color:#fff; border:1px solid #fff;}
+  .tagp.esc{color:var(--red); border-color:var(--red);}
+  .card-detail .meaning{font-size:12px; color:var(--ink-dim); line-height:1.55; margin:0;}
+  .card-detail .suitline{font-size:10px; color:#8a7ab8; margin-top:4px;}
+  .hint{font-size:11px; color:var(--ink-dim); text-align:center; margin:12px 0;}
+  .actions{display:flex; gap:10px; justify-content:center; margin:16px 0 4px; flex-wrap:wrap;}
+  .overlay{
+    position:fixed; inset:0; background:rgba(4,6,14,.92);
+    display:none; align-items:flex-start; justify-content:center; z-index:20; overflow-y:auto;
+    padding:calc(12px + env(safe-area-inset-top)) 12px calc(20px + env(safe-area-inset-bottom));
   }
-  .card-detail .orient{font-size:10px; padding:2px 7px; border-radius:8px; background:rgba(217,184,108,.2); color:var(--gold-soft); text-transform:uppercase;}
-  .card-detail .orient.rev{background:rgba(224,95,95,.25); color:#f3b8b8;}
-  .card-detail .meaning{font-size:13px; color:var(--ink-dim); line-height:1.5; margin:0;}
-  .card-detail .suitline{font-size:11px; color:#8a7ab8; margin-top:4px;}
-  .hint{font-size:12px; color:var(--ink-dim); text-align:center; margin:14px 0;}
-  .actions{
-    display:flex; gap:10px; justify-content:center; margin:16px 0 4px; flex-wrap:wrap;
+  .overlay.open{display:flex;}
+  .sheet{
+    width:100%; max-width:560px; background:var(--panel); border:2px solid var(--gold-d);
+    box-shadow:4px 4px 0 #000; padding:14px; position:relative;
   }
-  .btn{
-    background:var(--gold); color:#2b1a05; border:none;
-    padding:12px 22px; border-radius:24px; font-size:14px; font-weight:600;
-    touch-action:manipulation; cursor:pointer;
-  }
-  .btn.secondary{
-    background:none; border:1px solid rgba(217,184,108,.4); color:var(--gold-soft);
-  }
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(10,4,25,.85);
-    display:none; align-items:flex-end; justify-content:center; z-index:20;
-  }
-  .modal-overlay.open{display:flex;}
-  .modal{
-    width:100%; max-width:560px; max-height:80vh; overflow-y:auto;
-    background:var(--bg-2); border-radius:18px 18px 0 0;
-    padding:18px 18px calc(18px + env(safe-area-inset-bottom));
-    border-top:1px solid rgba(217,184,108,.4);
-  }
-  .modal h2{margin:0 0 12px; font-family:Georgia, serif; color:var(--gold-soft); font-size:17px;}
-  .history-item{
-    border-bottom:1px solid rgba(255,255,255,.08); padding:10px 0; font-size:13px;
-  }
-  .history-item .h-date{color:var(--ink-dim); font-size:11px;}
-  .history-item .h-cards{color:var(--gold-soft); margin-top:2px;}
-  .modal .close-btn{float:right; background:none; border:none; color:var(--ink-dim); font-size:18px; cursor:pointer;}
-  .empty-history{color:var(--ink-dim); font-size:13px; text-align:center; padding:20px 0;}
+  .sheet h2{margin:0 0 12px; font-size:13px; color:var(--gold); text-transform:uppercase; letter-spacing:2px;}
+  .close-btn{position:absolute; top:8px; right:8px;}
+  .zoom-wrap{display:flex; flex-direction:column; align-items:center; gap:12px;}
+  canvas.cv.zoom{width:270px; height:480px; cursor:default;}
+  @media (max-height:760px){ canvas.cv.zoom{width:180px; height:320px;} }
+  .zoom-info{width:100%;}
+  .zoom-info h3{margin:0 0 4px; font-size:14px; color:var(--gold); text-transform:uppercase; letter-spacing:1px;}
+  .zoom-info .meta{font-size:10px; color:#8a7ab8; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;}
+  .zoom-info p{margin:0 0 8px; font-size:12px; color:var(--ink-dim); line-height:1.55;}
+  .pol-row{display:flex; gap:8px; justify-content:center;}
+  .gallery-group{margin:4px 0 14px;}
+  .gallery-group h4{margin:0 0 8px; font-size:10px; color:var(--gold); letter-spacing:2px; text-transform:uppercase;}
+  .gallery-grid{display:grid; grid-template-columns:repeat(auto-fill, 90px); gap:12px 10px; justify-content:center;}
+  .g-item{display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .g-item span{font-size:8px; color:var(--ink-dim); text-align:center; line-height:1.2; max-width:90px;}
+  .history-item{border-bottom:1px dashed var(--line); padding:8px 0; font-size:11px;}
+  .history-item .h-date{color:var(--ink-dim); font-size:10px;}
+  .history-item .h-cards{color:var(--gold); margin-top:3px; line-height:1.5;}
+  .empty-history{color:var(--ink-dim); font-size:12px; text-align:center; padding:20px 0;}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <button class="icon-btn" id="historyBtn" aria-label="Histórico">☰</button>
-    <h1>✦ Oráculo das 52 Lâminas ✦</h1>
+    <button class="icon-btn left" id="galleryBtn" aria-label="Galeria do baralho">▦</button>
+    <h1>Oráculo das 52 Lâminas</h1>
     <p>Formule sua pergunta em silêncio, depois escolha a tiragem</p>
+    <button class="icon-btn right" id="historyBtn" aria-label="Histórico">☰</button>
   </header>
-
   <main>
     <div class="spreads" id="spreadPicker"></div>
     <div class="spread-desc" id="spreadDesc"></div>
     <div id="board"></div>
     <div id="choicePanel"></div>
+    <div class="hint" id="hint"></div>
     <div class="reading-info" id="readingInfo"></div>
-    <div class="hint" id="hint">Toque nas cartas para revelá-las</div>
-    <div class="actions">
-      <button class="btn" id="newReadingBtn">Nova leitura</button>
-    </div>
+    <div class="actions"><button class="pbtn big" id="newReadingBtn">Embaralhar de novo</button></div>
   </main>
 </div>
 
-<div class="modal-overlay" id="historyOverlay">
-  <div class="modal">
-    <button class="close-btn" id="closeHistory">✕</button>
+<div class="overlay" id="zoomOverlay">
+  <div class="sheet">
+    <button class="pbtn close-btn" data-close="zoomOverlay">✕</button>
+    <div class="zoom-wrap">
+      <canvas class="cv zoom" id="zoomCv" width="90" height="160"></canvas>
+      <div class="pol-row" id="polRow"></div>
+      <div class="zoom-info" id="zoomInfo"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="galleryOverlay">
+  <div class="sheet">
+    <button class="pbtn close-btn" data-close="galleryOverlay">✕</button>
+    <h2>O Baralho · 52 Lâminas</h2>
+    <div id="galleryBody"></div>
+  </div>
+</div>
+
+<div class="overlay" id="historyOverlay">
+  <div class="sheet">
+    <button class="pbtn close-btn" data-close="historyOverlay">✕</button>
     <h2>Histórico de leituras</h2>
     <div id="historyList"></div>
   </div>
@@ -273,509 +162,1524 @@
 
 <script>
 (function(){
-  "use strict";
+"use strict";
+const ROOT = typeof window !== "undefined" ? window : globalThis;
 
-  /* ---------- Numeral romano (0 fica "0"; tarot não tem zero romano) ---------- */
-  function toRoman(n){
-    if(n === 0) return "0";
-    var map = [[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
-    var out = "";
-    map.forEach(function(pair){
-      while(n >= pair[0]){ out += pair[1]; n -= pair[0]; }
-    });
-    return out;
+/* =====================================================================
+   MOTOR DE PIXEL ART (grade nativa 90x160, 9:16, escala inteira)
+   ===================================================================== */
+const W = 90, H = 160;
+const BAY = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+const bay = (x,y) => (BAY[((y&3)<<2)|(x&3)] + .5) / 16;
+const CC = {};
+function rgb(h){
+  if(typeof h !== "string") return h;
+  let c = CC[h]; if(c) return c;
+  let s = h.slice(1); if(s.length === 3) s = s[0]+s[0]+s[1]+s[1]+s[2]+s[2];
+  c = [parseInt(s.slice(0,2),16), parseInt(s.slice(2,4),16), parseInt(s.slice(4,6),16)];
+  CC[h] = c; return c;
+}
+const hex = c => "#" + c.map(v => Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,"0")).join("");
+const mix = (a,b,t) => { const A=rgb(a), B=rgb(b); return hex([0,1,2].map(i => A[i]+(B[i]-A[i])*t)); };
+const shade = (a,k) => hex(rgb(a).map(v => v*k));
+const P4 = f => [0,1,2,1][f];
+const SW = [0,1,0,-1];
+function rng(seed){ let a = seed>>>0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a>>>15, 1|a); t = t + Math.imul(t ^ t>>>7, 61|t) ^ t; return ((t ^ t>>>14)>>>0) / 4294967296; }; }
+function hashStr(s){ let h = 2166136261; for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h,16777619); } return h>>>0; }
+
+class Buf{
+  constructor(){ this.d = new Uint8ClampedArray(W*H*4); }
+  px(x,y,col,a){
+    if(a === undefined) a = 1;
+    x = Math.round(x); y = Math.round(y);
+    if(x<0||y<0||x>=W||y>=H||a<=0) return;
+    const c = rgb(col), d = this.d, i = (y*W+x)*4;
+    if(a >= 1){ d[i]=c[0]; d[i+1]=c[1]; d[i+2]=c[2]; d[i+3]=255; return; }
+    const da = d[i+3]/255, oa = a + da*(1-a);
+    d[i]   = (c[0]*a + d[i]*da*(1-a))/oa;
+    d[i+1] = (c[1]*a + d[i+1]*da*(1-a))/oa;
+    d[i+2] = (c[2]*a + d[i+2]*da*(1-a))/oa;
+    d[i+3] = oa*255;
   }
-
-  /* ---------- Deck data: baralho autoral de 52 cartas ---------- */
-
-  // Parte I — Arcanos Maiores (22 cartas, sem posição invertida)
-  var MAJOR = [
-    ["O Errante","O salto de fé rumo ao desconhecido, sem bagagens ou medos. A liberdade absoluta de quem confia na própria jornada.","Indica um momento de arriscar, iniciar algo totalmente novo e abandonar a necessidade de controle. Pede espontaneidade e coragem para ser autêntico."],
-    ["O Alquimista","O poder da manifestação. Aquele que domina os elementos ao seu redor e transforma ideias intangíveis em realidade material.","Mostra que você possui todos os recursos, contatos e habilidades necessárias para resolver o problema. Aja com foco e determinação."],
-    ["O Oráculo","A intuição pura e os mistérios ocultos. A voz silenciosa do subconsciente que guarda sabedorias ancestrais.","O momento não exige ação física, mas escuta interior. Segredos podem ser revelados. Confie em seus pressentimentos e preste atenção aos sonhos."],
-    ["A Matriz","A fonte criadora, a fertilidade e a abundância. A energia acolhedora que nutre e dá vida a tudo que toca.","Sinaliza crescimento, prosperidade, gravidez (física ou de projetos) e uma fase de grande força criativa. Conecte-se com a natureza e com o prazer de viver."],
-    ["O Arquiteto","A autoridade que traz ordem ao caos. A força estrutural que estabelece limites, regras e fundações duradouras.","Pede organização, disciplina e liderança. É hora de agir com razão, assumir o controle da situação e não ceder a chantagens emocionais."],
-    ["O Mentor","A tradição, a ética e a ponte entre o humano e o divino. O conhecimento estruturado passado através de gerações.","Busque aconselhamento com alguém mais experiente ou siga os métodos tradicionais. Indica também instituições, cursos acadêmicos e compromissos formais."],
-    ["O Pacto","O alinhamento profundo de valores. As encruzilhadas da vida que exigem escolhas morais e uniões verdadeiras.","Um momento de decisão importante que deve ser feita com o coração, não apenas com a lógica. Pode indicar grandes parcerias, sociedades ou o encontro de um amor genuíno."],
-    ["O Conquistador","O domínio sobre os próprios instintos conflitantes para avançar com determinação em uma única direção.","Movimento rápido, viagens ou a superação de obstáculos através da pura força de vontade e foco implacável. Você está no controle e a vitória é certa se não desviar a rota."],
-    ["O Domínio","A coragem compassiva. A capacidade de domar as \"feras\" interiores e exteriores não com brutalidade, mas com amor e firmeza.","Pede paciência, resiliência e persuasão. Enfrente seus medos ou uma pessoa difícil usando a doçura e a diplomacia, controlando seus impulsos nervosos."],
-    ["O Buscador","A jornada solitária para dentro. O uso da própria luz como farol para encontrar respostas longe do barulho do mundo.","Necessidade vital de isolamento, reflexão e autopreservação. Não tome decisões apressadas; afaste-se temporariamente para enxergar o quadro geral."],
-    ["O Ciclo","A roda inescapável do destino. A impermanência da vida, onde altos e baixos se alternam continuamente.","Mudanças inesperadas (frequentemente positivas, de \"sorte\") estão a caminho. Aceite que algumas coisas estão fora do seu controle e adapte-se ao movimento do universo."],
-    ["A Balança","A verdade nua e crua que corta ilusões. A lei universal de causa e efeito, onde cada ação encontra sua justa reação.","Assuntos legais, assinaturas de contratos e necessidade de imparcialidade. Você colherá exatamente o que plantou. Seja ético e exija justiça."],
-    ["A Suspensão","O sacrifício voluntário e a iluminação alcançada ao olhar o mundo por um ângulo invertido e desconfortável.","Situações estagnadas. Pare de forçar as coisas a acontecerem. Aceite a pausa obrigatória, mude sua perspectiva e faça concessões para destravar a energia."],
-    ["A Passagem","A transformação profunda e a transição inescapável. A morte de velhas formas para adubar o terreno do novo.","Finais definitivos e cortes radicais (um emprego, um relacionamento, um hábito). Aceite o luto e o desapego, pois esta limpeza é essencial para sua renovação."],
-    ["A Síntese","O equilíbrio alquímico. A mistura harmoniosa de opostos e a paciência para deixar o tempo agir como agente curador.","Pede moderação, meio-termo e calma. Não vá a extremos. Bom presságio para a saúde, harmonização de conflitos e reconciliações."],
-    ["As Correntes","O reino das sombras, dos desejos densos, da sexualidade, dos vícios e das ilusões de aprisionamento.","Alerta para relações tóxicas, obsessões, ambição desmedida ou dependências emocionais/financeiras. Lembre-se: as correntes estão soltas, você só está preso pelo próprio medo ou comodismo."],
-    ["O Colapso","O raio que destrói as fundações falsas. A crise inevitável que liberta a verdade aprisionada pelo orgulho.","Ruptura repentina de estruturas que já não serviam (divórcios repentinos, demissões, quebra de paradigmas). O choque é doloroso, mas traz libertação total."],
-    ["A Aurora","A luz da esperança brilhando após a tempestade. A renovação da fé, a inspiração celestial e a pura cura espiritual.","Um momento de grande proteção cósmica, alívio e otimismo. Deixe sua luz brilhar, invista em seus talentos e acredite no futuro. O pior já passou."],
-    ["O Labirinto","As águas profundas do inconsciente. O reino dos medos, das projeções, das paranoias e das emoções flutuantes.","Cuidado com ilusões, fofocas, traições ou autoenganos. As coisas não são o que parecem. Enfrente suas inseguranças e não deixe a ansiedade guiar seus passos."],
-    ["O Zênite","O triunfo absoluto da luz. A clareza, a vitalidade inesgotável, a alegria de viver e o sucesso radiante.","Excelente presságio. Confirmação de vitória, resolução de todos os problemas, saúde plena, energia infantil e sucesso público. Diga \"sim\" para a vida."],
-    ["O Chamado","O soar da trombeta para uma nova consciência. O momento de autoavaliação final, o despertar e a absolvição.","Uma vocação se apresenta. Perdoe os erros do passado (seus e dos outros) e abrace uma nova chance. Retorno de pessoas ou situações para um encerramento definitivo."],
-    ["O Cosmos","A totalidade, a integração do microcosmo com o macrocosmo e a conclusão gloriosa da longa jornada da alma.","O ápice da realização. Projetos concluídos com sucesso, viagens internacionais, expansão de limites e a sensação de estar exatamente onde deveria estar."]
-  ].map(function(a, i){
-    return {name:a[0], group:"Arcano Maior", groupTheme:null, cat:"major", numeral:toRoman(i), number:i, text:a[1] + " — " + a[2], special:false};
-  });
-
-  // Parte II — Arcanos Menores: 4 elementos x 7 graus (28 cartas, sem posição invertida)
-  var ELEMENTS = [
-    {
-      key:"agua", name:"Água", theme:"Emoção, Relacionamentos, Intuição",
-      graus:[
-        ["O Vínculo","O nascimento do afeto e da atração.","Indica o início de um romance, uma nova amizade ou uma reconciliação promissora. Abra-se para a troca emocional."],
-        ["O Oásis","O equilíbrio entre a festa e o retiro.","Comemore as pequenas vitórias com quem você ama, mas saiba quando se afastar para recarregar as energias emocionais."],
-        ["A Saudade","O bálsamo das memórias curando a dor da perda.","Resgate a pureza do passado para curar tristezas presentes. O retorno de alguém antigo, ou a necessidade de perdoar uma decepção emocional."],
-        ["A Miragem","A intuição rompendo as ilusões reconfortantes.","Abandone um sonho que não tem base na realidade. Hora de deixar para trás uma relação ou ambiente que não preenche mais a sua alma."],
-        ["A Plenitude","O ápice da harmonia familiar e emocional.","Alegria duradoura, paz no lar e desejos profundos do coração sendo atendidos. Você chegou a um estado de contentamento absoluto."],
-        ["O Sonhador","O impulso romântico, sensível e idealista.","Uma pessoa amorosa e poética (ou essa energia em você). Siga a sua intuição, faça uma declaração, ou dedique-se a uma expressão artística."],
-        ["O Guardião das Marés","A maestria emocional, o conselheiro profundo.","Exerça a empatia e o acolhimento sem se perder nas emoções dos outros. Indica maturidade nos relacionamentos e capacidade de curar as próprias feridas."]
-      ]
-    },
-    {
-      key:"fogo", name:"Fogo", theme:"Ação, Criatividade, Vontade",
-      graus:[
-        ["A Centelha","A ideia inicial, o planejamento e o ímpeto de mudar.","É o momento de dar o primeiro passo e sair da zona de conforto. Você tem o plano; agora precisa ter a ousadia de executá-lo."],
-        ["A Fogueira","A primeira expansão, o calor do apoio mútuo.","Indica boas parcerias, consolidação de um projeto e a chegada de bons resultados. Você está em um ambiente que incentiva e celebra o seu crescimento."],
-        ["A Forja","O atrito das competições lapidando o metal da vontade.","Haverá conflitos, oposição ou disputas de ego. Mantenha-se confiante; os desafios trarão reconhecimento público e vitória se você não recuar."],
-        ["O Ímpeto","A energia acelerada e a defesa inabalável do próprio espaço.","As coisas acontecerão muito rápido. Comunique-se com clareza, defenda suas posições e aproveite o momento para resolver pendências com velocidade."],
-        ["A Brasa","A resistência sob pressão extrema, carregando fardos.","Você está sobrecarregado, mas muito perto da linha de chegada. Aguente firme, mas delegue responsabilidades assim que o ciclo terminar."],
-        ["O Desbravador","O pioneiro enérgico, impaciente e passional.","Aja com coragem, entusiasmo e espírito de aventura. Uma viagem inesperada, uma mudança de rota ou uma atitude ousada trará excelentes resultados."],
-        ["O Soberano da Chama","A liderança magnética, o poder de inspiração.","Assuma o comando. Use o seu carisma e a sua autoconfiança para mobilizar pessoas. Seja a figura de autoridade visionária e generosa da situação."]
-      ]
-    },
-    {
-      key:"terra", name:"Terra", theme:"Matéria, Segurança, Concretização",
-      graus:[
-        ["A Semente","O surgimento do recurso material aliado ao malabarismo diário.","Uma nova oportunidade de ganhos está disponível, mas exigirá adaptação, jogo de cintura e flexibilidade na gestão do tempo ou dinheiro."],
-        ["O Alicerce","A edificação cautelosa e a união de competências técnicas.","Trabalhe em equipe para construir algo sólido. Cuidado com a avareza; proteja seus bens, mas não paralise o fluxo financeiro pelo medo de perder."],
-        ["A Providência","O balanço da balança material: escassez e ajuda.","Se estiver em dificuldade, engula o orgulho e peça socorro (um empréstimo, um favor). Se estiver próspero, seja generoso e retribua as bênçãos ao mundo."],
-        ["O Ofício","A repetição metódica, o foco nos detalhes e na produção.","Concentre-se no trabalho e nos estudos práticos. Aprimore suas habilidades. O sucesso chegará não por sorte, mas pelo esforço diário contínuo e bem feito."],
-        ["O Legado","O conforto definitivo, a herança e o patrimônio acumulado.","Desfrute do conforto material, da aposentadoria ou dos lucros de um longo esforço. Indica segurança estrutural, enriquecimento e fortes bases familiares."],
-        ["O Construtor","O avanço pragmático, teimoso e eficiente.","Não procure atalhos. Faça o que precisa ser feito com método, lealdade e perseverança. Cada passo pragmático pavimentará um caminho duradouro."],
-        ["O Soberano da Terra","A abundância instintiva, o provedor rico e próspero.","Aja com visão administrativa e pragmatismo, garantindo o conforto, a saúde física e o sucesso financeiro. Administre seus recursos visando luxo e qualidade."]
-      ]
-    },
-    {
-      key:"ar", name:"Ar", theme:"Mente, Verdade, Conflito",
-      graus:[
-        ["A Lucidez","O \"insight\" cortante que resolve impasses.","Tire as vendas. Use o intelecto frio para tomar a decisão que está sendo evitada. Uma conversa franca, lógica e direta resolverá a questão pendente."],
-        ["A Trégua","O descanso estratégico da mente, a pausa obrigatória para cura.","Pare de pensar excessivamente no problema. Você precisa descansar, meditar ou dormir para cicatrizar uma dor antes de voltar para a vida agitada."],
-        ["A Travessia","O abandono de vitórias inúteis em busca de paz.","Afaste-se da confusão. Aceite a perda, perdoe o agravante e mude fisicamente ou mentalmente de cenário. A paz é mais importante que estar certo."],
-        ["A Armadilha","As prisões criadas pelas crenças limitantes e pela ansiedade.","Você está refém dos seus próprios pensamentos. Pare de criar obstáculos imaginários. A saída é simples: encare o problema de frente e liberte-se."],
-        ["O Abismo","O fim inescapável da negação, o colapso dos esquemas mentais.","Aceite o pior cenário, chore, desabafe. A resistência só prolonga a dor mental. Quando você aceita o fundo do poço, a mente desocupa espaço e o renascimento começa."],
-        ["O Desafiante","A mente inquiridora, o discurso cortante, a pressa em debater.","Exija fatos e verdades. Esteja pronto para argumentar e cortar a manipulação alheia pela raiz. Cuidado apenas para não se tornar excessivamente agressivo ou frio."],
-        ["O Soberano do Ar","A imparcialidade suprema do intelecto refinado, o estratega.","Adote uma postura distanciada e analítica. Julgue a situação de forma ética, clara e sem sentimentalismos. Suas palavras têm o poder de sentenciar o futuro."]
-      ]
-    }
-  ];
-
-  var MINOR = [];
-  ELEMENTS.forEach(function(el){
-    el.graus.forEach(function(g, idx){
-      MINOR.push({
-        name: g[0],
-        group: "Elemento " + el.name,
-        groupTheme: el.theme,
-        cat: el.key,
-        numeral: toRoman(idx + 1),
-        grau: idx + 1,
-        text: g[1] + " — " + g[2],
-        special:false
-      });
-    });
-  });
-
-  // Parte III — Cartas Especiais (2 cartas, dualidade Luz/Sombra em vez de invertida)
-  var SPECIAL = [
-    {
-      name:"A Paixão",
-      group:"Carta Especial",
-      groupTheme:null,
-      cat:"special",
-      numeral:null,
-      description:"O magnetismo, o desejo absoluto e a necessidade de fusão.",
-      light:"O amor que devota, fortalece e gera milagres. A conexão íntima curadora, o carisma magnético. A força de dar a própria vida por algo sagrado.",
-      dark:"O ciúme possessivo, o apego tóxico e o vazio existencial. A obsessão, a chantagem emocional e a atração perigosa por algo que consumirá sua energia.",
-      special:true
-    },
-    {
-      name:"A Ambição",
-      group:"Carta Especial",
-      groupTheme:null,
-      cat:"special",
-      numeral:null,
-      description:"O instinto de ascensão, o orgulho e a fome de poder.",
-      light:"A superação admirável de limites, o ímpeto de vencer a miséria ou o ostracismo. A liderança que inspira e ergue os oprimidos, construindo um grande legado.",
-      dark:"A ganância insaciável, a tirania, e a política do \"os fins justificam os meios\". O ego que pisa nos outros e acaba governando, solitário, um império de cinzas.",
-      special:true
-    }
-  ];
-
-  var DECK = MAJOR.concat(MINOR).concat(SPECIAL); // 22 + 28 + 2 = 52
-
-  /* ---------- Glifos de canto por categoria (12x12, currentColor) ---------- */
-  var CORNER_GLYPH = {
-    major: '<svg viewBox="0 0 12 12"><rect x="4" y="0" width="4" height="12" fill="currentColor"/><rect x="0" y="4" width="12" height="4" fill="currentColor"/><rect x="1.8" y="1.8" width="8.4" height="8.4" fill="currentColor" transform="rotate(45 6 6)"/></svg>',
-    agua: '<svg viewBox="0 0 12 12"><path d="M6 0C9 4 11 7 11 9a5 5 0 0 1-10 0C1 7 3 4 6 0Z" fill="currentColor"/></svg>',
-    fogo: '<svg viewBox="0 0 12 12"><path d="M6 0c1.6 2.6 3.6 4 3.6 6.6A3.6 3.6 0 0 1 6 10.2a3.6 3.6 0 0 1-3.6-3.6c0-1 .4-1.7.9-2.4C3.6 5 4.4 5.8 5 5.6 4.3 3.8 4.6 1.8 6 0Z" fill="currentColor"/></svg>',
-    terra: '<svg viewBox="0 0 12 12"><polygon points="6,0 12,6 6,12 0,6" fill="currentColor"/></svg>',
-    ar: '<svg viewBox="0 0 12 12"><path d="M6 6c0-2.2 2.2-3.3 3.2-1.6S8.2 8.6 6 8.6 2.3 6.2 2.8 4 6 1 8.2 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
-    special: '<svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="currentColor"/><path d="M6 1a5 5 0 0 1 0 10Z" fill="#050505"/></svg>'
-  };
-
-  /* ---------- Verso das cartas: astrolábio 16-bit (mesmo para todo o baralho) ---------- */
-  function buildBackSVG(){
-    var ticks = "";
-    for(var i = 0; i < 12; i++){
-      var angle = (i * 30) * Math.PI / 180;
-      var x1 = 50 + 40 * Math.sin(angle), y1 = 50 - 40 * Math.cos(angle);
-      var x2 = 50 + 45 * Math.sin(angle), y2 = 50 - 45 * Math.cos(angle);
-      ticks += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="#D4AF37" stroke-width="1.6"/>';
-    }
-    var stars = "";
-    var starPos = [[8,10],[22,18],[85,12],[92,30],[12,70],[6,45],[88,68],[78,88],[35,92],[60,90],[15,25],[70,20]];
-    starPos.forEach(function(p, idx){
-      var r = idx % 3 === 0 ? 1.2 : 0.7;
-      var c = idx % 4 === 0 ? "#BEE9E8" : "#FFFFFF";
-      stars += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="' + c + '"/>';
-    });
-    return '<svg viewBox="0 0 100 100">' +
-      stars +
-      '<circle cx="50" cy="50" r="45" fill="none" stroke="#8A6818" stroke-width="1.5"/>' +
-      ticks +
-      '<circle cx="50" cy="50" r="30" fill="none" stroke="#D4AF37" stroke-width="1"/>' +
-      '<circle cx="50" cy="50" r="18" fill="#453205" stroke="#D4AF37" stroke-width="1.5"/>' +
-      '<path d="M50 34a16 16 0 0 1 0 32 12 12 0 0 0 0-32Z" fill="#F7D070"/>' +
-      '<circle cx="50" cy="50" r="3" fill="#080D1A"/>' +
-    '</svg>';
-  }
-  var BACK_SVG = buildBackSVG();
-
-  /* ---------- Spreads: números primos ≤ 7, Lei das Fileiras ----------
-     Meio = Presente (aberta 1ª) · Baixo = Passado (aberta 2ª) · Cima = Futuro (aberta 3ª)
-     A tiragem de Grau 2 é ramificada: a 2ª carta desce (Causa) ou sobe (Consequência). */
-  var SPREADS = [
-    {
-      id:"g2", num:2, label:"Grau 2 · Causa ou Consequência",
-      desc:"Resposta binária para urgências. Depois de ver o Presente, escolha investigar a Causa ou prever a Consequência.",
-      branch:true,
-      meio:[{label:"Situação Atual"}]
-    },
-    {
-      id:"g3", num:3, label:"Grau 3 · Linha do Tempo Direta",
-      desc:"Estrutura equilibrada e analítica: o agora, a raiz e a colheita.",
-      branch:false,
-      meio:[{label:"O status do agora"}],
-      baixo:[{label:"A raiz da questão"}],
-      cima:[{label:"A colheita que está chegando"}]
-    },
-    {
-      id:"g5", num:5, label:"Grau 5 · Ponto de Pressão",
-      desc:"Cruz horizontal com foco analítico massivo no presente.",
-      branch:false,
-      meio:[{label:"Situação aparente"},{label:"Obstáculo oculto"},{label:"Atitude mental"}],
-      baixo:[{label:"O gatilho original"}],
-      cima:[{label:"O veredito, se nada mudar"}]
-    },
-    {
-      id:"g7", num:7, label:"Grau 7 · A Teia do Destino",
-      desc:"A leitura máxima: um diamante 2-3-2 para cruzamento denso de dados.",
-      branch:false,
-      meio:[{label:"Corpo / Vida Material"},{label:"Mente / Estado Emocional"},{label:"Alma / Essência da Questão"}],
-      baixo:[{label:"A Herança"},{label:"O Fantasma"}],
-      cima:[{label:"A Luz"},{label:"A Escuridão"}]
-    }
-  ];
-
-  var ROW_TITLE = {meio:"Presente", baixo:"Passado", cima:"Futuro"};
-  var ROW_ORDER = ["cima","meio","baixo"]; // ordem visual: futuro em cima, presente no meio, passado embaixo
-
-  /* ---------- State ---------- */
-  var state = {
-    spread: SPREADS[1],
-    rows: {meio:[], baixo:[], cima:[]},
-    pendingSecond: null,
-    choiceMade: null
-  };
-
-  /* ---------- Helpers ---------- */
-  function shuffle(arr){
-    var a = arr.slice();
-    for(var i=a.length-1;i>0;i--){
-      var j = Math.floor(Math.random()*(i+1));
-      var t=a[i]; a[i]=a[j]; a[j]=t;
-    }
-    return a;
-  }
-
-  function makeDrawn(card, pos){
-    return {
-      pos: pos,
-      card: card,
-      polarity: card.special ? (Math.random() < 0.5 ? "luz" : "escuridao") : null,
-      revealed: false
-    };
-  }
-
-  function totalCount(spread){
-    if(spread.branch) return 2;
-    return spread.meio.length + spread.baixo.length + spread.cima.length;
-  }
-
-  function drawNewReading(spread){
-    var pool = shuffle(DECK);
-    var cards = pool.slice(0, totalCount(spread));
-    var i = 0;
-
-    state.spread = spread;
-    state.rows = {meio:[], baixo:[], cima:[]};
-    state.pendingSecond = null;
-    state.choiceMade = null;
-
-    spread.meio.forEach(function(pos){ state.rows.meio.push(makeDrawn(cards[i], pos)); i++; });
-
-    if(spread.branch){
-      state.pendingSecond = cards[i];
-    }else{
-      spread.baixo.forEach(function(pos){ state.rows.baixo.push(makeDrawn(cards[i], pos)); i++; });
-      spread.cima.forEach(function(pos){ state.rows.cima.push(makeDrawn(cards[i], pos)); i++; });
-    }
-    render();
-  }
-
-  function rowEntries(rowName){ return state.rows[rowName]; }
-
-  function rowRevealed(rowName){
-    var entries = rowEntries(rowName);
-    return entries.length > 0 && entries.every(function(d){ return d.revealed; });
-  }
-
-  function rowUnlocked(rowName){
-    if(rowName === "meio") return true;
-    if(state.spread.branch){
-      if(rowName === "baixo") return state.choiceMade === "causa";
-      if(rowName === "cima") return state.choiceMade === "consequencia";
-    }
-    if(rowName === "baixo") return rowRevealed("meio");
-    if(rowName === "cima") return rowRevealed("meio") && rowRevealed("baixo");
-    return false;
-  }
-
-  function allRevealed(){
-    return ["meio","baixo","cima"].every(function(r){
-      var entries = rowEntries(r);
-      return entries.every(function(d){ return d.revealed; });
-    });
-  }
-
-  function makeChoice(kind){
-    var pos = kind === "causa" ? {label:"A Causa"} : {label:"A Consequência"};
-    var row = kind === "causa" ? "baixo" : "cima";
-    state.choiceMade = kind;
-    state.rows[row].push(makeDrawn(state.pendingSecond, pos));
-    state.pendingSecond = null;
-    render();
-  }
-
-  function cardMeaning(d){
-    if(d.card.special){
-      return d.polarity === "escuridao" ? d.card.dark : d.card.light;
-    }
-    return d.card.text;
-  }
-
-  function saveToHistory(){
-    try{
-      var list = JSON.parse(localStorage.getItem("tarot_history") || "[]");
-      var cards = [];
-      ["meio","baixo","cima"].forEach(function(r){
-        state.rows[r].forEach(function(d){
-          cards.push(d.pos.label + ": " + d.card.name + (d.polarity ? " (" + (d.polarity === "escuridao" ? "Escuridão" : "Luz") + ")" : ""));
-        });
-      });
-      list.unshift({ date: new Date().toISOString(), spread: state.spread.label, cards: cards });
-      list = list.slice(0, 30);
-      localStorage.setItem("tarot_history", JSON.stringify(list));
-    }catch(e){ /* localStorage indisponível: ignora silenciosamente */ }
-  }
-
-  /* ---------- Render ---------- */
-  var boardEl = document.getElementById("board");
-  var spreadPickerEl = document.getElementById("spreadPicker");
-  var spreadDescEl = document.getElementById("spreadDesc");
-  var choicePanelEl = document.getElementById("choicePanel");
-  var infoEl = document.getElementById("readingInfo");
-  var hintEl = document.getElementById("hint");
-
-  function renderSpreadPicker(){
-    spreadPickerEl.innerHTML = "";
-    SPREADS.forEach(function(s){
-      var btn = document.createElement("button");
-      btn.className = "spread-btn" + (s.id === state.spread.id ? " active" : "");
-      btn.textContent = s.label;
-      btn.onclick = function(){ drawNewReading(s); };
-      spreadPickerEl.appendChild(btn);
-    });
-    spreadDescEl.textContent = state.spread.desc;
-  }
-
-  function makeCardEl(d, rowName){
-    var unlocked = rowUnlocked(rowName);
-    var isEscuridao = d.polarity === "escuridao";
-    var slot = document.createElement("div");
-    slot.className = "slot";
-
-    var label = document.createElement("div");
-    label.className = "slot-label";
-    label.textContent = d.pos.label;
-    slot.appendChild(label);
-
-    var glyph = CORNER_GLYPH[d.card.cat] || CORNER_GLYPH.major;
-    var cardEl = document.createElement("div");
-    cardEl.className = "card" + (d.revealed ? " flipped" : "") + (unlocked ? "" : " locked");
-    cardEl.innerHTML =
-      '<div class="card-inner">' +
-        '<div class="card-face card-back">' +
-          '<div class="nebula"></div>' + BACK_SVG +
-        '</div>' +
-        '<div class="card-face card-front cat-' + d.card.cat + '">' +
-          '<span class="glyph tl">' + glyph + '</span>' +
-          '<span class="glyph br">' + glyph + '</span>' +
-          (d.card.numeral ? '<div class="numeral">' + d.card.numeral + '</div>' : '') +
-          (d.polarity ? '<div class="polarity-tag">' + (isEscuridao ? "Escuridão" : "Luz") + '</div>' : '') +
-          '<div class="footer"><div class="name">' + d.card.name + '</div></div>' +
-        '</div>' +
-      '</div>';
-    cardEl.onclick = function(){
-      if(unlocked && !d.revealed){
-        d.revealed = true;
-        render();
-        if(allRevealed()) saveToHistory();
+  al(x,y){ return (x<0||y<0||x>=W||y>=H) ? 0 : this.d[(y*W+x)*4+3]; }
+  rect(x,y,w,h,c,a){ for(let j=0;j<h;j++) for(let i=0;i<w;i++) this.px(x+i,y+j,c,a); }
+  circ(cx,cy,r,c,a){ const R=Math.ceil(r), rr=r*r+r*.8; for(let j=-R;j<=R;j++) for(let i=-R;i<=R;i++) if(i*i+j*j<=rr) this.px(cx+i,cy+j,c,a); }
+  ring(cx,cy,r,c,a,t){ t=t||1; const R=Math.ceil(r), o=r*r+r*.8, n=(r-t)*(r-t)+(r-t)*.8; for(let j=-R;j<=R;j++) for(let i=-R;i<=R;i++){ const q=i*i+j*j; if(q<=o && q>n) this.px(cx+i,cy+j,c,a); } }
+  ell(cx,cy,rx,ry,c,a){ for(let j=-Math.ceil(ry);j<=ry;j++) for(let i=-Math.ceil(rx);i<=rx;i++) if((i*i)/(rx*rx)+(j*j)/(ry*ry)<=1.05) this.px(cx+i,cy+j,c,a); }
+  poly(p,c,a){
+    let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+    for(const q of p){ x0=Math.min(x0,q[0]); x1=Math.max(x1,q[0]); y0=Math.min(y0,q[1]); y1=Math.max(y1,q[1]); }
+    for(let y=Math.max(0,Math.floor(y0)); y<=Math.min(H-1,Math.ceil(y1)); y++){
+      for(let x=Math.max(0,Math.floor(x0)); x<=Math.min(W-1,Math.ceil(x1)); x++){
+        const px=x+.5, py=y+.5; let ins=false;
+        for(let i=0,j=p.length-1;i<p.length;j=i++){
+          const xi=p[i][0], yi=p[i][1], xj=p[j][0], yj=p[j][1];
+          if(((yi>py)!==(yj>py)) && (px < (xj-xi)*(py-yi)/(yj-yi)+xi)) ins=!ins;
+        }
+        if(ins) this.px(x,y,c,a);
       }
+    }
+  }
+  line(x0,y0,x1,y1,c,a,t){
+    t=t||1; const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0),1);
+    for(let k=0;k<=n;k++){ const x=x0+(x1-x0)*k/n, y=y0+(y1-y0)*k/n;
+      if(t<=1) this.px(x,y,c,a); else this.rect(Math.round(x-(t-1)/2),Math.round(y-(t-1)/2),t,t,c,a); }
+  }
+  grad(x,y,w,h,c1,c2,n){
+    n=n||6; const Lv=[]; for(let k=0;k<n;k++) Lv.push(rgb(mix(c1,c2,k/(n-1))));
+    for(let j=0;j<h;j++){ const t=(h<2?0:j/(h-1))*(n-1), lo=Math.floor(t), fr=t-lo;
+      for(let i=0;i<w;i++){ const lv = fr>bay(x+i,y+j) ? Math.min(lo+1,n-1) : lo; this.px(x+i,y+j,Lv[lv]); } }
+  }
+  blob(cx,cy,rx,ry,c,dens,a){
+    dens=dens||1;
+    for(let j=-Math.ceil(ry);j<=ry;j++) for(let i=-Math.ceil(rx);i<=rx;i++){
+      const q=Math.sqrt((i*i)/(rx*rx)+(j*j)/(ry*ry));
+      if(q<=1 && (1-q)*dens > bay(Math.round(cx+i),Math.round(cy+j))) this.px(cx+i,cy+j,c,a);
+    }
+  }
+  over(o,a){
+    a = a===undefined ? 1 : a; const e=o.d;
+    for(let i=0;i<W*H;i++){ const k=i*4, oa=e[k+3]/255*a; if(oa<=0) continue; this.px(i%W,(i/W)|0,[e[k],e[k+1],e[k+2]],oa); }
+  }
+  outline(c){
+    const m=[];
+    for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+      if(this.al(x,y)>60) continue;
+      if(this.al(x-1,y)>127||this.al(x+1,y)>127||this.al(x,y-1)>127||this.al(x,y+1)>127) m.push(x,y);
+    }
+    for(let i=0;i<m.length;i+=2) this.px(m[i],m[i+1],c);
+  }
+  rim(c,amt,dk){
+    const A=new Uint8Array(W*H); for(let i=0;i<W*H;i++) A[i]=this.d[i*4+3];
+    const al=(x,y)=>(x<0||y<0||x>=W||y>=H)?0:A[y*W+x]; const C=rgb(c), d=this.d;
+    for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+      if(al(x,y)<128) continue; const i=(y*W+x)*4;
+      if(al(x-1,y)<128||al(x,y-1)<128){ for(let k=0;k<3;k++) d[i+k]+=(C[k]-d[i+k])*amt; }
+      else if(al(x+1,y)<128||al(x,y+1)<128){ for(let k=0;k<3;k++) d[i+k]*=dk; }
+    }
+  }
+  flipV(){ const o=new Buf(); for(let y=0;y<H;y++) o.d.set(this.d.subarray(y*W*4,(y+1)*W*4),(H-1-y)*W*4); return o; }
+  map(fn){ const d=this.d; for(let i=0;i<W*H;i++){ const k=i*4; if(!d[k+3]) continue; const r=fn(d[k],d[k+1],d[k+2],i%W,(i/W)|0); d[k]=r[0]; d[k+1]=r[1]; d[k+2]=r[2]; } }
+}
+
+/* ---------- Primitivas de cenário ---------- */
+function stars(b,r,n,y1,f,cols){ cols=cols||["#FFFFFF","#BEE9E8"];
+  for(let i=0;i<n;i++){ const x=(r()*W)|0, y=(r()*y1)|0, c=cols[i%cols.length], ph=(i+f)%4;
+    b.px(x,y,c,ph===0?.35:1);
+    if(i%6===0 && ph===2){ b.px(x-1,y,c,.6); b.px(x+1,y,c,.6); b.px(x,y-1,c,.6); b.px(x,y+1,c,.6); } } }
+function mtn(b,r,base,hmin,hmax,c,snow,seg){ seg=seg||9; const p=[[0,H],[0,base-hmin]], pk=[]; let x=0;
+  while(x<W+seg){ x+=seg*.5+r()*seg; const y=base-(hmin+r()*(hmax-hmin)); p.push([x,y]); pk.push([x,y]); }
+  p.push([W+10,H]); b.poly(p,c);
+  if(snow) pk.forEach(q=>{ if(q[1]<base-hmin-3) b.poly([[q[0]-3,q[1]+4],[q[0],q[1]],[q[0]+3,q[1]+4],[q[0]+1,q[1]+3],[q[0]-1,q[1]+5]],snow); }); }
+function hills(b,base,amp,fr,ph,c){ for(let x=0;x<W;x++){ const y=Math.round(base-amp*(Math.sin(x*fr+ph)*.5+.5)); b.rect(x,y,1,H-y,c); } }
+function waves(b,y0,y1,c1,c2,f,sp){ sp=sp||2; b.grad(0,y0,W,y1-y0,c1,shade(c1,.55),4);
+  for(let y=y0+1;y<y1;y+=3) for(let x=0;x<W;x++) if(((x+y*3+f*sp)%11)<2) b.px(x,y,c2,.8); }
+function pillar(b,x,y0,y1,w,cM,cL,cD){ b.rect(x,y0,w,y1-y0,cM); b.rect(x,y0,1,y1-y0,cL); b.rect(x+w-1,y0,1,y1-y0,cD); b.rect(x-1,y0-3,w+2,3,cL); b.rect(x-1,y1,w+2,2,cD); }
+function tree(b,x,y,h,cT,cL,rad){ b.rect(x-1,y-h,3,h,cT); b.circ(x,y-h,rad,cL); b.circ(x-rad*.7,y-h+3,rad*.7,cL); b.circ(x+rad*.7,y-h+3,rad*.7,cL); }
+function cloud(b,x,y,w,c1,c2){ for(let i=0;i<=w;i+=4){ const q=3+((i*7)%4); b.circ(x+i,y-q/2,q,c1); } b.rect(x-2,y,w+4,2,c2); }
+function bolt(b,r,x,y0,y1,c,a){ let px=x,py=y0; while(py<y1){ const nx=px+Math.round((r()-.5)*8), ny=py+3+((r()*4)|0); b.line(px,py,nx,ny,c,a); if(r()<.25) b.line(nx,ny,nx+Math.round((r()-.5)*10),ny+6,c,(a||1)*.7); px=nx; py=ny; } }
+function rays(b,cx,cy,n,len,c,a,rot){ rot=rot||0; for(let k=0;k<n;k++){ const an=rot+k*Math.PI*2/n; for(let t=5;t<len;t++){ if((t+k)%2) continue; b.px(cx+Math.cos(an)*t,cy+Math.sin(an)*t,c,a*(1-t/len)); } } }
+function sun(b,cx,cy,rad,c1,c2,halo){ if(halo) b.blob(cx,cy,rad*2.2,rad*2.2,halo,1.2,.8); b.circ(cx,cy,rad,c2); b.circ(cx,cy,rad-2,c1); }
+function moon(b,cx,cy,rad,c,cd){ b.circ(cx,cy,rad,c); b.circ(cx-rad*.3,cy-rad*.2,rad*.25,cd); b.circ(cx+rad*.35,cy+rad*.3,rad*.18,cd); }
+function crescent(b,cx,cy,rad,c,dx){ const R=Math.ceil(rad), rr=rad*rad+rad*.8; for(let j=-R;j<=R;j++) for(let i=-R;i<=R;i++){ if(i*i+j*j<=rr && ((i-dx)*(i-dx)+j*j>rr*.85)) b.px(cx+i,cy+j,c); } }
+function eclipse(b,cx,cy,rad,corona,f){ b.blob(cx,cy,rad*2.1,rad*2.1,corona,1+P4(f)*.12,.85); b.ring(cx,cy,rad+1,"#FFFFFF",1,1); b.circ(cx,cy,rad,"#050505"); }
+function flame(b,x,y,h,f,cols,wm){ cols=cols||["#FFF3B0","#F4A300","#E0521B"]; wm=wm||1; const fl=SW[f];
+  for(let k=0;k<h;k++){ const t=k/h, hw=Math.round((1-t)*h*.32*wm), ox=Math.round(fl*t*t*2);
+    for(let i=-hw;i<=hw;i++){ const e=hw?Math.abs(i)/hw:0; const c=(e<.4&&t<.55)?cols[0]:(e<.75&&t<.8)?cols[1]:cols[2]; b.px(x+i+ox,y-k,c); } } }
+function fall(b,r,n,c,f,dir,y0,y1,spd,a){ const R=y1-y0; for(let i=0;i<n;i++){ const x=(r()*W)|0, base=r()*R; const y=y0+(((base+dir*f*spd)%R)+R)%R; b.px(x,y,c,a); } }
+function grass(b,r,y,n,c){ b.rect(0,y,W,H-y,c); for(let i=0;i<n;i++){ const x=(r()*W)|0, h=2+((r()*7)|0); b.line(x,y,x+(i%2?-1:1),y-h,c); } }
+function rocks(b,r,y,n,c){ b.rect(0,y,W,H-y,c); for(let i=0;i<n;i++){ const x=r()*W, w=3+r()*8, h=2+r()*6; b.poly([[x-w,y+1],[x-w*.5,y-h*.7],[x,y-h],[x+w*.6,y-h*.6],[x+w,y+1]],c); } }
+function mist(b,y0,n,c,a,f){ for(let k=0;k<n;k++){ const y=y0+k*6; for(let x=0;x<W;x++) if(((x+f*2+k*5)%9)<5) b.px(x,y+((x+k)%3===0?1:0),c,a); } }
+
+/* ---------- Companheiros ---------- */
+function dog(b,x,y,c,a,sg){ b.rect(x-3,y-8,6,8,c,a); b.circ(x+sg*2,y-11,3,c,a); b.poly([[x+sg*1,y-13],[x+sg*2,y-18],[x+sg*3,y-13]],c,a); b.rect(sg>0?x+4:x-6,y-11,3,2,c,a); b.rect(sg>0?x-6:x+3,y-3,3,2,c,a); b.px(x+sg*3,y-12,"#FFFFFF",Math.min(1,a+.3)); }
+function tiger(b,x,y,f){ const o="#E07A20", w="#F4E8D0";
+  b.ell(x+4,y-9,12,6,o); b.ell(x+4,y-6,10,3,w);
+  for(let k=0;k<6;k++) b.line(x-4+k*3,y-15,x-5+k*3,y-9,"#1a1008");
+  b.circ(x-9,y-14,5,o); b.rect(x-13,y-13,4,3,w); b.px(x-11,y-15,"#1a1008"); b.px(x-7,y-15,"#1a1008");
+  b.poly([[x-12,y-18],[x-11,y-21],[x-9,y-18]],o); b.poly([[x-7,y-18],[x-6,y-21],[x-4,y-18]],o);
+  [-4,0,8,12].forEach(dx=>b.rect(x+dx,y-4,3,5,o));
+  b.line(x+16,y-11,x+20,y-16-SW[f],o,1,2); }
+function raven(b,x,y,sg,f){ b.ell(x,y,3,2,"#0a0a12"); b.circ(x+sg*2,y-2,2,"#0a0a12"); b.px(x+sg*4,y-2,"#4a4a4a"); b.px(x+sg*2,y-3,"#9ad8ff"); b.line(x-sg*3,y,x-sg*5,y+2,"#0a0a12"); if(f%2) b.line(x,y-1,x-sg*3,y-5,"#1a1a28"); }
+function bird(b,x,y,c,f){ b.rect(x-1,y,3,2,c); b.px(x+2,y-1,c); if(f%2){ b.px(x-1,y-1,c); b.px(x-2,y-2,c); } else b.px(x-2,y+1,c); }
+function owl(b,x,y,f){ const c="#8a8a90"; b.ell(x,y,3,4,c); b.circ(x,y-4,3,c); b.px(x-1,y-4,"#FFD34E"); b.px(x+1,y-4,"#FFD34E"); const up=f%2?-4:2; b.poly([[x-2,y-1],[x-12,y+up],[x-9,y+3]],c); b.poly([[x+2,y-1],[x+12,y+up],[x+9,y+3]],c); }
+function horse(b,x,y,sg,f){ const c="#FFB020", d="#E0621B";
+  b.ell(x,y-15,11,6,c); b.ell(x,y-13,9,3,d,.5);
+  b.poly([[x+sg*6,y-19],[x+sg*8,y-32],[x+sg*12,y-33],[x+sg*12,y-22],[x+sg*9,y-14]],c);
+  b.poly([[x+sg*10,y-34],[x+sg*18,y-29],[x+sg*17,y-26],[x+sg*10,y-27]],c);
+  b.px(x+sg*13,y-31,"#3a1a00"); b.px(x+sg*17,y-28,"#3a1a00");
+  [-8,-5,5,8].forEach((dx,i)=>{ b.line(x+dx,y-11,x+dx,y-2,d,1,2); b.rect(x+dx-1,y-1,3,2,"#5a2a00"); });
+  for(let k=0;k<4;k++) flame(b,x+sg*(7+k),y-24+k*3,4+((k+f)%2)*2,f,["#FFFFFF","#FFF3B0","#FF9A2A"]);
+  flame(b,x-sg*10,y-14,6,f,["#FFF3B0","#FF9A2A","#E0321B"]); }
+function ram(b,x,y,c){ b.ell(x,y-9,10,6,c); for(let k=0;k<8;k++) b.px(x-8+k*2,y-12+(k%2),mix(c,"#FFFFFF",.3)); b.circ(x-10,y-13,4,c); b.ring(x-9,y-15,3,"#F7D070",1,1); b.px(x-12,y-13,"#1a0a00"); [-6,-2,4,8].forEach(dx=>b.rect(x+dx,y-4,2,4,"#5a3010")); }
+function wolf(b,x,y){ const c="#7a7a82"; b.ell(x,y-4,10,4,c); b.ell(x,y-3,8,2,"#9a9aa2"); b.circ(x-9,y-6,3,c); b.poly([[x-11,y-8],[x-10,y-12],[x-8,y-8]],c); b.rect(x-14,y-6,3,2,c); b.px(x-10,y-7,"#1a1a1a"); b.line(x+10,y-4,x+15,y-2,c,1,2); }
+function fish(b,x,y,sg,c){ b.ell(x,y,3,1.5,c); b.poly([[x-sg*3,y],[x-sg*6,y-2],[x-sg*6,y+2]],c); b.px(x+sg*2,y,"#1a1a1a"); }
+
+/* ---------- Figura humanoide parametrizada ---------- */
+const HP = {down:[13,42], open:[21,26], up:[14,2], chest:[4,27], hold:[12,32], fwd:[16,24], high:[12,-6], side:[18,38]};
+const dv = (v,d) => v==null ? d : v;
+
+function wings(L,cx,T,w){
+  const s=L.s, gf=L.gf, f=L.f, fl=[0,-1,-2,-1][f], p=P4(f);
+  if(w.type==="fire"){
+    const PS=[[[0,0],[8,-16],[20,-30],[18,-14],[26,-10],[12,6]],[[0,4],[16,-2],[34,0],[26,8],[34,18],[12,14]],[[0,10],[10,22],[22,38],[14,34],[8,44],[2,22]]];
+    for(const sg of [-1,1]) PS.forEach((pts,k)=>{
+      const pp=pts.map(([x,y])=>[cx+sg*(6+x),T+18+y+(k===0?fl:0)]);
+      s.poly(pp,k===1?"#FF9A2A":"#FF7A1A");
+      s.poly(pp.map(([x,y])=>[cx+sg*6+(x-cx-sg*6)*.6,T+18+(y-T-18)*.6]),"#FFD34E");
+      const m=pp[2], ex=Math.round((m[0]+cx+sg*6)/2), ey=Math.round((m[1]+T+18)/2);
+      s.rect(ex-1,ey,3,2,"#FFFFFF"); s.px(ex,ey,"#1a1a40");
+      gf.poly(pp,"#FFB020",.1+p*.07);
+    });
+    return;
+  }
+  if(w.type==="arm"){
+    for(const sg of [-1,1]){
+      const pts=[[cx+sg*8,T+16],[cx+sg*24,T+22],[cx+sg*41,T+16],[cx+sg*43,T+26],[cx+sg*36,T+42],[cx+sg*22,T+50],[cx+sg*9,T+36]];
+      s.poly(pts,w.c);
+      for(let q=0;q<4;q++) s.line(cx+sg*(14+q*7),T+22+q,cx+sg*(12+q*6),T+44+q,w.c2);
+      s.line(cx+sg*12,T+20,cx+sg*40,T+18,mix(w.c,"#FFFFFF",.5));
+    }
+    return;
+  }
+  if(w.type==="iris"){
+    const C=["#FF6A6A","#FFB04A","#FFF06A","#6AE06A","#6AB0FF","#B07AFF"];
+    for(const sg of [-1,1]) C.forEach((c,q)=>{ const k=1-q*.12;
+      s.poly([[cx+sg*6,T+18],[cx+sg*(6+24*k),T+2+fl],[cx+sg*(6+34*k),T+10+fl],[cx+sg*(6+28*k),T+34],[cx+sg*(6+14*k),T+50]],c,.3); });
+    return;
+  }
+  for(const sg of [-1,1]){
+    const c=sg<0?(w.cl||w.c):(w.cr||w.c);
+    const pts=[[cx+sg*6,T+18],[cx+sg*16,T+4+fl],[cx+sg*30,T-6+fl*2],[cx+sg*38,T+4+fl*2],[cx+sg*34,T+22+fl],[cx+sg*26,T+44],[cx+sg*16,T+60],[cx+sg*8,T+38]];
+    s.poly(pts,c);
+    for(let q=0;q<5;q++) s.line(cx+sg*(12+q*5),T+8+q*2+fl,cx+sg*(10+q*4),T+34+q*5,shade(c,.78));
+    s.line(cx+sg*16,T+4+fl,cx+sg*30,T-6+fl*2,w.c2||mix(c,"#FFFFFF",.5));
+    if(w.glow) gf.poly(pts,w.glow,.08+p*.07);
+  }
+}
+
+function multiArms(L,cx,T,o){
+  const s=L.s, sk=o.skin;
+  [[24,6,"sword"],[27,18,"disc"],[23,40,"bow"]].forEach(([dx,dy,wp])=>{
+    for(const sg of [-1,1]){
+      const hx=cx+sg*dx, hy=T+dy;
+      s.line(cx+sg*8,T+19,hx,hy,sk,1,2); s.rect(hx-1,hy-1,3,3,sk);
+      if(wp==="sword") s.line(hx,hy,hx+sg*2,hy-8,"#DFE6EE");
+      else if(wp==="disc") s.ring(hx,hy-3,2.2,"#F7D070",1,1);
+      else s.line(hx,hy-6,hx,hy+6,"#8a5a2a");
+    }
+  });
+}
+
+function head(L,cx,T,o){
+  const s=L.s, gf=L.gf, f=L.f, hy=T+7, sk=o.skin||"#c68a5a", hr=o.hair||"#1a1210", ey=o.eye||"#140c08", h=o.head||"hair";
+  const hairBase=()=>{ s.circ(cx,hy-1,7,hr); s.ell(cx,hy+1,5,5,sk); };
+  const eyes=()=>{
+    if(o.oneEye){ s.px(cx-2,hy,o.oneEye); s.rect(cx+1,hy-1,3,2,"#111111"); gf.circ(cx-2,hy,2,o.oneEye,.35); }
+    else { s.px(cx-2,hy,ey); s.px(cx+2,hy,ey); if(o.eyeGlow){ gf.circ(cx-2,hy,1.5,o.eyeGlow,.5); gf.circ(cx+2,hy,1.5,o.eyeGlow,.5); } }
+    if(o.smile){ s.px(cx-1,hy+3,shade(sk,.55)); s.px(cx,hy+4,shade(sk,.55)); s.px(cx+1,hy+3,shade(sk,.55)); }
+  };
+  const beard=()=>{ if(!o.beard) return; const lg=o.beardLong?13:8; s.poly([[cx-5,hy+2],[cx+5,hy+2],[cx+3,hy+lg],[cx,hy+lg+2],[cx-3,hy+lg]],o.beard); s.px(cx,hy+3,shade(sk,.6)); };
+  switch(h){
+    case "ibis":
+      s.circ(cx,hy,6,"#F4F4F0"); s.circ(cx,hy+2,4,"#E4E4DC"); s.px(cx+2,hy-1,"#111111");
+      s.line(cx+4,hy+1,cx+13,hy+8,"#1a1a1a",1,2); s.line(cx+13,hy+8,cx+14,hy+12,"#1a1a1a");
+      s.rect(cx-4,hy+5,9,2,"#F7D070"); return;
+    case "jackal":
+      s.poly([[cx-8,hy-3],[cx+8,hy-3],[cx+10,hy+14],[cx-10,hy+14]],"#1a3a8a");
+      for(let y=hy-2;y<hy+14;y+=2) s.line(cx-9,y,cx+9,y,"#F7D070");
+      s.circ(cx,hy,6,"#111111");
+      s.poly([[cx-5,hy-3],[cx-3,hy-15],[cx-1,hy-4]],"#111111"); s.poly([[cx+1,hy-4],[cx+3,hy-15],[cx+5,hy-3]],"#111111");
+      s.px(cx-3,hy-10,"#3a2a2a"); s.px(cx+3,hy-10,"#3a2a2a");
+      s.poly([[cx+3,hy-1],[cx+13,hy+3],[cx+12,hy+6],[cx+3,hy+5]],"#111111");
+      s.px(cx+2,hy-1,"#F7D070"); gf.px(cx+2,hy-1,"#FFE08a",.7); return;
+    case "straw": return;
+    case "hood": s.circ(cx,hy,8,o.hoodCol||o.robe); s.ell(cx,hy+2,4,5,sk); eyes(); beard(); return;
+    case "veil":
+      s.ell(cx,hy+1,5,6,sk); eyes();
+      s.circ(cx,hy-1,8,o.veil||"#E0E0F0",.75);
+      s.poly([[cx-8,hy],[cx+8,hy],[cx+11,hy+18],[cx-11,hy+18]],o.veil||"#E0E0F0",.5); return;
+    case "triple":
+      [-9,9].forEach(dx=>{ s.circ(cx+dx,hy+2,4,sk); s.px(cx+dx+(dx<0?-1:1),hy+1,ey); s.circ(cx+dx,hy,5,o.veil,.55); });
+      s.ell(cx,hy+1,5,6,sk); eyes(); s.circ(cx,hy-1,8,o.veil,.65);
+      s.poly([[cx-8,hy],[cx+8,hy],[cx+12,hy+20],[cx-12,hy+20]],o.veil,.45); return;
+    case "half":
+      hairBase(); eyes();
+      for(let j=-4;j<=6;j++) for(let i=1;i<=5;i++) if(i*i+(j-1)*(j-1)<=28) s.px(cx+i,hy+j,"#E4DED2");
+      s.rect(cx+1,hy-1,3,2,"#1a1a22"); s.px(cx+2,hy+3,"#1a1a22");
+      for(let i=1;i<5;i++) s.px(cx+i,hy+5,i%2?"#1a1a22":"#E4DED2"); return;
+  }
+  hairBase(); eyes(); beard();
+  switch(h){
+    case "bald": s.circ(cx,hy-3,4,sk); s.ell(cx,hy+1,5,5,sk); eyes(); break;
+    case "conical": { const c1=o.hat[0], c2=o.hat[1];
+      s.poly([[cx-8,hy-3],[cx+8,hy-3],[cx+2,hy-21]],c1); s.poly([[cx-8,hy-3],[cx,hy-3],[cx+2,hy-21]],c2);
+      s.rect(cx-8,hy-4,17,2,"#F7D070"); break; }
+    case "hat_wide":
+      s.poly([[cx-6,hy-5],[cx+6,hy-5],[cx+4,hy-12],[cx-4,hy-12]],o.hatCol);
+      s.rect(cx-12,hy-5,25,2,o.hatCol); s.rect(cx-12,hy-4,25,1,shade(o.hatCol,.7)); break;
+    case "helmet":
+      s.poly([[cx-7,hy+1],[cx-7,hy-4],[cx-4,hy-8],[cx+4,hy-8],[cx+7,hy-4],[cx+7,hy+1],[cx+4,hy+1],[cx+4,hy-2],[cx-4,hy-2],[cx-4,hy+1]],o.helm);
+      s.rect(cx,hy-2,1,5,o.helm); s.rect(cx-6,hy-7,13,1,mix(o.helm,"#FFFFFF",.4));
+      if(o.crest) s.poly([[cx-2,hy-8],[cx+2,hy-8],[cx+4,hy-16],[cx-8,hy-15],[cx-9,hy-11]],o.crest); break;
+    case "crown": { const c=o.crownCol||"#F7D070";
+      s.rect(cx-6,hy-8,13,3,c); [-5,0,5].forEach(dx=>s.line(cx+dx,hy-8,cx+dx,hy-11,c));
+      s.px(cx,hy-7,o.gem||"#C8102E"); break; }
+    case "rays12":
+      for(let k=0;k<12;k++){ const an=Math.PI*(1+k/11); s.line(cx+Math.cos(an)*8,hy-1+Math.sin(an)*8,cx+Math.cos(an)*13,hy-1+Math.sin(an)*13,"#FFD34E"); }
+      gf.blob(cx,hy-4,14,12,"#FFE08a",1,.35+.1*P4(f)); break;
+    case "feather":
+      s.rect(cx-6,hy-5,13,2,"#40C0C0");
+      s.poly([[cx,hy-6],[cx+2,hy-6],[cx+5,hy-22],[cx+2,hy-24],[cx-1,hy-16]],"#FFFFFF");
+      s.line(cx+1,hy-6,cx+3,hy-22,"#C8C8D0"); break;
+    case "wheat":
+      for(let k=0;k<7;k++){ const an=Math.PI*(1.1+k*.8/6);
+        const x1=cx+Math.cos(an)*6, y1=hy-2+Math.sin(an)*6, x2=cx+Math.cos(an)*12, y2=hy-2+Math.sin(an)*12;
+        s.line(x1,y1,x2,y2,"#DDA15E"); s.px(x2,y2,"#FFD34E"); } break;
+    case "horns":
+      for(const sg of [-1,1]){ s.line(cx+sg*4,hy-5,cx+sg*8,hy-15,o.hornCol,1,2); s.line(cx+sg*7,hy-11,cx+sg*11,hy-13,o.hornCol); s.line(cx+sg*6,hy-8,cx+sg*9,hy-7,o.hornCol); } break;
+    case "flamehair":
+      for(let k=0;k<5;k++) flame(s,cx-6+k*3,hy-3,8+((k+f)%3)*2,f,["#FFF3B0","#FF9A2A","#E0321B"]); break;
+    case "spiky":
+      for(let k=0;k<7;k++){ const an=Math.PI*(1.05+k*.9/6);
+        s.poly([[cx+Math.cos(an)*5-2,hy-1+Math.sin(an)*5],[cx+Math.cos(an)*14,hy-1+Math.sin(an)*14],[cx+Math.cos(an)*5+2,hy-1+Math.sin(an)*5]],hr); } break;
+    case "twoface":
+      s.circ(cx-8,hy+1,4,sk); s.px(cx-10,hy,ey); s.px(cx-11,hy+2,shade(sk,.6)); break;
+    case "templewings":
+      for(const sg of [-1,1]) s.poly([[cx+sg*6,hy-2],[cx+sg*13,hy-7+SW[f]],[cx+sg*12,hy-3],[cx+sg*14,hy-1],[cx+sg*7,hy+1]],"#F4F4F0"); break;
+  }
+  if(o.halo){ L.gb.ring(cx,hy-1,11,o.halo,.85,2); L.gb.blob(cx,hy-1,15,15,o.halo,1,.25); }
+}
+
+function item(L,k,x,y,sg,o){
+  const s=L.s, gf=L.gf, gb=L.gb, f=L.f, p=P4(f);
+  switch(k){
+    case "torch": s.rect(x,y-12,1,15,"#5a3a1a"); s.rect(x-1,y-13,3,2,"#3a2a1a"); flame(s,x,y-14,7,f); gb.blob(x,y-18,11,11,"#F4A300",1,.35); break;
+    case "staff": s.line(x,y-34,x,y+30,"#6b4423",1,2); s.circ(x,y-35,2,"#8a6a3a"); break;
+    case "ogo": s.line(x,y-18,x,y+8,"#3a2415",1,2); s.circ(x,y-19,3,"#3a2415"); for(let q=0;q<5;q++) s.px(x+(q%2?1:-1),y-16+q*3,"#FFFFFF"); s.px(x,y-20,"#C8102E"); break;
+    case "sword": s.rect(x,y-24,2,22,"#DFE6EE"); s.rect(x,y-24,1,22,"#FFFFFF"); s.rect(x-3,y-2,8,2,"#F7D070"); s.rect(x,y,2,4,"#5a3a1a"); break;
+    case "coppersword": s.rect(x,y-22,2,20,"#d8905a"); s.rect(x,y-22,1,20,"#f0c090"); s.rect(x-3,y-2,8,2,"#b87333"); s.rect(x,y,2,4,"#3a2010"); gf.blob(x+1,y-12,4,12,"#FFB080",1,.2+p*.05); break;
+    case "flamesword":
+      s.rect(x-2,y-3,6,2,"#F7D070"); s.rect(x,y-1,2,4,"#5a3a1a");
+      for(let j=0;j<26;j++){ const c=j<9?"#FFFFFF":j<17?"#FFD34E":"#FF7A1A"; s.rect(x,y-4-j,2,1,c); if((j+f)%3===0) s.px(x+(j%2?-1:2),y-4-j,"#FF7A1A"); }
+      gf.blob(x+1,y-17,7,17,"#FFB020",1.2,.3+p*.08); break;
+    case "spear": s.line(x,y-42,x,y+26,"#7a5a3a"); s.poly([[x-2,y-40],[x+2,y-40],[x,y-48]],"#DFE6EE"); break;
+    case "spearD": s.line(x-8,y+16,x+20,y-40,"#7a5a3a"); s.poly([[x+17,y-36],[x+22,y-38],[x+24,y-46]],"#EEF2F6"); gf.line(x+24,y-46,x+30,y-58,"#FFFFFF",.6); break;
+    case "trumpet": { const mx=o.cx+5, my=o.T+9;
+      s.line(mx,my,mx+20,my-12,"#F7D070",1,2); s.circ(mx+21,my-13,3,"#FFE9A0"); s.circ(mx+21,my-13,1,"#b8862b");
+      for(let q=0;q<6;q++){ const d=5+q*5+f*2; gf.px(mx+22+d*.8,my-14-d*.6+(q%2?2:-2),"#FFF3B0",.95); gf.px(mx+23+d*.8,my-14-d*.6,"#FFFFFF",.6); }
+      break; }
+    case "mirror": s.rect(x,y-1,1,4,"#b87333"); s.circ(x+sg*2,y-4,3,"#d8a040"); s.circ(x+sg*2,y-4,2,"#FFF3D0"); if(f===1) gf.px(x+sg*2-1,y-5,"#FFFFFF"); break;
+    case "ankh": s.ring(x+sg,y-9,2.2,"#E0E6EE",1,1); s.rect(x+sg,y-7,1,10,"#E0E6EE"); s.rect(x+sg-2,y-6,5,1,"#E0E6EE"); gf.blob(x+sg,y-5,6,9,"#BEE9E8",1,.3+p*.08); break;
+    case "papyrus": s.rect(x-3+sg*2,y-5,7,6,"#F0E6C8"); s.rect(x-3+sg*2,y-5,7,1,"#C8B890"); for(let q=0;q<3;q++) s.rect(x-2+sg*2,y-3+q,5,1,q===f%3?"#62F0FF":"#3a9aaa"); gf.blob(x+sg*2,y-2,6,5,"#62F0FF",1,.3); break;
+    case "stylus": s.line(x,y+1,x+sg*2,y-8,"#D8C8A0"); break;
+    case "axe2": s.line(x,y+8,x,y-20,"#5a3a1a",1,2); s.poly([[x,y-20],[x-8,y-25],[x-8,y-14]],"#C8D0D8"); s.poly([[x+1,y-20],[x+9,y-25],[x+9,y-14]],"#C8D0D8"); s.px(x,y-22,"#9E2A2B"); break;
+    case "hammer": s.line(x,y+6,x,y-14,"#5a3a1a",1,2); s.rect(x-5,y-19,11,5,"#6a7078"); s.rect(x-5,y-19,11,1,"#A8B0B8"); break;
+    case "trident": s.line(x,y+24,x,y-26,"#C08070"); s.rect(x-3,y-27,7,1,"#C08070"); s.line(x-3,y-27,x-3,y-32,"#C08070"); s.line(x,y-27,x,y-34,"#C08070"); s.line(x+3,y-27,x+3,y-32,"#C08070"); break;
+    case "lotus": s.circ(x,y-2,2,"#F28AB2"); s.px(x-2,y-4,"#FFD1E3"); s.px(x+2,y-4,"#FFD1E3"); s.px(x,y-5,"#FFD1E3"); break;
+    case "cornucopia":
+      s.poly([[x-1,y+3],[x+sg*5,y-2],[x+sg*12,y-9],[x+sg*14,y-4],[x+sg*7,y+4]],"#D8A040"); s.line(x+sg*5,y-1,x+sg*12,y-7,"#A87020");
+      ["#F7D070","#62B6CB","#E07A5F","#8ECF6A","#FFFFFF"].forEach((c,q)=>s.px(x+sg*(11+(q%3)),y-10-(q>>1),c));
+      for(let q=0;q<3;q++) s.line(x+sg*12,y-10,x+sg*(10+q*3),y-16-q,"#DDA15E");
+      gf.blob(x+sg*12,y-10,5,5,"#FFE08a",1,.3); break;
+    case "sickle": s.line(x,y+4,x,y-4,"#5a3a1a"); crescent(s,x+sg*4,y-8,5,"#F7D070",sg*3); break;
+    case "lantern":
+      s.line(x,y,x,y+3,"#3a2a1a"); s.rect(x-2,y+3,5,6,"#b8862b"); s.rect(x-1,y+4,3,4,"#FFE066");
+      gb.blob(x,y+6,8,8,"#FFE066",1.2,.5); gb.poly([[x-1,y+9],[x+1,y+9],[x+14,o.B+3],[x-18,o.B+3]],"#FFD34E",.22); break;
+    case "gourd": s.circ(x,y+4,3,"#8a5a2a"); s.rect(x-1,y,2,2,"#6a4020"); break;
+    case "jar": s.poly([[x-2,y],[x+2,y],[x+3,y+5],[x,y+7],[x-3,y+5]],"#C0A060"); s.rect(x-2,y,5,1,"#8a7040"); break;
+    case "jewel": s.circ(x+sg*2,y-3,2,"#BEE9E8"); gf.blob(x+sg*2,y-3,7,7,"#62F0FF",1,.3+p*.1); break;
+    case "comb": s.rect(x-2,y-5,5,2,"#F0E6D0"); for(let q=0;q<5;q++) s.px(x-2+q,y-3,"#F0E6D0"); break;
+    case "damaru": s.poly([[x-3,y-7],[x+3,y-7],[x,y-4]],"#8a5a2a"); s.poly([[x-3,y-1],[x+3,y-1],[x,y-4]],"#8a5a2a"); break;
+    case "jadeblade": for(let t=0;t<14;t++) s.rect(x+sg*Math.round(t*.5),y-3-t+Math.round(Math.sin(t/4)*2),2,1,"#5AC080"); s.rect(x-1,y-1,3,3,"#1a3a2a"); gf.blob(x+sg*3,y-10,4,8,"#5AC080",1,.2); break;
+    case "poppy": s.line(x,y,x+sg*6,y-10,"#4a7a3a"); s.circ(x+sg*6,y-11,2,"#D02030"); s.px(x+sg*7,y-8+f,"#BEE9E8"); break;
+    case "bread": s.ell(x+sg*2,y-1,3,2,"#D8A060"); s.px(x+sg*1,y-2,"#F0C080"); break;
+    case "scepter": s.line(x,y+8,x,y-16,"#F7D070"); s.circ(x,y-17,2,"#FF7A1A"); gf.blob(x,y-17,5,5,"#FFB020",1,.35); break;
+    case "firelotus": s.ell(x,y-1,3,1.5,"#F28AB2"); flame(s,x,y-2,6,f); gf.blob(x,y-5,5,5,"#FFB020",1,.3); break;
+    case "scythe": s.line(x,y+22,x,y-26,"#5a4a3a"); for(let t=0;t<13;t++) s.rect(x-sg*t,y-26+Math.round(t*t/14),1,2,"#9AA4AE"); break;
+    case "reins": s.line(x,y,x+sg*14,y-4,"#F7D070"); break;
+    case "grain": s.ell(x+sg*2,y-12,5,3,"#DDA15E"); for(let q=0;q<4;q++) s.line(x+sg*(q-1),y-14,x+sg*(q-2),y-19,"#DDA15E"); s.rect(x+sg-2,y-9,6,2,"#FFD700"); break;
+    case "eruexim": s.line(x,y,x,y-6,"#8a6a3a"); for(let q=0;q<5;q++) s.line(x,y-6,x+sg*(2+q)+SW[f],y-18-q,"#E8ECF0"); break;
+  }
+}
+
+function human(L,o){
+  const s=L.s, f=L.f, sw=o.still?0:SW[f];
+  const cx=dv(o.cx,45), T=dv(o.T,44), B=dv(o.B,134);
+  const skin=o.skin||"#c68a5a", robe=o.robe||"#6a5a8a", trim=o.trim||mix(robe,"#FFFFFF",.35), dk=shade(robe,.7);
+  const seat=o.pose==="seat";
+  const tunic=o.tunic||o.pose==="step"||o.pose==="run"||o.pose==="dance";
+  const hemY=seat?B:(tunic?T+54:B);
+  o.cx=cx; o.T=T; o.B=B;
+  if(o.hairLong) s.poly([[cx-7,T+3],[cx+7,T+3],[cx+9+sw,T+dv(o.hairLen,32)],[cx-9+sw,T+dv(o.hairLen,32)]],o.hair||"#1a1210");
+  if(o.wings) wings(L,cx,T,o.wings);
+  if(o.cape) s.poly([[cx-9,T+15],[cx+9,T+15],[cx+18+sw*2,B],[cx-18+sw*2,B]],o.cape);
+  if(o.back) o.back(L,cx,T,B);
+  if(tunic && !seat){
+    const lc=o.legs||skin; let fx1=cx-6, fx2=cx+6;
+    if(o.pose==="step"){ fx1=cx-11; fx2=cx+9; }
+    if(o.pose==="run"){ fx1=cx-14; fx2=cx+12; }
+    s.line(cx-5,hemY-2,fx1,B,lc,1,3);
+    if(o.pose==="dance"){ s.line(cx+5,hemY-2,cx+13,hemY+10,lc,1,3); s.line(cx+13,hemY+10,cx-1,hemY+15,lc,1,3); }
+    else s.line(cx+5,hemY-2,fx2,B,lc,1,3);
+    s.rect(fx1-2,B,4,2,o.feet||shade(lc,.6));
+    if(o.pose!=="dance") s.rect(fx2-2,B,4,2,o.feet||shade(lc,.6));
+  }
+  if(seat){
+    s.ell(cx,B-5,17,6,robe); s.rect(cx-16,B-5,33,1,trim);
+    s.poly([[cx-9,T+15],[cx+9,T+15],[cx+11,B-6],[cx-11,B-6]],robe);
+    s.poly([[cx+3,T+15],[cx+9,T+15],[cx+11,B-6],[cx+4,B-6]],dk,.5);
+  } else {
+    const hw=tunic?11:13;
+    s.poly([[cx-9,T+15],[cx+9,T+15],[cx+hw+sw,hemY],[cx-hw+sw,hemY]],robe);
+    s.poly([[cx+3,T+15],[cx+9,T+15],[cx+hw+sw,hemY],[cx+4+sw,hemY]],dk,.55);
+    s.line(cx-hw+sw,hemY-1,cx+hw+sw,hemY-1,trim,1,2);
+    if(!tunic && !o.noFeet){ s.rect(cx-6+sw,B,4,2,o.feet||shade(skin,.7)); s.rect(cx+3+sw,B,4,2,o.feet||shade(skin,.7)); }
+  }
+  if(o.bare){ s.poly([[cx-8,T+15],[cx+8,T+15],[cx+7,T+32],[cx-7,T+32]],skin); s.line(cx,T+21,cx,T+30,shade(skin,.8)); }
+  if(o.armor){ s.rect(cx-8,T+16,17,15,o.armor); s.rect(cx-8,T+16,17,1,mix(o.armor,"#FFFFFF",.5)); s.line(cx,T+17,cx,T+30,shade(o.armor,.75)); s.rect(cx-11,T+14,5,4,shade(o.armor,.9)); s.rect(cx+7,T+14,5,4,shade(o.armor,.9)); }
+  if(o.collar){ s.ell(cx,T+17,8,3,o.collar); s.line(cx-7,T+18,cx+7,T+18,shade(o.collar,.7)); }
+  s.rect(seat?cx-9:cx-8,T+32,seat?19:17,2,trim);
+  s.rect(cx-2,T+11,5,5,skin);
+  const hands={};
+  ["L","R"].forEach(side=>{
+    const sg=side==="L"?-1:1, pose=(side==="L"?o.armL:o.armR)||o.arms||"down", hp=HP[pose]||HP.down;
+    const sx=cx+sg*9, sy=T+17, hx=cx+sg*hp[0], hy=T+hp[1];
+    const ac=o.bareArms?skin:(o.sleeve||robe);
+    const ex=(sx+hx)/2+sg*2, ey=(sy+hy)/2+2;
+    s.line(sx,sy,ex,ey,ac,1,3); s.line(ex,ey,hx,hy,o.bareArms?skin:(o.fore||ac),1,3);
+    s.rect(hx-1,hy-1,3,3,skin); hands[side]=[hx,hy];
+  });
+  if(o.multi) multiArms(L,cx,T,o);
+  head(L,cx,T,o);
+  if(o.l) item(L,o.l,hands.L[0],hands.L[1],-1,o);
+  if(o.r) item(L,o.r,hands.R[0],hands.R[1],1,o);
+  if(o.front) o.front(L,cx,T,B,hands);
+  return hands;
+}
+
+/* =====================================================================
+   BÍBLIA VISUAL — uma função de arte por lâmina
+   L = { b: fundo, gb: brilho de fundo, s: sprite, gf: brilho frontal, fg: primeiro plano, r: rng, f: frame(0-3) }
+   ===================================================================== */
+const ART = {};
+
+/* ---------------- ARCANOS MAIORES ---------------- */
+ART["O Errante"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#12031f","#D23A78",7);
+  b.blob(22,36,28,14,"#3a0a50",1.1); b.blob(72,64,24,12,"#5a1060",1);
+  stars(b,r,26,84,f);
+  b.poly([[8,112],[82,112],[70,124],[58,136],[46,144],[34,136],[20,124]],"#2a0808");
+  b.poly([[22,116],[40,116],[44,138],[32,130]],"#3e100c");
+  b.ell(45,111,38,6,"#8a2818"); b.ell(45,110,36,4,"#B8452A");
+  b.line(12,110,78,112,"#E0805A"); b.line(18,113,72,107,"#E0805A");
+  fall(gf,r,16,"#FFD8A0",f,-1,10,110,3);
+  human(L,{T:30,B:110,pose:"step",skin:"#3b2418",robe:"#9E1B1B",trim:"#111111",sleeve:"#111111",head:"conical",hat:["#9E1B1B","#111111"],hair:"#111111",armR:"fwd",r:"ogo"});
+  [[10,126,3],[80,118,2],[72,132,2]].forEach(([x,y,q])=>fg.circ(x,y+SW[f],q,"#1a0406"));
+};
+
+ART["O Alquimista"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#0a1a22","#1f3a46",6);
+  for(let y=4;y<118;y+=7){ const off=((y/7)|0)%2?0:6; for(let x=-off;x<W;x+=12){ b.rect(x,y,12,1,"#081218"); b.rect(x,y,1,7,"#081218"); } }
+  b.rect(0,118,W,H-118,"#10222a"); b.line(0,118,W,118,"#2a4a56");
+  const HG=["101","111","010","110","011","100","111","001"];
+  for(let i=0;i<14;i++){ const x=4+(i%2)*74+((r()*6)|0), y=10+((i/2)|0)*14+((r()*4)|0), g=(r()*6)|0;
+    const c=(i+f)%4===0?"#BEFFFF":"#3AD0E0";
+    for(let j=0;j<3;j++) for(let k=0;k<3;k++) if(HG[(g+j)%8][k]==="1") b.px(x+k,y+j,c);
+    gb.blob(x+1,y+1,4,4,"#62F0FF",1,.25); }
+  human(L,{T:40,B:128,skin:"#8a5a3a",robe:"#EDE8DA",trim:"#F7D070",bareArms:true,bare:true,collar:"#F7D070",head:"ibis",armL:"hold",armR:"hold",l:"papyrus",r:"stylus"});
+  ["#FF5A3A","#3A8AFF","#6ADA5A","#FFFFFF"].forEach((c,i)=>{ const an=f*Math.PI/2+i*Math.PI/2; const x=45+Math.cos(an)*19, y=72+Math.sin(an)*5; gf.circ(x,y,2,c); gf.blob(x,y,5,5,c,1,.35); });
+  fg.rect(4,126,82,3,"#05080a"); fg.rect(8,129,3,8,"#05080a"); fg.rect(79,129,3,8,"#05080a");
+  [[14,"#6ADA5A"],[22,"#E04AE0"],[68,"#62F0FF"],[76,"#FFB020"]].forEach(([x,c],i)=>{ fg.rect(x-1,117,2,4,"#05080a"); fg.circ(x,123,3,"#05080a"); fg.circ(x,124,2,c); gf.px(x,120-((f+i)%3),c); gf.blob(x,123,5,4,c,1,.3); });
+};
+
+ART["O Oráculo"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#04050e","#1c2440",6); stars(b,r,20,70,f);
+  b.blob(45,26,22,18,"#6a7aa0",1,.6); moon(b,45,26,11,"#E6ECF4","#B8C4D4");
+  [[6,24],[33,24],[60,24]].forEach(([x,w],i)=>{ const top=i===1?60:70;
+    pillar(b,x,top,116,4,"#3a3f4c","#5a6070","#1e222c"); pillar(b,x+w-4,top,116,4,"#3a3f4c","#5a6070","#1e222c");
+    for(let a=0;a<=20;a++){ const an=Math.PI*(1+a/20); b.rect(Math.round(x+w/2-2+Math.cos(an)*(w/2-2)),Math.round(top+Math.sin(an)*10),4,2,a%5?"#3a3f4c":"#5a6070"); } });
+  b.grad(0,116,W,H-116,"#141828","#0a0c16",4);
+  mist(b,100,3,"#8A9AB8",.25,f);
+  human(L,{T:42,B:130,skin:"#E8D4C0",robe:"#2d1b3d",trim:"#9AA0B8",head:"triple",veil:"#C8C8E8",armL:"fwd",armR:"fwd",l:"torch",r:"torch",
+    front:(L,cx,T)=>{ L.s.ring(cx-4,T+36,1.5,"#6a6a78",1,1); L.s.rect(cx-4,T+37,1,5,"#6a6a78"); L.s.px(cx-3,T+41,"#6a6a78"); }});
+  dog(s,20,132,"#A8C8FF",.5,1); dog(s,70,132,"#A8C8FF",.5,-1);
+  grass(fg,r,134,30,"#05060c");
+};
+
+ART["A Matriz"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#0a2a1c","#3a8a50",6);
+  b.rect(62,8,10,104,"#9AE0F0");
+  for(let y=8;y<112;y++) for(let x=62;x<72;x++) if(((y+f*3+x*5)%7)<2) b.px(x,y,"#FFFFFF");
+  b.blob(67,112,12,5,"#FFFFFF",1,.8);
+  for(let i=0;i<16;i++){ const x=r()*W, y=r()*30-4, q=6+r()*8; b.circ(x,y,q,i%2?"#123a22":"#1a5030"); }
+  for(let i=0;i<5;i++){ const x=6+i*19, ln=40+r()*30; b.line(x,0,x+2,ln,"#1f5a30"); b.px(x+1,30+i*5,"#F28AB2"); b.circ(x+2,44+i*3,1.5,"#FF7A3A"); gf.px(x+2,44+i*3,"#FFD08a",.6); }
+  b.grad(0,112,W,H-112,"#1e5a30","#0e3a1e",4);
+  for(let k=0;k<16;k++){ const an=Math.PI*2*k/16; s.ell(45+Math.cos(an)*16,124+Math.sin(an)*4,4,2,k%2?"#F28AB2":"#FFD1E3"); }
+  human(L,{T:62,B:124,pose:"seat",skin:"#C98A5A",robe:"#C8102E",trim:"#F7D070",hairLong:true,hair:"#1a0e08",head:"crown",halo:"#FFE08a",armL:"chest",armR:"chest",l:"lotus"});
+  for(let i=0;i<8;i++){ const x=(r()*W)|0, t=124+((r()*6)|0); fg.poly([[x-6,137],[x,t],[x+6,137]],"#06140a"); }
+};
+
+ART["O Arquiteto"] = L => { const {b,gb,s,gf,fg,r,f}=L; const p=P4(f);
+  b.grad(0,0,W,H,"#050520","#1e3080",6);
+  [[4,6,20],[80,6,20],[18,4,40],[68,4,40]].forEach(([x,w,top],i)=>{
+    pillar(b,x,top,114,w,i<2?"#2a4fb0":"#1e3a8a","#7a9ff0","#101e50");
+    flame(b,x+w/2,top-4,6,f,["#FFF3B0","#FFB020","#E0521B"]); gb.blob(x+w/2,top-7,6,6,"#FFB020",1,.3); });
+  b.grad(0,114,W,H-114,"#2a3a90","#0a0f30",4);
+  for(let x=0;x<W;x+=2) b.px(x,116+((x+f)%4),"#6a8ff0",.35);
+  const HB=[["111","001","111"],["101","101","111"],["110","010","011"],["111","100","100"]];
+  for(let i=0;i<10;i++){ const x=(r()*80+4)|0, y0=r()*100+10; const y=Math.round(((y0-f*2)%110+110)%110+4); const g=HB[i%4];
+    for(let j=0;j<3;j++) for(let k=0;k<3;k++) if(g[j][k]==="1") gf.px(x+k,y+j,"#F7D070",.85); }
+  human(L,{T:44,B:132,skin:"#F3E6D0",robe:"#F8F4E3",trim:"#F7D070",hair:"#E8D8A0",halo:"#FFF3B0",wings:{type:"fire"},armL:"chest",armR:"chest"});
+  const cx=45, cy=71, R=8, hp=[];
+  for(let k=0;k<6;k++){ const an=Math.PI/6+k*Math.PI/3+f*Math.PI/24; hp.push([cx+Math.cos(an)*R,cy+Math.sin(an)*R]); }
+  for(let k=0;k<6;k++){ const a=hp[k], c=hp[(k+1)%6], d=hp[(k+2)%6];
+    gf.line(a[0],a[1],c[0],c[1],"#FFE08a"); gf.line(a[0],a[1],cx,cy,"#F7D070",.8); gf.line(a[0],a[1],d[0],d[1],"#F7D070",.45); }
+  gf.circ(cx,cy,1,"#FFFFFF"); gf.blob(cx,cy,12,12,"#FFE08a",1,.25+p*.08);
+  fg.rect(0,133,W,5,"#050818");
+};
+
+ART["O Mentor"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#06120e","#2a3e38",6);
+  const curve=(pts,t,c)=>{ for(let i=0;i<pts.length-1;i++) b.line(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1],c,1,t); };
+  curve([[20,0],[40,14],[70,6],[92,20]],6,"#2a1c12");
+  curve([[-4,10],[10,30],[16,60],[12,90],[20,118]],8,"#2a1c12"); curve([[94,6],[80,34],[74,64],[80,96],[70,118]],8,"#2a1c12");
+  curve([[0,60],[20,70],[30,90],[26,118]],4,"#4a3422"); curve([[90,70],[68,80],[62,100],[66,118]],4,"#4a3422");
+  b.grad(0,116,W,H-116,"#1a3a28","#0a1a12",4);
+  const RU=[["010","010","111"],["101","110","101"],["100","110","101"],["111","010","010"],["110","101","110"]];
+  for(let i=0;i<9;i++){ const x=(r()*78+6)|0, y=(r()*80+14)|0, g=RU[i%5], c=(i+f)%4===0?"#E0F6FF":"#7FD4FF";
+    for(let j=0;j<3;j++) for(let k=0;k<3;k++) if(g[j][k]==="1") gf.px(x+k,y+j-SW[f],c);
+    gf.blob(x+1,y+1,4,4,"#7FD4FF",1,.2); }
+  human(L,{T:42,B:130,skin:"#D8B89A",robe:"#5a6064",cape:"#3a3f44",hair:"#D8D8D8",beard:"#E8E8E8",beardLong:true,head:"hat_wide",hatCol:"#454a50",oneEye:"#7FD4FF",armR:"hold",r:"spear"});
+  raven(s,32,56,-1,f); raven(s,58,56,1,f);
+  mist(fg,126,2,"#9AB0A8",.35,f); grass(fg,r,134,20,"#06100a");
+};
+
+ART["O Pacto"] = L => { const {b,s,gf,fg,r,f}=L;
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const d=(x-45)+(y-80)*.6, t=y/H;
+    b.px(x,y, d < (bay(x,y)-.5)*6 ? mix("#0a1a48","#2a5ab0",t) : mix("#3a2208","#D8A030",t)); }
+  eclipse(b,45,22,8,"#FFE8A0",f);
+  tree(b,8,118,34,"#08101e","#0a1830",10); tree(b,82,118,34,"#2a1a06","#3a2408",10);
+  b.grad(0,118,W,H-118,"#1a2a1a","#0a140a",4);
+  human(L,{cx:29,T:44,B:130,skin:"#3B7BD4",robe:"#F7D070",trim:"#C8102E",hair:"#0a0a1a",head:"crown",gem:"#2AA060",armL:"down",armR:"fwd",
+    front:(L,cx,T)=>{ L.s.line(cx+3,T+10,cx+16,T+12,"#8a5a2a"); L.s.line(cx,T-4,cx+3,T-9,"#2AA060"); L.s.px(cx+3,T-10,"#3A8AFF"); }});
+  human(L,{cx:61,T:46,B:130,skin:"#E0A878",robe:"#F4A300",trim:"#C8102E",hairLong:true,hair:"#140a06",armL:"fwd",armR:"chest"});
+  for(let t=0;t<=20;t++){ const x=37+t*.8, y=62+t*.1+Math.sin(Math.PI*t/20)*12; s.px(x,y,t%2?"#F28AB2":"#FFFFFF"); if(t%5===0) s.circ(x,y,1,"#FFD1E3"); }
+  grass(fg,r,134,30,"#0a120a");
+  [[12,132],[30,134],[62,133],[80,131]].forEach(([x,y])=>{ fg.px(x,y,"#F28AB2"); fg.px(x+1,y-1,"#FFD1E3"); });
+};
+
+ART["O Conquistador"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,62,"#FFE9A0","#B8862B",5); b.grad(0,62,W,H-62,"#2a2440","#0a0a18",6);
+  for(let i=0;i<9;i++) b.blob(i*11,64+((i*7)%5),10,6,"#3a3456",1.2);
+  for(let i=0;i<7;i++) b.blob(i*14+4,60,8,4,"#D8B060",1,.8);
+  if(f===1||f===3) bolt(b,rng(99+f),12+(f*23)%60,66,118,"#FFFFFF");
+  human(L,{T:44,B:130,skin:"#F0D0B0",robe:"#9AA4AE",trim:"#F7D070",armor:"#DFE6EE",hair:"#E8C070",halo:"#F7D070",
+    wings:{cl:"#B01030",cr:"#F4F4F4",c2:"#F7D070"},armR:"high",r:"flamesword",armL:"down",
+    front:(L,cx,T,B)=>{ for(let y=T+38;y<B;y+=6) L.s.line(cx-12,y,cx+12,y,"#6a747e"); }});
+  for(let i=0;i<5;i++) fg.blob(12+i*16,138,12,6,"#05050a",1.3);
+  for(let i=0;i<8;i++){ const an=i*.8+f*.4; gf.px(45+Math.cos(an)*14,131+Math.sin(an)*3,"#FFF3B0",.9); }
+};
+
+ART["O Domínio"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#2a1440","#F09A50",7);
+  sun(b,45,88,9,"#FFE8B0","#FFD08a","#FFB070");
+  mtn(b,r,112,20,42,"#6a5a8a","#F0F4FF",10); mtn(b,r,120,6,16,"#A8B0D0","#FFFFFF",8);
+  b.grad(0,120,W,H-120,"#E8EEF8","#B8C4D8",4);
+  human(L,{cx:38,T:44,B:130,skin:"#D8A070",robe:"#B0202A",trim:"#F7D070",armor:"#F7D070",head:"crown",hairLong:true,hair:"#140a06",multi:true,armL:"down",armR:"fwd"});
+  tiger(s,66,130,f);
+  fg.rect(0,134,W,4,"#C8D0E0");
+  fg.line(6,133,20,129,"#4a4460",1,1); fg.line(18,128,20,131,"#4a4460"); fg.line(74,134,86,128,"#4a4460"); fg.line(84,127,88,129,"#4a4460");
+};
+
+ART["O Buscador"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#021016","#0c2c3a",6);
+  hills(b,110,12,.08,1,"#12303a"); hills(b,122,10,.11,3,"#0a2430");
+  const cx=40, T=40, B=132, sw=SW[f];
+  s.poly([[cx,T-6],[cx+7,T+6],[cx+16+sw,B],[cx-16+sw,B],[cx-7,T+6]],"#B8903C");
+  for(let k=-14;k<=14;k+=2) s.line(cx+k*.3,T+2+Math.abs(k)*.4,cx+k+sw,B,k%4?"#8A6A2A":"#DCC070");
+  [T+30,T+60].forEach(y=>{ for(let x=cx-14;x<=cx+14;x+=2) s.px(x+sw,y+(x%4?1:0),"#6a4a1a"); });
+  s.rect(cx+11,T+44,3,3,"#8A8A8A"); s.rect(cx-14,T+46,3,3,"#8A8A8A");
+  item(L,"lantern",cx+13,T+45,1,{B:B});
+  item(L,"gourd",cx-13,T+46,-1,{});
+  fg.rect(0,134,W,4,"#03141a"); for(let x=0;x<W;x+=3) fg.px(x,133-((x/9)|0)%2,"#03141a");
+};
+
+ART["O Ciclo"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#07031a","#2a1650",6); stars(b,r,30,110,f);
+  for(let i=0;i<40;i++){ const an=i*.5+f*.3, rad=i*.55; gf.px(45+Math.cos(an)*rad,76+Math.sin(an)*rad,i%3?"#FFFFFF":"#BEE9E8",.8); }
+  [[38,70,2,"#E07A5F"],[54,82,1.5,"#62B6CB"],[48,64,1,"#F7D070"]].forEach(([x,y,q,c])=>{ gf.circ(x,y,q,c); gf.ring(x,y,q+2,c,.4,1); });
+  b.grad(0,114,W,H-114,"#F4EEDC","#C8BEA0",4);
+  for(let y=116;y<H;y+=4) for(let x=0;x<W;x++) if(((x+y+f*2)%13)<3) b.px(x,y,"#FFFFFF");
+  const cx=45, cy=78, R=30;
+  for(let a=0;a<360;a+=5){ const an=a*Math.PI/180, x=cx+Math.cos(an)*R, y=cy+Math.sin(an)*R;
+    s.circ(x,y,4,((a/5)|0)%2?"#2A5AA0":"#B87A3A"); s.circ(cx+Math.cos(an)*(R-3),cy+Math.sin(an)*(R-3),1.5,"#E0C080"); }
+  for(let k=-2;k<=2;k++){ const x=cx+k*8, y=cy-R-6-(2-Math.abs(k))*3;
+    s.ell(x,y,4,6,"#2A5AA0"); s.ell(x,y+1,2,3,"#B87A3A"); s.px(x-1,y-2,"#F7D070"); s.px(x+1,y-2,"#F7D070"); }
+  fg.rect(0,134,W,4,"#E0D6BE");
+};
+
+ART["A Balança"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#0e0a07","#3a2a1a",6);
+  [2,14,70,82].forEach(x=>pillar(b,x,16,112,6,"#2a2a30","#5a5a66","#101014"));
+  for(let y=114;y<H;y+=3) for(let x=0;x<W;x+=6) b.rect(x,y,6,3,((x/6+(y-114)/3)|0)%2?"#3a2a1a":"#2a1e12");
+  [16,74].forEach(x=>{ b.rect(x,58,2,56,"#B87333"); b.rect(x-8,58,18,2,"#D89050");
+    b.line(x-7,60,x-7,72,"#8a5a2a"); b.line(x+9,60,x+9,72,"#8a5a2a");
+    b.ell(x-7,73,4,1.5,"#B87333"); b.ell(x+9,73,4,1.5,"#B87333"); });
+  human(L,{T:46,B:132,skin:"#B07A4A",robe:"#F0EDE4",trim:"#40C0C0",collar:"#40C0C0",hair:"#0a0a0a",head:"feather",bareArms:true,
+    wings:{type:"arm",c:"#40C0C0",c2:"#1A6A8A"},armL:"open",armR:"open"});
+  fg.rect(0,134,W,4,"#0e0a07");
+};
+
+ART["A Suspensão"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#1d1030","#0a0612",6);
+  for(let i=0;i<9;i++){ const x=(r()*W)|0, ln=8+r()*20; b.line(x,0,x+((r()*6)|0)-3,ln,"#3a2418",1,2); }
+  for(let i=0;i<9;i++){ const x=(r()*W)|0, h=10+r()*18; b.poly([[x-4,H],[x,H-26-h],[x+4,H]],i%2?"#6A3AA0":"#9A6AE0"); b.line(x,H-26-h,x,H-20,"#D8B8FF"); }
+  fall(gf,r,14,"#9AE0FF",f,-1,20,130,5);
+  const t=new Buf(); const L2=Object.assign({},L,{s:t});
+  human(L2,{T:34,B:122,tunic:true,skin:"#C89070",robe:"#1E3A6E",trim:"#F7D070",hair:"#1a0e08",legs:"#C89070",armL:"up",armR:"up",still:true});
+  s.over(t.flipV());
+  s.poly([[39,120],[51,120],[50+SW[f],134],[40+SW[f],134]],"#1a0e08");
+  gb.ring(45,119,11,"#F7D070",.9,2); gb.blob(45,119,16,16,"#FFE08a",1,.3);
+  s.line(45,4,45,36,"#6ADA7A",1,2); gf.line(45,4,45,36,"#AFFFC0",.35);
+  fg.rect(0,136,W,2,"#0a0612");
+};
+
+ART["A Passagem"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#030306","#14142a",6); stars(b,r,12,70,f);
+  b.rect(0,90,W,6,"#0e0e1c");
+  b.grad(0,96,W,22,"#070a14","#02040a",3);
+  for(let i=0;i<10;i++){ const x=((r()*W+f*3)|0)%W, y=98+((r()*18)|0); b.rect(x,y,4,1,"#C8D0E0",.6); }
+  b.poly([[8,98],[28,98],[25,102],[11,102]],"#B8862B"); b.circ(18,94,3,"#FFD34E"); gf.blob(18,94,6,6,"#FFD34E",1,.3);
+  mist(b,86,2,"#8A8AA0",.25,f);
+  b.grad(0,118,W,H-118,"#1a1a14","#0a0a08",3);
+  human(L,{T:42,B:130,skin:"#3a2a1f",robe:"#F0EDE4",trim:"#F7D070",collar:"#F7D070",bare:true,bareArms:true,head:"jackal",armL:"fwd",l:"ankh",armR:"hold",r:"jar"});
+  for(let i=0;i<14;i++){ const x=(r()*W)|0, h=10+((r()*14)|0); fg.line(x,137,x+SW[(i+f)%4],137-h,"#0a0806"); fg.px(x+SW[(i+f)%4],137-h,"#8a7a50"); }
+};
+
+ART["A Síntese"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#2a5a95","#CFEAF8",6);
+  ["#FF4A4A","#FF9A2A","#FFE04A","#5ADA5A","#4A9AFF","#9A5AFF"].forEach((c,k)=>b.ring(45,112,46-k*2,c,.7,2));
+  [[4,10],[76,10]].forEach(([x,w])=>{ b.rect(x,0,w,118,"#9AD8F0"); for(let y=0;y<118;y++) for(let i=0;i<w;i++) if(((y+f*3+i*5)%6)<2) b.px(x+i,y,"#FFFFFF"); });
+  b.grad(0,118,W,H-118,"#62B6CB","#1B4965",4);
+  for(let i=0;i<14;i++) gf.px((r()*W)|0,(r()*120)|0,"#FFFFFF",(i+f)%3?.3:.9);
+  human(L,{T:44,B:130,skin:"#F0D8C0",robe:"#F4F0FF",trim:"#C0A0FF",hairLong:true,hair:"#E8C070",wings:{type:"iris"},armL:"fwd",armR:"hold",
+    front:(L,cx,T,B,h)=>{ const s=L.s; item(L,"jar",h.L[0],h.L[1],-1,{}); item(L,"jar",h.R[0],h.R[1],1,{});
+      for(let t=0;t<=12;t++){ const x=h.L[0]+(h.R[0]-h.L[0])*t/12, y=h.L[1]+(h.R[1]-h.L[1])*t/12-Math.sin(Math.PI*t/12)*8; L.gf.px(x,y,(t+L.f)%3?"#BEF4FF":"#FFFFFF"); } }});
+  rocks(fg,r,135,6,"#0B1A24");
+};
+
+ART["As Correntes"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#020402","#0e1a10",6);
+  b.poly([[0,0],[18,0],[12,40],[20,90],[10,130],[0,130]],"#070808"); b.poly([[90,0],[72,0],[78,50],[70,100],[80,130],[90,130]],"#070808");
+  b.line(12,40,20,90,"#2a3a4a"); b.line(78,50,70,100,"#2a3a4a");
+  [[14,62],[76,62]].forEach(([x,y])=>{ b.rect(x,y,1,8,"#3a2a1a"); flame(b,x,y,7,f,["#E0FFE0","#6AFF8A","#1A8A3A"]); gb.blob(x,y-4,12,12,"#6AFF8A",1,.3); });
+  b.grad(0,118,W,H-118,"#0a120a","#040604",3);
+  const hands=human(L,{T:40,B:130,skin:"#7A7A82",robe:"#1a0f24",trim:"#F7D070",head:"crown",gem:"#6AFF8A",eye:"#FF3020",eyeGlow:"#FF3020",armL:"down",armR:"down",
+    front:(L,cx,T)=>{ [[-4,20],[3,22],[0,26],[-2,29],[4,28]].forEach(([dx,dy])=>L.s.px(cx+dx,T+dy,"#F7D070")); }});
+  [[16,118],[74,118]].forEach(([x,y],i)=>{ const hnd=i?hands.R:hands.L; gf.line(hnd[0],hnd[1]+1,x,y-4,"#F7D070",.8);
+    fg.circ(x,y,3,"#0c120c"); fg.poly([[x-5,y+3],[x+5,y+3],[x+6,y+16],[x-6,y+16]],"#0c120c"); fg.px(x-1,y+1,"#8a8a70"); fg.px(x+1,y+1,"#8a8a70");
+    fg.line(x,y+8,x+(i?8:-8),137,"#5A5A5A"); });
+};
+
+ART["O Colapso"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#1a0303","#A02A10",6);
+  for(let i=0;i<6;i++) b.blob((r()*W)|0,(r()*60)|0,16,6,"#5a1008",1.2);
+  b.rect(36,24,8,90,"#2a1a1a"); b.rect(46,22,8,92,"#2a1a1a");
+  b.poly([[43,22],[47,22],[45,60],[47,90],[44,114],[43,70]],"#FF7A1A"); b.line(45,26,45,100,"#FFE070");
+  b.line(88,2,58,20,"#FF9A2A",1,3); b.circ(57,21,3,"#FFF3B0"); gb.blob(57,21,10,10,"#FFB020",1,.4);
+  b.grad(0,114,W,H-114,"#2a0a06","#120402",3);
+  for(let k=0;k<24;k++){ const an=k*Math.PI*2/24, x=45+Math.cos(an)*34, y=80+Math.sin(an)*34; flame(gb,x,y,5+((k+f)%3),f,["#FFF3B0","#FF9A2A","#E0321B"]); }
+  human(L,{T:44,B:130,pose:"dance",skin:"#5B7FA8",robe:"#D89040",trim:"#3a2a10",bare:true,bareArms:true,hair:"#2a1a10",armL:"open",armR:"up",r:"damaru",
+    front:(L,cx,T)=>{ const s=L.s; s.line(cx-9,T+18,cx-19,T+8,"#5B7FA8",1,3); s.line(cx+9,T+18,cx+19,T+38,"#5B7FA8",1,3);
+      for(let k=0;k<4;k++){ s.line(cx-5,T+4+k*2,cx-14-k*2,T+k*3-SW[L.f],"#2a1a10"); s.line(cx+5,T+4+k*2,cx+14+k*2,T+k*3+SW[L.f],"#2a1a10"); } }});
+  fall(gf,r,20,"#8A8A8A",f,1,0,130,4);
+  rocks(fg,r,134,8,"#0a0202");
+};
+
+ART["A Aurora"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#2a1a4a","#FFB26A",7);
+  sun(b,45,112,20,"#FFF8E0","#FFE8A0","#FFD08a");
+  rays(gb,45,112,18,100,"#FFE8A0",.55,f*.05);
+  b.poly([[0,0],[26,0],[14,30],[20,70],[10,118],[0,118]],"#1a1020"); b.poly([[90,0],[64,0],[76,30],[70,70],[80,118],[90,118]],"#1a1020");
+  b.poly([[0,0],[90,0],[70,10],[45,6],[20,10]],"#1a1020");
+  b.grad(0,118,W,H-118,"#3a2030","#1a0e18",3);
+  s.poly([[14,6],[28,6],[26,120],[8,120]],"#1a1030"); s.poly([[62,6],[76,6],[82,120],[64,120]],"#1a1030");
+  human(L,{T:44,B:130,skin:"#F5DCC0",robe:"#FAFAF5",trim:"#F7D070",hairLong:true,hair:"#0a0a0a",armL:"open",armR:"open",
+    front:(L,cx,T,B)=>{ const s=L.s; for(let y=T+36;y<B;y+=6) for(let x=cx-10;x<=cx+10;x+=5) s.px(x+((y/6)%2)*2,y,"#F7D070");
+      s.circ(cx,T+24,3,"#F7D070"); s.circ(cx,T+24,2,"#FFFFFF"); L.gf.blob(cx,T+24,7,7,"#FFF3B0",1,.35+P4(L.f)*.08); }});
+  rocks(fg,r,134,8,"#1a0e18");
+  for(let i=0;i<6;i++) gf.px((r()*W)|0,130+((r()*6)|0),"#FFFFFF",(i+f)%3?.3:1);
+};
+
+ART["O Labirinto"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#02050c","#142030",6); stars(b,r,10,60,f);
+  crescent(b,64,22,8,"#E6ECF4",4); b.blob(64,22,16,16,"#6A7AA0",1,.35);
+  for(let i=0;i<12;i++){ const x=(r()*W)|0; b.rect(x,0,3,120,i%2?"#0E2A1A":"#15321f"); for(let y=6+((r()*10)|0);y<120;y+=12) b.rect(x,y,3,1,"#2a4a30"); }
+  mist(b,70,4,"#8A9AB0",.22,f);
+  b.grad(0,118,W,H-118,"#0a1620","#040a10",3);
+  for(let y=118;y<137;y++){ const src=117-(y-118), off=Math.round(Math.sin((y+f*2)*.8)*1.5);
+    for(let x=0;x<W;x++){ const i=(src*W+Math.min(W-1,Math.max(0,x+off)))*4, d=b.d; b.px(x,y,[d[i]*.6,d[i+1]*.6,d[i+2]*.75],.7); } }
+  human(L,{T:42,B:118,skin:"#E8E0F0",robe:"#0E1630",trim:"#8A9AC0",hairLong:true,hair:"#C8D0E0",armR:"fwd",r:"jadeblade",
+    front:(L,cx,T,B)=>{ const rr=rng(7); for(let i=0;i<12;i++) L.s.px(cx-9+((rr()*19)|0),T+20+((rr()*(B-T-24))|0),"#FFFFFF"); }});
+  [[3,0],[86,0]].forEach(([x])=>{ fg.rect(x,0,3,137,"#020806"); });
+};
+
+ART["O Zênite"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#0a2a8a","#3a7ae0",6);
+  sun(b,45,28,13,"#FFFFFF","#FFE066","#FFD34E"); rays(gb,45,28,16,54,"#FFF3B0",.5,f*.1);
+  b.grad(0,112,W,H-112,"#2a6a3a","#123a1e",3);
+  horse(s,16,118,1,f); horse(s,74,118,-1,f);
+  human(L,{T:46,B:130,skin:"#D8A070",robe:"#FFFFFF",trim:"#F7D070",hair:"#FFD34E",head:"rays12",armL:"fwd",armR:"fwd",l:"reins",r:"reins"});
+  for(let i=0;i<5;i++){ const x=8+i*18, y=126+(i%2)*5; fg.line(x,137,x,y,"#1a4a1a",1,2); for(let k=0;k<8;k++){ const an=k*Math.PI/4; fg.px(x+Math.cos(an)*3,y+Math.sin(an)*3,"#FFD34E"); } fg.circ(x,y,1.5,"#5a3a10"); }
+};
+
+ART["O Chamado"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#05050f","#E8B04A",7);
+  for(let k=0;k<5;k++) b.ring(45,16,8+k*7,k%2?"#F7D070":"#B8862B",.35,2);
+  b.blob(45,16,14,12,"#FFF3B0",1.2,.8);
+  hills(b,116,14,.1,2,"#2a2030"); b.grad(0,122,W,H-122,"#1a1420","#0a0810",3);
+  human(L,{T:36,B:126,skin:"#F0D8C0",robe:"#FAFAFF",trim:"#F7D070",hair:"#E8C070",halo:"#FFF3B0",
+    wings:{c:"#FFFFFF",c2:"#F7D070",glow:"#FFF3B0"},armR:"fwd",r:"trumpet",armL:"down"});
+  [[12,128],[76,127]].forEach(([x,y],i)=>{ fg.rect(x-5,y,10,8,"#6a6a78"); fg.poly([[x-6,y-1],[x+4,y-5],[x+6,y-3],[x-4,y+1]],"#8a8a98");
+    const sy=y-10-(f%2); fg.circ(x,sy,1.5,"#FFFFFF",.85); fg.rect(x-1,sy+2,3,5,"#FFFFFF",.85); fg.line(x-1,sy+2,x-3,sy-2,"#FFFFFF",.85); fg.line(x+1,sy+2,x+3,sy-2,"#FFFFFF",.85); });
+  rocks(fg,r,136,6,"#0a0810");
+};
+
+ART["O Cosmos"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#03030c","#2a1050",6);
+  b.blob(20,30,24,14,"#4a1a6a",1.1); b.blob(70,110,26,14,"#1a3a6a",1.1); b.blob(64,40,16,10,"#6a1a4a",1);
+  stars(b,r,44,150,f,["#FFFFFF","#BEE9E8","#FFD1E3"]);
+  [[10,20,-1],[70,130,1]].forEach(([x,y,d])=>{ b.line(x,y,x+d*12,y+6,"#BEE9E8",.6); b.circ(x,y,1,"#FFFFFF"); });
+  b.ring(45,80,44,"#F7D070",.8,2); [[45,36],[45,124],[1,80],[89,80]].forEach(([x,y])=>b.poly([[x-3,y],[x,y-3],[x+3,y],[x,y+3]],"#F7D070"));
+  const t=new Buf(); const L2=Object.assign({},L,{s:t});
+  for(let k=0;k<12;k++){ const an=Math.PI*2*k/12; t.ell(45+Math.cos(an)*18,126+Math.sin(an)*4,4,2,k%2?"#8A7AFF":"#C8B8FF"); }
+  human(L2,{T:62,B:126,pose:"seat",skin:"#C8B8FF",robe:"#1a1450",trim:"#8A7AFF",hair:"#2a1a6a",armL:"chest",armR:"chest",still:true});
+  const rr=rng(3); for(let i=0;i<20;i++) t.px(34+((rr()*22)|0),80+((rr()*40)|0),"#FFFFFF");
+  s.over(t,.65);
+  for(let i=0;i<30;i++){ const an=i*.55+f*.4, rad=i*.22; gf.px(45+Math.cos(an)*rad,88+Math.sin(an)*rad*.7,i%3?"#FFD1E3":"#FFFFFF"); }
+  gf.blob(45,88,7,5,"#C8B8FF",1,.35);
+};
+
+/* ---------------- ÁGUA ---------------- */
+ART["O Vínculo"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#0e3040","#3a8a9a",6);
+  for(let i=0;i<6;i++){ const x=6+i*16; b.line(x,0,x+2,18,"#2a5a3a",1,2); for(let k=0;k<6;k++) b.line(x+k*2-5,10,x+k*2-6,34+((k*7)%12),k%2?"#1e5a3a":"#2A7A4A"); }
+  for(let k=0;k<4;k++) b.line(10+k*20,0,30+k*20,60,"#FFF3B0",.12);
+  b.grad(0,108,W,18,"#62B6CB","#1B4965",3);
+  for(let i=0;i<8;i++) b.rect(((r()*W+f*4)|0)%W,110+((r()*14)|0),4,1,"#FFFFFF",.7);
+  b.grad(0,126,W,H-126,"#2a3a2a","#1a2418",3);
+  human(L,{T:44,B:128,skin:"#6B4226",robe:"#E8B923",trim:"#FFF0A0",hair:"#1a0e08",head:"veil",veil:"#BEE9E8",armL:"fwd",armR:"fwd",l:"mirror"});
+  const a=f*Math.PI/4; fish(s,45+Math.cos(a)*6,62-Math.abs(Math.sin(a))*6,1,"#FFD34E"); fish(s,45-Math.cos(a)*6,60-Math.abs(Math.cos(a))*6,-1,"#F7B020");
+  rocks(fg,r,133,7,"#0B1A24"); for(let i=0;i<5;i++) fg.px((r()*W)|0,131,"#2a6a3a");
+};
+
+ART["O Oásis"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#0e3440","#4a9a8a",6);
+  b.rect(72,20,5,100,"#3a2a1a");
+  for(let i=0;i<12;i++){ const x=40+r()*50, y=r()*30; b.circ(x,y,6+r()*5,i%2?"#2a5a3a":"#1e4a2e"); b.circ(x+2,y+3,1,"#8a5a2a"); }
+  b.ell(22,102,14,5,"#6a7078"); b.ell(22,100,11,3,"#62B6CB"); b.line(22,99,22,86+SW[f],"#BEE9E8"); b.px(21,86+SW[f],"#FFFFFF");
+  b.grad(0,112,W,H-112,"#1B4965","#0B1A24",3);
+  [[10,120],[74,126],[60,116]].forEach(([x,y])=>{ b.ell(x,y,4,1.5,"#2a7a4a"); b.px(x,y-1,"#FFD1E3"); });
+  human(L,{T:66,B:128,pose:"seat",skin:"#F0D8C0",robe:"#62B6CB",trim:"#BEE9E8",hairLong:true,hair:"#C05030",armL:"chest",armR:"chest",
+    front:(L,cx,T)=>{ L.s.ell(cx,T+48,5,3,"#D9DCD6"); L.s.px(cx-2,T+47,"#FFFFFF"); for(let k=0;k<3;k++) L.gf.px(cx-4+k*4,T+52+((k+L.f)%3),"#62B6CB"); }});
+  for(let i=0;i<4;i++){ const x=10+((i*23+f*5)%70), y=40+((i*17)%40); gf.line(x-2,y,x+2,y,"#62F0FF",.8); gf.px(x,y-1,"#BEE9E8"); }
+  grass(fg,r,134,20,"#06140e");
+};
+
+ART["A Saudade"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#1a3a52","#02070c",7);
+  b.poly([[0,0],[30,0],[24,14],[12,18],[4,12]],"#D8EEF4"); b.poly([[56,0],[90,0],[86,10],[70,20],[60,12]],"#BEE9E8");
+  for(let k=0;k<3;k++) gb.line(20+k*22,0,30+k*22,90,"#BEE9E8",.12);
+  [[18,64,1],[72,50,-1]].forEach(([x,y,d])=>{ b.ell(x,y,10,3,"#061420"); b.poly([[x-d*10,y],[x-d*15,y-4],[x-d*15,y+4]],"#061420"); });
+  b.grad(0,118,W,H-118,"#0a1a20","#02070c",3);
+  const sk="#9AB0B8";
+  [[-18,0],[18,0],[-14,-20],[14,-22],[0,-30]].forEach(([dx,dy])=>{ s.line(45,110,45+dx,82+dy,"#8A7A7A",1,2); s.line(45+dx,82+dy,45+dx+(dx>0?4:-4),78+dy,"#8A7A7A"); });
+  human(L,{T:64,B:126,pose:"seat",skin:sk,robe:"#1B4965",trim:"#62B6CB",hairLong:true,hairLen:44,hair:"#050A10",armL:"chest",armR:"chest",
+    front:(L,cx,T)=>{ const s=L.s; s.rect(cx-7,T+44,14,7,"#5a4a3a"); s.rect(cx-7,T+44,14,1,"#8a7a5a"); s.px(cx-3,T+43,"#FFD1E3"); s.px(cx+2,T+43,"#FFFFFF"); }});
+  fall(gf,r,12,"#BEE9E8",f,-1,20,130,3);
+  for(let i=0;i<6;i++){ const x=(r()*W)|0; fg.line(x,137,x-2,128,"#1a1414"); fg.line(x,132,x+3,127,"#1a1414"); }
+  fg.rect(0,134,W,4,"#040a0e");
+};
+
+ART["A Miragem"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#7A8A98","#D8D2C4",6);
+  waves(b,94,112,"#A8B0B8","#E8ECEF",f,2);
+  b.grad(0,112,W,H-112,"#C8B890","#A89870",4);
+  [[10,104],[76,106]].forEach(([x,y],i)=>{ b.rect(x-5,y,11,10,"#D8C8A0"); b.rect(x-3,y-6,7,6,"#D8C8A0"); b.rect(x-3,y-8,2,2,"#D8C8A0"); b.rect(x+1,y-8,2,2,"#D8C8A0"); b.rect(x+(i?-5:3),y+4,3,6,"#A89870"); b.px(x,y+11+f,"#C8B890"); });
+  const t=new Buf(); const L2=Object.assign({},L,{s:t});
+  human(L2,{T:42,B:128,skin:"#B09080",robe:"#4A6A7A",trim:"#8AB0C0",hair:"#E8E8E8",beard:"#E8E8E8",beardLong:true,armR:"hold",r:"trident",armL:"down"});
+  const y0=90;
+  for(let y=y0;y<H;y++) for(let x=0;x<W;x++){ const i=(y*W+x)*4; if(!t.d[i+3]) continue; const q=(y-y0)/40; if(bay(x+f,y)<q){ t.d[i+3]=0; if(bay(x,y+f)<.3) gf.px(x,y,"#E8ECEF",.5); } }
+  s.over(t);
+  hills(fg,136,4,.2,f,"#8a7a5a");
+};
+
+ART["A Plenitude"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,96,"#040820","#1B4965",6); stars(b,r,30,90,f);
+  b.grad(0,96,W,24,"#1B4965","#0B1A24",3);
+  for(let y=118;y<128;y+=2) for(let x=0;x<W;x++) if(((x+y*2+f*3)%9)<4) b.px(x,y,y%4?"#BEE9E8":"#FFFFFF");
+  b.grad(0,126,W,H-126,"#D8C8A0","#A89870",3);
+  const hands=human(L,{T:42,B:130,skin:"#8a5a3a",robe:"#F8FBFF",trim:"#62B6CB",hairLong:true,hair:"#0a0a0a",head:"crown",crownCol:"#E0E8F0",gem:"#62B6CB",armL:"open",armR:"open"});
+  [hands.L,hands.R].forEach(h=>{ for(let k=0;k<4;k++) gf.px(h[0],h[1]+3+((k*5+f*2)%18),"#FFFFFF"); gf.blob(h[0],h[1],4,4,"#BEE9E8",1,.3); });
+  for(let x=0;x<W;x+=2) fg.px(x,135-((x+f)%3===0?1:0),"#FFFFFF",.8);
+};
+
+ART["O Sonhador"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#14223a","#6A8AB0",6);
+  for(let x=0;x<W;x++){ const y=Math.round(84+Math.pow((x-45)/45,2)*10); b.rect(x,y,1,3,"#D03020"); b.px(x,y-5,"#D03020"); }
+  [8,26,64,82].forEach(x=>{ const y=Math.round(84+Math.pow((x-45)/45,2)*10); b.rect(x,y-5,2,5,"#D03020"); b.rect(x,y+3,2,16,"#8a1a10"); });
+  waves(b,104,H,"#1B4965","#BEE9E8",f,3);
+  fall(gf,r,16,"#FFB7D0",f,1,0,130,3);
+  human(L,{T:42,B:128,skin:"#E8D0B0",robe:"#2A8A9A",trim:"#BEE9E8",hair:"#1a4a5a",hairLong:true,head:"horns",hornCol:"#FF8060",armR:"fwd",r:"jewel"});
+  for(let x=0;x<W;x+=3) fg.px(x,133+((x+f)%2),"#FFFFFF",.8);
+};
+
+ART["O Guardião das Marés"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#0E4A6A","#020E18",6);
+  for(let k=0;k<5;k++) gb.line(8+k*18+f,0,k*18-6+f,110,"#BEE9E8",.12);
+  [["#E07A5F",10],["#FFB7D0",26],["#62B6CB",64],["#E07A5F",80]].forEach(([c,x])=>{ b.line(x,126,x,108,c,1,2); b.line(x,116,x-4,110,c); b.line(x,114,x+4,106,c); });
+  b.grad(0,124,W,H-124,"#0a2030","#040c14",3);
+  for(let i=0;i<4;i++){ const x=((i*27+f*3)%86)+2, y=70+((i*19)%40); b.ell(x,y,3,1.5,"#061018"); gf.px(x+3,y-2,"#BEFFFF"); gf.blob(x+3,y-2,3,3,"#62F0FF",1,.3); }
+  human(L,{T:44,B:130,skin:"#5A3A2A",robe:"#1B4965",trim:"#BEE9E8",hairLong:true,hair:"#050505",armL:"fwd",armR:"fwd",l:"mirror",r:"comb",
+    front:(L,cx,T)=>{ const s=L.s, pts=[[cx-18,T+34],[cx-12,T+22],[cx-8,T+15],[cx,T+13],[cx+8,T+15],[cx+13,T+24],[cx+17,T+32]];
+      for(let i=0;i<pts.length-1;i++) s.line(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1],"#C8D0D8",1,3);
+      pts.forEach((p,i)=>{ if(i%2) s.px(p[0],p[1],"#8A949E"); });
+      s.ell(cx+19,T+33,3,2,"#C8D0D8"); s.px(cx+20,T+32,"#1a1a1a"); }});
+  for(let i=0;i<7;i++){ const x=(r()*W)|0; fg.line(x,137,x,127,"#04101a",1,2); fg.line(x,131,x+3,127,"#04101a"); }
+};
+
+/* ---------------- FOGO ---------------- */
+ART["A Centelha"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#14060E","#E07A5F",7);
+  b.grad(0,108,W,H-108,"#2a1e1e","#120c0c",4);
+  for(let i=0;i<8;i++){ const x=(r()*W)|0, y=110+((r()*20)|0); b.line(x,y,x+6,y+2,"#3a2a2a"); }
+  fall(gf,r,20,"#FFB020",f,-1,30,130,4); fall(gf,r,8,"#FFF3B0",f,-1,40,120,6);
+  ram(s,26,130,"#B87333");
+  human(L,{cx:52,T:44,B:130,skin:"#C0302A",robe:"#E07A5F",trim:"#F4F1DE",hair:"#1a0808",head:"twoface",armR:"up",r:"torch"});
+  rocks(fg,r,134,8,"#0a0606");
+};
+
+ART["A Fogueira"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#4A2410","#1E0E06",6);
+  for(let x=4;x<W;x+=8) b.line(x,0,x,118,"#1A0A04");
+  for(let x=0;x<W;x++){ const y=Math.round(22+Math.sin(x*.2)*4); if(x%2===0) b.px(x,y,"#DDA15E"); if(x%6===0) b.px(x,y+1,"#FFD34E"); }
+  b.grad(0,118,W,H-118,"#3a2010","#1a0e06",3);
+  gb.blob(45,118,40,30,"#FFB020",1,.3);
+  human(L,{T:60,B:122,pose:"seat",skin:"#E8C098",robe:"#8A3A1A",trim:"#F4A300",head:"veil",veil:"#F4A300",armL:"fwd",armR:"fwd"});
+  fg.ell(45,131,18,5,"#4A4040"); fg.ell(45,130,14,3,"#1a0a04");
+  flame(fg,39,130,8,f); flame(fg,45,130,11,f); flame(fg,51,130,8,f);
+  gf.blob(45,122,14,10,"#FFB020",1,.35+P4(f)*.05);
+};
+
+ART["A Forja"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#1A0404","#3A0E0A",6);
+  b.poly([[0,0],[16,0],[10,60],[0,90]],"#0a0202"); b.poly([[90,0],[74,0],[82,50],[90,80]],"#0a0202");
+  b.rect(0,100,W,6,"#FF6020"); for(let x=0;x<W;x++) if(((x+f*3)%7)<2) b.px(x,101+(x%3),"#FFD34E");
+  gb.blob(45,103,50,10,"#FF6020",1,.35);
+  b.grad(0,106,W,H-106,"#2a0e0a","#120402",3);
+  human(L,{cx:36,T:42,B:130,tunic:true,skin:"#B07050",robe:"#5A3A20",trim:"#8a6a4a",legs:"#3a2a1a",bare:true,bareArms:true,beard:"#1a0a04",hair:"#1a0a04",armR:"up",r:"hammer",armL:"hold"});
+  fg.poly([[52,122],[76,122],[72,127],[66,127],[68,137],[58,137],[60,127],[54,127]],"#3a3a40"); fg.rect(52,122,24,1,"#6a6a70");
+  fg.rect(54,120,20,2,"#FF9A2A"); fg.rect(56,120,14,1,"#FFF3B0");
+  for(let k=0;k<10;k++){ const an=-Math.PI*(k/9), d=3+((k+f*3)%8); gf.px(62+Math.cos(an)*d*1.4,119+Math.sin(an)*d,k%2?"#FFD34E":"#FFFFFF"); }
+  gf.blob(64,120,10,5,"#FFB020",1,.35);
+};
+
+ART["O Ímpeto"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#120404","#5A1A14",6);
+  bolt(b,rng(40+f),10+f*20,0,90,"#FF4A3A"); if(f%2) bolt(b,rng(70+f),70-f*8,0,70,"#FF8A6A");
+  for(let k=0;k<5;k++) b.rect(0+k*4,100+k*6,W-k*8,6,k%2?"#5a4a44":"#4a3a34");
+  b.grad(0,130,W,H-130,"#2a1e1a","#1a120e",2);
+  human(L,{T:44,B:130,skin:"#3B2418",robe:"#9E2A2B",trim:"#FFFFFF",cape:"#7A1A1A",bare:true,bareArms:true,hair:"#0a0a0a",head:"crown",crownCol:"#B87333",gem:"#FFFFFF",armR:"up",r:"axe2",armL:"open"});
+  rocks(fg,r,134,8,"#0a0404");
+};
+
+ART["A Brasa"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#2A2020","#6A5A54",6);
+  for(let i=0;i<7;i++) b.blob(((i*17+f*2)%100)-5,20+i*12,14,6,"#8A8078",1,.6);
+  b.grad(0,114,W,H-114,"#2a2220","#140e0c",3);
+  human(L,{T:46,B:130,skin:"#1E1A1A",robe:"#3A2A24",trim:"#E07A5F",hair:"#6A6A6A",beard:"#8A8A8A",armL:"hold",armR:"hold",
+    back:(L,cx,T)=>{ const s=L.s; for(let k=0;k<4;k++){ s.line(cx+4+k*3,T+30,cx+8+k*3,T-6,"#4a3020",1,2); flame(s,cx+8+k*3,T-7,6,L.f); } L.gb.blob(cx+13,T-10,12,8,"#FFB020",1,.3); },
+    front:(L,cx,T)=>{ [[cx-6,T+2,cx-2,T+10],[cx+2,T+20,cx+6,T+30],[cx-4,T+36,cx+2,T+50],[cx-10,T+26,cx-12,T+36]].forEach(q=>{ L.s.line(q[0],q[1],q[2],q[3],"#FF7A1A"); L.gf.line(q[0],q[1],q[2],q[3],"#FFB020",.4); }); }});
+  fg.rect(0,131,W,6,"#140E0C");
+  for(let i=0;i<14;i++){ const x=(r()*W)|0, y=131+((r()*5)|0); fg.px(x,y,(i+f)%3?"#FF3A1A":"#FFB020"); }
+};
+
+ART["O Desbravador"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#1E0630","#6A2A5A",6);
+  b.poly([[10,110],[38,40],[52,40],[84,110]],"#1a0a14");
+  b.line(40,44,30,100,"#FF6020",1,2); b.line(50,44,62,104,"#FF6020",1,2);
+  for(let k=0;k<10;k++){ const an=-Math.PI*(.2+k*.06), d=6+((k*5+f*4)%18); gf.px(45+Math.cos(an)*d,40+Math.sin(an)*d*1.6,k%2?"#FFD34E":"#FF6020"); }
+  gb.blob(45,38,14,10,"#FF6020",1,.4);
+  b.grad(64,100,26,20,"#1B4965","#0B1A24",2); b.blob(74,98,10,5,"#FFFFFF",1,.5);
+  b.grad(0,110,W,H-110,"#1a0a10","#0a0408",3);
+  human(L,{cx:42,T:44,B:130,pose:"run",skin:"#A06A4A",robe:"#9E2A2B",trim:"#E07A5F",head:"flamehair",armL:"open",armR:"fwd"});
+  rocks(fg,r,134,9,"#0A0508"); for(let i=0;i<6;i++){ const x=(r()*W)|0; fg.line(x,136,x+4,133,"#FF6020"); }
+};
+
+ART["O Soberano da Chama"] = L => { const {b,gb,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#5A2A06","#F7C060",6);
+  [8,24,62,78].forEach(x=>{ const o=SW[f]; b.rect(x+o,0,8,44,"#9E2A2B"); b.rect(x+o,44,8,2,"#F7D070"); b.poly([[x+o,46],[x+8+o,46],[x+4+o,52]],"#9E2A2B"); });
+  b.grad(0,112,W,H-112,"#8a4a10","#4a2206",3);
+  s.poly([[26,120],[64,120],[62,70],[56,50],[45,36],[34,50],[28,70]],"#F7D070"); s.poly([[30,118],[60,118],[58,72],[45,46],[32,72]],"#FF9A2A");
+  for(let k=0;k<5;k++) flame(s,33+k*6,50-(k===2?12:Math.abs(k-2)*-4)+Math.abs(k-2)*6,6+((k+f)%2)*2,f);
+  gb.blob(45,60,30,30,"#FFB020",1,.35);
+  human(L,{T:58,B:122,pose:"seat",skin:"#D08040",robe:"#F4A300",trim:"#9E2A2B",head:"crown",halo:"#FFE08a",armL:"fwd",armR:"fwd",l:"firelotus",r:"scepter"});
+  for(let k=0;k<3;k++) fg.rect(10+k*6,128+k*3,70-k*12,3,k%2?"#3a1a04":"#4a2406");
+};
+
+/* ---------------- TERRA ---------------- */
+ART["A Semente"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#8ECAE6","#F4ECD0",6);
+  mtn(b,r,84,10,32,"#8A9AB0","#FFFFFF",10);
+  for(let k=0;k<6;k++){ const y=88+k*8; b.rect(0,y,W,8,k%2?"#4A7A3A":"#6A9A4A"); b.line(0,y,W,y,"#2A4A2A"); }
+  const hand=sg=>{ const x=45+sg*2; s.poly([[x,122],[x+sg*22,122],[x+sg*26,112],[x+sg*20,100],[x+sg*8,104],[x,110]],"#8A5A3A");
+    for(let k=0;k<4;k++) s.rect(x+sg*(10+k*4)-(sg<0?3:0),96+k,3,8,"#8A5A3A"); s.px(x+sg*14,114,"#6A6A6A"); s.px(x+sg*18,108,"#6A6A6A"); s.px(x+sg*8,116,"#6A6A6A"); };
+  hand(-1); hand(1);
+  s.line(45,108,45,74,"#5AA040",1,2); s.line(45,96,36,86,"#5AA040"); s.line(45,92,54,82,"#5AA040"); s.line(45,86,38,78,"#6ABA4A");
+  s.ell(45,68,3,7,"#F7D070"); for(let y=62;y<75;y+=2){ s.px(44,y,"#FFE066"); s.px(46,y+1,"#D8A020"); }
+  gf.blob(45,68,9,11,"#FFE066",1,.35+P4(f)*.08);
+  gf.px(47,76+f*2,"#FFE066"); gf.px(47,77+f*2,"#FFF3B0",.7);
+  fg.rect(0,128,W,10,"#3A2412"); for(let i=0;i<10;i++) fg.px((r()*W)|0,127,"#3A2412");
+};
+
+ART["O Alicerce"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#E8C890","#F8E8C0",6);
+  b.poly([[60,60],[74,40],[88,60]],"#C8A060"); b.poly([[4,64],[16,48],[28,64]],"#C8A060");
+  pillar(b,34,50,96,5,"#D8B070","#F0D8A0","#A88040"); pillar(b,50,62,96,5,"#D8B070","#F0D8A0","#A88040"); b.line(36,48,60,40,"#6a5a3a");
+  s.poly([[0,137],[0,112],[8,104],[20,100],[28,104],[40,98],[60,100],[72,94],[86,100],[90,108],[90,137]],"#5A7A3A");
+  s.poly([[14,102],[20,96],[26,102],[24,106],[16,106]],"#6A8A4A"); s.line(17,101,21,101,"#2a3a1a"); s.px(12,104,"#5A7A3A");
+  for(let x=4;x<88;x+=3) s.px(x,Math.round(104-Math.sin(x*.12)*4),"#8ABA5A");
+  [[56,90],[70,86]].forEach(([x,y])=>{ s.rect(x,y,3,8,"#D8B070"); s.rect(x-1,y-1,5,1,"#F0D8A0"); });
+  [[46,96],[62,92],[78,96]].forEach(([x,y],i)=>{ s.rect(x,y-4+(i+f)%2,2,4,"#3a2a1a"); s.px(x,y-5+(i+f)%2,"#E0B080"); s.rect(x+2,y-4,2,2,"#D8B070"); });
+  rocks(fg,r,135,6,"#6a5030");
+};
+
+ART["A Providência"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#2A1E14","#E0A050",6);
+  tree(b,10,112,40,"#4A3A2A","#6A7A5A",12); tree(b,82,112,44,"#4A3A2A","#6A7A5A",12);
+  for(let k=0;k<3;k++) b.line(30+k*12,0,40+k*12,80,"#FFE0A0",.12);
+  b.grad(0,112,W,H-112,"#5A4A2A","#2A2214",3);
+  const hands=human(L,{T:44,B:130,skin:"#E0B890",robe:"#6B4A2A",trim:"#D8C090",head:"bald",hair:"#6A4A2A",beard:"#6A4A2A",armL:"open",armR:"open",l:"bread",
+    front:(L,cx,T)=>{ [[-3,33],[0,34],[3,33]].forEach(([dx,dy])=>L.s.px(cx+dx,T+dy+1,"#8a6a3a")); }});
+  [hands.L,hands.R].forEach(h=>{ gf.px(h[0],h[1],"#FF2040"); gf.blob(h[0],h[1],3,3,"#FF6080",1,.3); });
+  bird(s,hands.L[0]-2,hands.L[1]-5,"#8A6A4A",f); bird(s,hands.R[0]+1,hands.R[1]-5,"#F4F4F4",(f+1)%4); bird(s,hands.R[0]+6,hands.R[1]-12-f,"#8A6A4A",f);
+  wolf(s,24,134);
+  fg.ell(70,132,6,3,"#8a5a2a"); [["#C8102E",68],["#F7D070",71],["#8ECF6A",73]].forEach(([c,x])=>fg.px(x,129,c));
+  grass(fg,r,135,20,"#1a1408");
+};
+
+ART["O Ofício"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#0A1E14","#1E3A24",6);
+  for(let i=0;i<7;i++){ const x=(r()*W)|0, h=40+r()*30; b.poly([[x-8,112],[x,112-h],[x+8,112]],i%2?"#0e2a1a":"#123420"); }
+  b.rect(2,60,18,2,"#4A3020"); b.rect(2,76,18,2,"#4A3020"); [[5,56],[9,54],[14,57],[6,72],[12,70]].forEach(([x,y])=>b.line(x,y,x,y+4,"#C8D0D8"));
+  b.grad(0,112,W,H-112,"#2a2a20","#141410",3);
+  human(L,{cx:40,T:44,B:130,tunic:true,skin:"#3B2418",robe:"#1E3A5A",trim:"#6ADA7A",legs:"#2a2a3a",bare:true,bareArms:true,head:"helmet",helm:"#6A7078",armR:"up",r:"hammer",armL:"hold"});
+  fg.poly([[56,122],[80,122],[76,127],[70,127],[72,137],[62,137],[64,127],[58,127]],"#2a2a30");
+  fg.rect(58,120,18,2,"#FF9A2A"); gf.blob(66,120,8,4,"#FFB020",1,.35);
+  for(let k=0;k<3;k++){ fg.circ(8+k*6,134,3,"#1a1a1e"); fg.px(8+k*6,132,"#A8B0B8"); }
+};
+
+ART["O Legado"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,60,"#8ECAE6","#D8E8F0",4);
+  b.rect(0,60,W,56,"#6A7078"); for(let y=62;y<116;y+=5) for(let x=((y/5)%2)*6;x<W;x+=12) b.rect(x,y,1,5,"#4A5058"); for(let y=64;y<116;y+=5) b.line(0,y,W,y,"#5A6068");
+  for(let x=0;x<W;x+=8) b.rect(x,56,5,4,"#6A7078");
+  [[10,96],[80,96]].forEach(([x,y])=>{ b.rect(x-7,y,14,20,"#8A5A2A"); b.poly([[x-9,y],[x,y-8],[x+9,y]],"#5A3A1A"); b.rect(x-2,y+10,4,10,"#3a2210"); });
+  b.grad(0,116,W,H-116,"#8A8070","#5A5040",3);
+  human(L,{T:42,B:130,skin:"#E8C8A8",robe:"#386641",trim:"#F7D070",cape:"#F4F4F4",hair:"#D8B060",beard:"#D8B060",beardLong:true,armR:"hold",r:"cornucopia",armL:"down",
+    back:(L,cx,T,B)=>{ for(let k=0;k<10;k++) L.s.px(cx-15+(k*7)%30,T+24+k*9,"#1a1a1a"); }});
+  [[14,132],[76,132]].forEach(([x,y])=>{ fg.poly([[x-5,y+5],[x,y-8],[x+5,y+5]],"#8a6a2a"); fg.line(x,y-6,x,y+4,"#DDA15E"); });
+};
+
+ART["O Construtor"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#9AD0E0","#E0F0E8",6);
+  hills(b,84,16,.07,1,"#6A9A8A"); hills(b,94,10,.1,2,"#5A8A6A");
+  for(let k=0;k<6;k++){ const y=96+k*6; b.rect(0,y,W,6,k%2?"#5AA040":"#8AD0C0"); if(k%2===0) for(let x=0;x<W;x+=4) b.px(x+(k*3+f)%4,y+2,"#FFFFFF",.5); }
+  b.poly([[40,137],[50,137],[48,96],[44,96]],"#A09080");
+  [[16,100],[74,104]].forEach(([x,y])=>{ for(let a=0;a<=10;a++){ const an=Math.PI*(1+a/10); b.px(x+Math.cos(an)*6,y+Math.sin(an)*4,"#8a8a8a"); } });
+  human(L,{T:44,B:130,skin:"#E8C098",robe:"#A25A38",trim:"#DDA15E",head:"bald",hair:"#E8E8E8",beard:"#FFFFFF",beardLong:true,smile:true,armL:"hold",l:"staff",armR:"fwd",r:"grain"});
+  for(let i=0;i<6;i++) fg.ell(38+((i*5)%16),133+(i%2)*2,3,1.5,"#6a5a4a");
+  grass(fg,r,136,12,"#2a4a2a");
+};
+
+ART["O Soberano da Terra"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#8ECAE6","#F0E0A0",6);
+  [[12,70],[78,74]].forEach(([x,y])=>{ b.rect(x-5,y,10,34,"#A09080"); b.circ(x,y,5,"#8A7A6A"); b.line(x-5,y+8,x+4,y+8,"#7a6a5a"); });
+  [[30,90],[60,92]].forEach(([x,y])=>{ tree(b,x,y+14,14,"#4a3020","#3A6A2A",7); for(let k=0;k<5;k++) b.px(x-4+k*2,y-2+(k%2)*3,"#C8102E"); });
+  b.grad(0,100,W,H-100,"#DDA15E","#A87830",4);
+  for(let x=0;x<W;x+=2) for(let y=102;y<136;y+=5) b.line(x,y,x+SW[(x+f)%4],y-3,"#F0C070");
+  human(L,{T:42,B:130,skin:"#E8C098",robe:"#2A4A2A",trim:"#DDA15E",hairLong:true,hair:"#6A3A1A",head:"wheat",armL:"up",l:"torch",armR:"hold",r:"sickle"});
+  for(let x=2;x<W;x+=4){ fg.line(x,137,x+SW[(x+f)%4],126,"#6A4A1A"); fg.px(x+SW[(x+f)%4],125,"#8A6A2A"); }
+};
+
+/* ---------------- AR ---------------- */
+ART["A Lucidez"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#8A9098","#C8CCD0",6);
+  b.blob(74,16,26,20,"#4AB0F0",1.6); b.blob(74,16,14,10,"#8AD8FF",1.4);
+  b.poly([[0,0],[14,0],[20,40],[12,80],[18,118],[0,118]],"#5A5048"); b.poly([[90,40],[80,60],[84,90],[76,118],[90,118]],"#5A5048");
+  for(let y=10;y<118;y+=9){ b.line(0,y,16,y+2,"#6a6058"); b.line(78,y+30,90,y+28,"#6a6058"); }
+  for(let k=0;k<5;k++) for(let x=0;x<W;x++) if(((x-f*3+k*11)%17)<6) b.px(x,40+k*12,"#E8ECEF",.35);
+  b.grad(0,118,W,H-118,"#6a6058","#3a3430",3);
+  human(L,{T:44,B:130,skin:"#F0D8C0",robe:"#D9DCD6",trim:"#8ECAE6",armor:"#C8D0D8",head:"helmet",helm:"#C8D0D8",crest:"#2A4A8A",hair:"#3a2a1a",armR:"hold",r:"spearD",armL:"down"});
+  owl(s,16,30,f);
+  rocks(fg,r,134,7,"#2A2622");
+};
+
+ART["A Trégua"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#3A3A5A","#E8A080",7);
+  cloud(b,8,30,24,"#F0D8D0","#C8A0A0"); cloud(b,56,20,28,"#F0D8D0","#C8A0A0"); cloud(b,36,52,16,"#E0C0C0","#B89090");
+  pillar(b,8,70,116,7,"#B8B0A8","#E0D8D0","#7A7068"); b.poly([[7,70],[16,70],[14,64],[10,67]],"#B8B0A8");
+  pillar(b,74,82,116,7,"#B8B0A8","#E0D8D0","#7A7068");
+  b.grad(0,116,W,H-116,"#4A6A3A","#2A4020",3);
+  human(L,{T:44,B:130,skin:"#F0D8C0",robe:"#D9DCD6",trim:"#8ECAE6",hair:"#3a2a1a",head:"templewings",armL:"fwd",l:"poppy",armR:"hold",
+    front:(L,cx,T)=>{ L.s.rect(cx+2,T+34,20,2,"#5A4A3A"); L.s.rect(cx+1,T+33,3,4,"#F7D070"); L.gf.px(cx+10,T+32+L.f,"#BEE9E8"); }});
+  grass(fg,r,134,30,"#1a2a12");
+};
+
+ART["A Travessia"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#B8C0C8","#E8ECEF",6);
+  waves(b,80,98,"#3A5060","#FFFFFF",f,3);
+  b.grad(0,98,W,H-98,"#B0C8D0","#8AA8B8",4);
+  for(let y=102;y<H;y+=4) b.line(4,y,86,y,"#D0E0E8",.4);
+  mist(b,60,4,"#FFFFFF",.35,f);
+  s.poly([[12,112],[78,112],[72,120],[18,120]],"#C8A860"); for(let x=16;x<76;x+=4) s.line(x,112,x+2,120,"#8A7040");
+  s.line(12,112,8,104,"#C8A860",1,2); s.line(78,112,82,104,"#C8A860",1,2);
+  human(L,{T:26,B:111,skin:"#B08060",robe:"#8ECAE6",trim:"#F8F9FA",hair:"#2a1a10",beard:"#2a1a10",armL:"fwd",armR:"fwd",r:"staff",noFeet:true});
+  gf.poly([[18,122],[72,122],[78,128],[12,128]],"#C8A860",.25);
+};
+
+ART["A Armadilha"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#26292C","#5A6064",6);
+  const br=(pts)=>{ for(let i=0;i<pts.length-1;i++) b.line(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1],"#0a0a0c",1,2); };
+  br([[0,30],[14,36],[22,28],[30,34]]); br([[90,20],[74,30],[66,24],[60,32]]); br([[0,70],[10,64],[16,72]]);
+  raven(b,22,26,1,f); raven(b,66,22,-1,(f+2)%4); raven(b,12,62,1,(f+1)%4);
+  for(let x=6;x<W;x+=10) for(let y=40;y<118;y++) if(bay(x+f,y)<.5) b.px(x,y,"#8A9098",.25);
+  b.grad(0,112,W,H-112,"#2a3230","#141a18",3);
+  b.rect(44,86,2,26,"#9AA4AE"); b.rect(41,90,8,2,"#6a6a70");
+  human(L,{T:44,B:130,skin:"#D8D0C8",robe:"#16161E",trim:"#3A4A6A",hairLong:true,hair:"#050508",cape:"#0E0E14",armL:"down",armR:"down",
+    back:(L,cx,T,B)=>{ for(let y=T+18;y<B;y+=4) for(let x=cx-16;x<=cx+16;x+=4) L.s.px(x+((y/4)%2)*2,y,"#2a3a5a"); }});
+  [[20,112],[70,114]].forEach(([x,y])=>{ s.rect(x,y,2,20,"#9AA4AE"); s.rect(x,y,1,20,"#E0E6EE"); s.rect(x-3,y-2,8,2,"#6a6a70"); s.rect(x,y-6,2,4,"#3a2a1a"); });
+  grass(fg,r,134,20,"#0a100e");
+};
+
+ART["O Abismo"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#1E222A","#5A6070",6);
+  for(let i=0;i<8;i++) b.blob((r()*W)|0,(r()*50)|0,18,7,"#3A3E48",1.3);
+  b.grad(62,100,28,H-100,"#0a0c10","#000000",3);
+  b.poly([[0,100],[64,100],[68,110],[62,137],[0,137]],"#A8C0D0"); b.line(0,100,64,100,"#E0F0F8"); b.line(64,100,68,110,"#E0F0F8");
+  [[10,100,14,86],[26,100,22,88],[54,100,58,90]].forEach(q=>{ b.line(q[0],q[1],q[2],q[3],"#5A4A3A"); b.px(q[2],q[3],"#8a8a8a"); });
+  human(L,{cx:40,T:36,B:100,head:"half",skin:"#E8D8D0",robe:"#2A2A3A",trim:"#8A9AA8",hairLong:true,hair:"#0a0a0a",armR:"hold",r:"scythe",armL:"down"});
+  fall(gf,r,18,"#FFFFFF",f,1,0,136,4,.8);
+  fg.rect(0,128,62,10,"#8AA0B0");
+};
+
+ART["O Desafiante"] = L => { const {b,s,gf,fg,r,f}=L;
+  b.grad(0,0,W,H,"#2A3040","#6A7890",6);
+  for(let k=0;k<4;k++){ const cx=[16,74,20,70][k], cy=[30,40,80,90][k]; for(let t=0;t<26;t++){ const an=t*.35+f*.5, rad=t*.35; b.px(cx+Math.cos(an)*rad,cy+Math.sin(an)*rad,"#A8B4C8",.7); } }
+  for(let i=0;i<10;i++) b.blob(i*10,118+(i%3)*2,10,7,i%2?"#C8D0D8":"#A8B0BC",1.3);
+  b.rect(0,124,W,H-124,"#C8D0D8");
+  human(L,{T:46,B:124,tunic:true,skin:"#2A9A5A",robe:"#F4F4F4",trim:"#C8D0D8",legs:"#2A9A5A",bare:true,bareArms:true,head:"spiky",hair:"#0A3A1A",eye:"#FFE066",armL:"up",armR:"up",
+    back:(L,cx,T)=>{ for(let a=0;a<=20;a++){ const an=Math.PI*(1+a/20); L.s.circ(cx+Math.cos(an)*20,T+10+Math.sin(an)*14,5,a%4?"#A8C8D8":"#8AB0C0"); } L.s.line(cx-20,T+10,cx-24,T+16,"#6a5a3a"); L.s.line(cx+20,T+10,cx+24,T+16,"#6a5a3a"); }});
+  for(let i=0;i<8;i++) fg.circ(i*12+((f*2)%6),136,5,"#E8EEF2");
+};
+
+ART["O Soberano do Ar"] = L => { const {b,s,gf,fg,r,f}=L;
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const edge=45+Math.sin(y*.08)*8; b.px(x,y, x<edge+(bay(x,y)-.5)*6 ? mix("#101418","#2A2E36",y/H) : mix("#8ECAE6","#D8EEF8",y/H)); }
+  bolt(b,rng(11+f),14+f*4,0,100,"#E0F0FF"); if(f%2) bolt(b,rng(31+f),30,10,70,"#BEE9E8");
+  [[12,40],[26,56],[8,70]].forEach(([x,y])=>{ b.ell(x,y,6,3,"#1A1E24"); b.circ(x-6,y-1,2,"#1A1E24"); b.line(x-7,y-3,x-9,y-5,"#1A1E24"); b.rect(x-4,y+2,1,3,"#1A1E24"); b.rect(x+3,y+2,1,3,"#1A1E24"); });
+  for(let i=0;i<8;i++) b.blob(i*12,122,10,6,i%2?"#C8D0D8":"#8A94A0",1.2);
+  b.rect(0,126,W,H-126,"#6A7480");
+  human(L,{T:44,B:128,skin:"#5A3A2A",robe:"#7A2A3A",trim:"#B87333",hair:"#0a0a0a",hairLong:true,head:"crown",crownCol:"#B87333",gem:"#62F0FF",eye:"#62F0FF",eyeGlow:"#62F0FF",armL:"fwd",l:"eruexim",armR:"up",r:"coppersword"});
+  for(let i=0;i<7;i++) fg.circ(i*14+SW[f],137,6,"#4A5460");
+};
+
+/* ---------------- ESPECIAIS ---------------- */
+ART["A Paixão"] = L => { const {b,s,gf,fg,r,f}=L; const p=P4(f);
+  b.grad(0,0,W,H,"#0A0A0A","#5E5E5E",6);
+  eclipse(b,45,22,8,L.pol==="escuridao"?"#FF2050":"#D8D8D8",f);
+  [[4,40,8],[16,62,6],[70,48,7],[82,70,5]].forEach(([x,top,w])=>{ pillar(b,x,top,114,w,"#C8C8C8","#F0F0F0","#7A7A7A"); b.poly([[x-1,top-3],[x+w+1,top-3],[x+w-1,top-7],[x+2,top-5]],"#C8C8C8"); });
+  b.rect(0,114,W,H-114,"#8A8A8A"); for(let i=0;i<8;i++) b.rect((r()*W)|0,116+((r()*16)|0),3+((r()*5)|0),2,"#B8B8B8");
+  human(L,{T:42,B:130,skin:"#B8B8B8",robe:"#E8E8E8",trim:"#9A9A9A",hairLong:true,hair:"#2A2A2A",armL:"chest",armR:"chest",
+    front:(L,cx,T,B)=>{ const s=L.s;
+      s.poly([[cx,T+15],[cx+9,T+15],[cx+13,B],[cx,B]],"#3A3A3E");
+      for(let y=T+18;y<B;y+=5) s.poly([[cx+10,y],[cx+15,y-2],[cx+11,y+2]],"#1E1E22");
+      s.rect(cx+6,T+14,6,3,"#2A2A2E"); s.px(cx+12,T+13,"#1E1E22");
+      s.poly([[cx-9,T+15],[cx-18+SW[L.f],B],[cx-10,B]],"#FFFFFF",.35);
+      const hx=cx, hy=T+25;
+      s.circ(hx-2,hy-1,2,"#FF0055"); s.circ(hx+2,hy-1,2,"#FF0055"); s.poly([[hx-4,hy],[hx+4,hy],[hx,hy+5]],"#FF0055");
+      s.px(hx-2,hy-2,"#FF8AB0"); s.line(hx,hy-4,hx+1,hy-6,"#C0003A");
+      L.gf.blob(hx,hy,9+p*2,9+p*2,"#FF0055",1.1,.3+p*.12); }});
+  fall(gf,r,10,"#C8103A",f,1,30,134,3);
+  fg.rect(0,132,W,6,"#0E0E0E"); for(let i=0;i<10;i++){ const x=(r()*W)|0; fg.line(x,137,x+((r()*8)|0)-4,122+((r()*8)|0),"#0E0E0E"); }
+  [[8,126],[20,130],[70,128],[84,124]].forEach(([x,y])=>{ fg.circ(x,y,2,"#C8103A"); fg.px(x,y,"#FF4A6A"); });
+};
+
+ART["A Ambição"] = L => { const {b,s,gf,fg,r,f}=L; const p=P4(f);
+  b.grad(0,0,W,H,"#101010","#4A4A4E",6);
+  b.poly([[45,18],[80,98],[10,98]],"#050506"); b.line(45,18,80,98,"#3A3A4A"); b.line(45,18,45,98,"#15151A");
+  for(let i=0;i<12;i++) b.blob(4+i*8,98+(i%3)*3,9,5,"#6A6A70",1.1);
+  b.rect(0,102,W,H-102,"#5A5A60");
+  for(let k=0;k<9;k++){ const y=134-k*5, x0=6+k*3, x1=84-k*3; b.rect(x0,y,x1-x0,5,k%2?"#5A5A5E":"#626268"); b.rect(x0,y,x1-x0,1,"#8A8A92"); }
+  const cx=46, T=54;
+  s.poly([[cx-5,T+34],[cx-1,T+34],[cx-3,T+50],[cx-7,T+50]],"#3A3A3E");
+  s.poly([[cx+1,T+34],[cx+6,T+34],[cx+10,T+43],[cx+6,T+46]],"#3A3A3E");
+  s.poly([[cx-13,T+13],[cx+13,T+13],[cx+9,T+36],[cx-9,T+36]],"#3E3E44");
+  s.line(cx-13,T+14,cx-17,T+36,"#3A3A3E",1,4); s.line(cx+13,T+14,cx+17,T+36,"#3A3A3E",1,4);
+  s.circ(cx,T+6,6,"#38383C"); s.px(cx+6,T+6,"#58585E"); s.rect(cx-2,T+11,5,3,"#38383C");
+  [[cx-6,T+16,cx-2,T+30],[cx+4,T+18,cx+8,T+32],[cx-2,T+30,cx+3,T+35],[cx-15,T+20,cx-16,T+30],[cx+15,T+22,cx+16,T+30]].forEach(q=>{ s.line(q[0],q[1],q[2],q[3],"#FFE070"); gf.line(q[0],q[1],q[2],q[3],"#FFD700",.4+p*.1); });
+  for(let k=0;k<5;k++) flame(s,cx-6+k*3,T,6+((k+f)%2)*2,f,["#FFFFFF","#FFD700","#E09A00"]);
+  for(let k=0;k<4;k++) s.line(cx-5+k*3.5,T+1,cx-6+k*3.5,T-4,"#2A2A2E");
+  gf.blob(cx,T-3,15,11,"#FFD700",1,.35+p*.12);
+  fall(gf,r,14,"#FFE070",f,-1,4,T,3);
+  [[12,128],[70,123]].forEach(([x,y])=>{ fg.rect(x,y-10,8,10,"#2A2A2A"); fg.rect(x-1,y-14,10,4,"#2A2A2A"); fg.rect(x,y-3,8,2,"#1A1A1A"); });
+  fg.line(24,133,34,130,"#5A6A3A"); fg.circ(34,130,1,"#6A7A4A"); fg.line(56,131,64,134,"#5A6A3A");
+};
+
+/* =====================================================================
+   HUD: moldura chanfrada, glifos de canto, numeral e rodapé
+   ===================================================================== */
+const FONT = {
+  A:["010","101","111","101","101"], B:["110","101","110","101","110"], C:["011","100","100","100","011"],
+  D:["110","101","101","101","110"], E:["111","100","110","100","111"], F:["111","100","110","100","100"],
+  G:["011","100","101","101","011"], H:["101","101","111","101","101"], I:["111","010","010","010","111"],
+  J:["001","001","001","101","010"], K:["101","101","110","101","101"], L:["100","100","100","100","111"],
+  M:["10001","11011","10101","10001","10001"], N:["1001","1101","1011","1001","1001"], O:["010","101","101","101","010"],
+  P:["110","101","110","100","100"], Q:["010","101","101","110","011"], R:["110","101","110","101","101"],
+  S:["011","100","010","001","110"], T:["111","010","010","010","010"], U:["101","101","101","101","111"],
+  V:["101","101","101","101","010"], W:["10001","10001","10101","11011","10001"], X:["101","101","010","101","101"],
+  Y:["101","101","010","010","010"], Z:["111","001","010","100","111"], " ":["00","00","00","00","00"],
+  "0":["111","101","101","101","111"], "'":["1","1","0","0","0"], "-":["000","000","111","000","000"]
+};
+const ACC = {"Á":["A","ac"],"À":["A","gr"],"Â":["A","ci"],"Ã":["A","ti"],"É":["E","ac"],"Ê":["E","ci"],"Í":["I","ac"],"Ó":["O","ac"],"Ô":["O","ci"],"Õ":["O","ti"],"Ú":["U","ac"],"Ç":["C","ce"]};
+const MARK = {ac:["001","010"], gr:["100","010"], ci:["010","101"], ti:["011","110"]};
+const BIGNUM = {
+  I:["111","010","010","010","010","010","111"],
+  V:["10001","10001","10001","10001","01010","01010","00100"],
+  X:["10001","10001","01010","00100","01010","10001","10001"],
+  "0":["01110","10001","10011","10101","11001","10001","01110"]
+};
+const glyphOf = ch => { const u=ch.toUpperCase(); if(ACC[u]) return {g:FONT[ACC[u][0]], m:ACC[u][1]}; return {g:FONT[u]||FONT[" "], m:null}; };
+function textW(str){ let w=0; for(const ch of str) w+=glyphOf(ch).g[0].length+1; return Math.max(0,w-1); }
+function text(b,str,x,y,col,sh){
+  for(const ch of str){
+    const {g,m}=glyphOf(ch), gw=g[0].length;
+    const draw=(ox,oy,c)=>{
+      g.forEach((row,j)=>{ for(let i=0;i<gw;i++) if(row[i]==="1") b.px(x+i+ox,y+j+oy,c); });
+      if(m && m!=="ce") MARK[m].forEach((row,j)=>{ for(let i=0;i<3;i++) if(row[i]==="1") b.px(x+i+ox,y-2+j+oy,c); });
+      if(m==="ce") b.px(x+1+ox,y+5+oy,c);
     };
-    slot.appendChild(cardEl);
-    return slot;
+    if(sh) draw(1,1,sh); draw(0,0,col); x+=gw+1;
   }
+}
+function outlinedBitmap(b,rows,x,y,col){
+  const h=rows.length, w=rows[0].length;
+  for(let j=0;j<h;j++) for(let i=0;i<w;i++) if(rows[j][i]==="1") for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++) b.px(x+i+dx,y+j+dy,"#000000");
+  for(let j=0;j<h;j++) for(let i=0;i<w;i++) if(rows[j][i]==="1") b.px(x+i,y+j,col);
+}
+function wrap(str,maxW){ const words=str.split(" "), lines=[]; let cur="";
+  words.forEach(w=>{ const t=cur?cur+" "+w:w; if(textW(t)<=maxW||!cur) cur=t; else { lines.push(cur); cur=w; } }); if(cur) lines.push(cur); return lines; }
 
-  function renderBoard(){
-    boardEl.innerHTML = "";
-    ROW_ORDER.forEach(function(rowName){
-      var entries = rowEntries(rowName);
-      if(entries.length === 0) return;
-      var block = document.createElement("div");
-      block.className = "row-block";
-      var header = document.createElement("div");
-      header.className = "row-header";
-      header.textContent = ROW_TITLE[rowName];
-      block.appendChild(header);
-      var cardsWrap = document.createElement("div");
-      cardsWrap.className = "row-cards";
-      entries.forEach(function(d){ cardsWrap.appendChild(makeCardEl(d, rowName)); });
-      block.appendChild(cardsWrap);
-      boardEl.appendChild(block);
+const CORNER = {
+  major:["0001000","0101010","0011100","1111111","0011100","0101010","0001000"],
+  agua:["0001000","0001000","0011100","0111110","0111110","0111110","0011100"],
+  fogo:["0001000","0011000","0011100","0111100","0111110","0111110","0011100"],
+  terra:["0001000","0011100","0111110","1111111","0111110","0011100","0001000"],
+  ar:["0111100","1000010","1011001","1010101","1001101","0100001","0011110"],
+  special:["0011100","0111110","1111111","1111111","1111111","0111110","0011100"]
+};
+const ACCENT = {major:"#F7D070", agua:"#62B6CB", fogo:"#E07A5F", terra:"#DDA15E", ar:"#D9DCD6", special:"#FFFFFF"};
+const FRAME = {major:["#FFF3B0","#F7D070","#9A7424","#3A2806"], minor:["#F8F9FA","#ADB5BD","#5C636A","#1E2226"], special:["#FFFFFF","#ADB5BD","#343A40","#050505"]};
+const SHADOW = {major:"#0E091C", agua:"#0B1A24", fogo:"#2B1717", terra:"#1B2418", ar:"#212529", special:"#050505"};
+const RIM = {major:"#FFF3B0", agua:"#BEE9E8", fogo:"#FFD9A0", terra:"#F0D08A", ar:"#F8F9FA", special:"#FFFFFF"};
+
+function frame(b,cat){
+  const P=FRAME[cat==="major"?"major":cat==="special"?"special":"minor"];
+  for(let k=0;k<4;k++){
+    const x0=k, y0=k, x1=W-1-k, y1=H-1-k;
+    const tl=[P[3],P[0],P[1],P[2]][k], br=[P[3],P[2],P[1],P[0]][k];
+    for(let x=x0;x<=x1;x++){ b.px(x,y0,tl); b.px(x,y1,br); }
+    for(let y=y0;y<=y1;y++){ b.px(x0,y,tl); b.px(x1,y,br); }
+  }
+  [[1,1],[W-2,1],[1,H-2],[W-2,H-2]].forEach(([x,y])=>b.px(x,y,P[0]));
+}
+function corner(b,cat,x,y){
+  const rows=CORNER[cat], col=ACCENT[cat];
+  for(let j=0;j<7;j++) for(let i=0;i<7;i++) if(rows[j][i]==="1") for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++) b.px(x+i+dx,y+j+dy,"#000000");
+  for(let j=0;j<7;j++) for(let i=0;i<7;i++) if(rows[j][i]==="1") b.px(x+i,y+j, cat==="special"&&i>3 ? "#1C1C1C" : col);
+}
+function vignette(b,c){
+  const C=rgb(c), d=b.d;
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+    const dx=(x-45)/45, dy=(y-72)/80, q=dx*dx+dy*dy; if(q<.5) continue;
+    const t=Math.min(.5,(q-.5)*.8), i=(y*W+x)*4;
+    for(let k=0;k<3;k++) d[i+k]=d[i+k]+(C[k]-d[i+k])*t;
+  }
+}
+function hud(b,card,pol){
+  frame(b,card.cat);
+  corner(b,card.cat,6,6); corner(b,card.cat,W-13,H-13);
+  if(card.numeral){
+    const chars=card.numeral.split(""); let w=0; chars.forEach(ch=>w+=BIGNUM[ch][0].length+1); w-=1;
+    let x=Math.round(45-w/2); chars.forEach(ch=>{ outlinedBitmap(b,BIGNUM[ch],x,6,ACCENT[card.cat]); x+=BIGNUM[ch][0].length+1; });
+  } else {
+    const t=pol==="escuridao"?"ESCURIDAO":"LUZ", x=Math.round(45-textW(t)/2);
+    for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++) text(b,t,x+dx,7+dy,"#000000");
+    text(b,t,x,7,pol==="escuridao"?"#FF3A5A":"#FFFFFF");
+  }
+  b.rect(4,H-23,W-8,19,"#000000",.85);
+  const lines=wrap(card.name.toUpperCase(),56), y0=lines.length===1?H-15:H-19;
+  lines.slice(0,2).forEach((ln,i)=>text(b,ln,Math.round(45-textW(ln)/2),y0+i*8,"#FFFFFF","#1A1A1A"));
+}
+
+/* =====================================================================
+   COMPOSIÇÃO FINAL
+   ===================================================================== */
+function renderFront(card,pol,f){
+  const L={b:new Buf(), gb:new Buf(), s:new Buf(), gf:new Buf(), fg:new Buf(), f:f, pol:pol, r:rng(hashStr(card.name)), card:card};
+  (ART[card.name]||(()=>L.b.grad(0,0,W,H,"#222","#000")))(L);
+  const out=L.b;
+  if(pol==="escuridao") out.map((r,g,bb)=>[r*.45+22,g*.3,bb*.4+10]);
+  out.over(L.gb);
+  L.s.rim(RIM[card.cat],.45,.78); L.s.outline("#0A0A0A");
+  out.over(L.s); out.over(L.gf);
+  L.fg.map((r,g,bb)=>[r,g,bb]); out.over(L.fg);
+  vignette(out,SHADOW[card.cat]);
+  hud(out,card,pol);
+  return out;
+}
+
+const ZOD = [
+  ["11011","10101","00100","00100","00100"], ["10001","01110","10001","10001","01110"], ["11111","01010","01010","01010","11111"],
+  ["01111","10010","00000","01001","11110"], ["01100","10010","01010","00010","00011"], ["11010","10101","10101","10111","00010"],
+  ["00100","01010","11011","00000","11111"], ["11010","10101","10101","10101","00011"], ["00111","00011","00101","01000","10000"],
+  ["10100","01010","01010","01011","00011"], ["01010","10101","00000","01010","10101"], ["10001","01010","11111","01010","10001"]
+];
+function renderBack(f){
+  const b=new Buf(), gf=new Buf(), p=P4(f);
+  b.rect(0,0,W,H,"#080D1A");
+  [[18,30,20,12],[68,52,16,10],[24,110,18,10]].forEach(([x,y,rx,ry])=>{ b.blob(x,y,rx,ry,"#1F1133",1.2); b.blob(W-1-x,H-1-y,rx,ry,"#1F1133",1.2); });
+  const r=rng(52);
+  for(let i=0;i<34;i++){ const x=(r()*W)|0, y=(r()*H)|0, c=i%3?"#FFFFFF":"#62F0FF", a=(i+f)%4===0?.3:1;
+    b.px(x,y,c,a); b.px(W-1-x,H-1-y,c,a); if(i%7===0&&(i+f)%4===2){ b.px(x-1,y,c,.5); b.px(x+1,y,c,.5); b.px(x,y-1,c,.5); b.px(x,y+1,c,.5); } }
+  const cx=45, cy=80;
+  b.ring(cx,cy,39,"#453205",1,1); b.ring(cx,cy,38,"#D4AF37",1,1); b.ring(cx,cy,37,"#8A6818",1,1); b.ring(cx,cy,25,"#D4AF37",1,1); b.ring(cx,cy,24,"#453205",1,1);
+  for(let k=0;k<12;k++){ const an=(k*30-90)*Math.PI/180, an2=((k*30+15)-90)*Math.PI/180;
+    b.line(cx+Math.cos(an2)*26,cy+Math.sin(an2)*26,cx+Math.cos(an2)*36,cy+Math.sin(an2)*36,"#8A6818");
+    const gx=Math.round(cx+Math.cos(an)*31-2), gy=Math.round(cy+Math.sin(an)*31-2);
+    ZOD[k].forEach((row,j)=>{ for(let i=0;i<5;i++) if(row[i]==="1") b.px(gx+i,gy+j,"#D4AF37"); }); }
+  b.ring(cx,cy,19,"#8A6818",1,2);
+  for(let k=0;k<24;k++){ const an=(k*15+f*3.75)*Math.PI/180; b.px(cx+Math.cos(an)*20,cy+Math.sin(an)*20,"#D4AF37"); }
+  for(let k=0;k<4;k++){ const an=k*Math.PI/2; b.line(cx+Math.cos(an)*10,cy+Math.sin(an)*10,cx+Math.cos(an)*23,cy+Math.sin(an)*23,"#D4AF37");
+    const tx=cx+Math.cos(an)*23, ty=cy+Math.sin(an)*23; b.circ(tx,ty,1,"#F7D070"); }
+  for(let k=0;k<8;k++){ const an=k*Math.PI/4+Math.PI/8; b.line(cx+Math.cos(an)*9,cy+Math.sin(an)*9,cx+Math.cos(an)*13,cy+Math.sin(an)*13,"#F7D070"); }
+  b.circ(cx,cy,8,"#F7D070"); b.circ(cx,cy,7,"#D4AF37");
+  crescent(b,cx+3,cy,7,"#D9DCD6",-5);
+  b.ell(cx,cy,4,2,"#FFFFFF"); b.circ(cx,cy,1.2,"#62F0FF"); b.px(cx,cy,"#080D1A");
+  gf.blob(cx,cy,10,10,"#62F0FF",1,.15+p*.08);
+  [[cx,20],[cx,H-21]].forEach(([x,y])=>{ b.poly([[x-4,y],[x,y-4],[x+4,y],[x,y+4]],"#D4AF37"); b.px(x,y,"#FFF3B0"); });
+  b.over(gf);
+  frame(b,"major");
+  return b;
+}
+
+ROOT.__ORACLE__ = {renderFront, renderBack, W, H, ART};
+
+/* =====================================================================
+   DADOS DO BARALHO (52 lâminas)
+   ===================================================================== */
+function toRoman(n){ if(n===0) return "0"; const m=[[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]]; let o=""; m.forEach(p=>{ while(n>=p[0]){ o+=p[1]; n-=p[0]; } }); return o; }
+
+const MAJOR = [
+  ["O Errante","O salto de fé rumo ao desconhecido, sem bagagens ou medos. A liberdade absoluta de quem confia na própria jornada.","Indica um momento de arriscar, iniciar algo totalmente novo e abandonar a necessidade de controle. Pede espontaneidade e coragem para ser autêntico."],
+  ["O Alquimista","O poder da manifestação. Aquele que domina os elementos ao seu redor e transforma ideias intangíveis em realidade material.","Mostra que você possui todos os recursos, contatos e habilidades necessárias para resolver o problema. Aja com foco e determinação."],
+  ["O Oráculo","A intuição pura e os mistérios ocultos. A voz silenciosa do subconsciente que guarda sabedorias ancestrais.","O momento não exige ação física, mas escuta interior. Segredos podem ser revelados. Confie em seus pressentimentos e preste atenção aos sonhos."],
+  ["A Matriz","A fonte criadora, a fertilidade e a abundância. A energia acolhedora que nutre e dá vida a tudo que toca.","Sinaliza crescimento, prosperidade, gravidez (física ou de projetos) e uma fase de grande força criativa. Conecte-se com a natureza e com o prazer de viver."],
+  ["O Arquiteto","A autoridade que traz ordem ao caos. A força estrutural que estabelece limites, regras e fundações duradouras.","Pede organização, disciplina e liderança. É hora de agir com razão, assumir o controle da situação e não ceder a chantagens emocionais."],
+  ["O Mentor","A tradição, a ética e a ponte entre o humano e o divino. O conhecimento estruturado passado através de gerações.","Busque aconselhamento com alguém mais experiente ou siga os métodos tradicionais. Indica também instituições, cursos acadêmicos e compromissos formais."],
+  ["O Pacto","O alinhamento profundo de valores. As encruzilhadas da vida que exigem escolhas morais e uniões verdadeiras.","Um momento de decisão importante que deve ser feita com o coração, não apenas com a lógica. Pode indicar grandes parcerias, sociedades ou o encontro de um amor genuíno."],
+  ["O Conquistador","O domínio sobre os próprios instintos conflitantes para avançar com determinação em uma única direção.","Movimento rápido, viagens ou a superação de obstáculos através da pura força de vontade e foco implacável. Você está no controle e a vitória é certa se não desviar a rota."],
+  ["O Domínio","A coragem compassiva. A capacidade de domar as \"feras\" interiores e exteriores não com brutalidade, mas com amor e firmeza.","Pede paciência, resiliência e persuasão. Enfrente seus medos ou uma pessoa difícil usando a doçura e a diplomacia, controlando seus impulsos nervosos."],
+  ["O Buscador","A jornada solitária para dentro. O uso da própria luz como farol para encontrar respostas longe do barulho do mundo.","Necessidade vital de isolamento, reflexão e autopreservação. Não tome decisões apressadas; afaste-se temporariamente para enxergar o quadro geral."],
+  ["O Ciclo","A roda inescapável do destino. A impermanência da vida, onde altos e baixos se alternam continuamente.","Mudanças inesperadas (frequentemente positivas, de \"sorte\") estão a caminho. Aceite que algumas coisas estão fora do seu controle e adapte-se ao movimento do universo."],
+  ["A Balança","A verdade nua e crua que corta ilusões. A lei universal de causa e efeito, onde cada ação encontra sua justa reação.","Assuntos legais, assinaturas de contratos e necessidade de imparcialidade. Você colherá exatamente o que plantou. Seja ético e exija justiça."],
+  ["A Suspensão","O sacrifício voluntário e a iluminação alcançada ao olhar o mundo por um ângulo invertido e desconfortável.","Situações estagnadas. Pare de forçar as coisas a acontecerem. Aceite a pausa obrigatória, mude sua perspectiva e faça concessões para destravar a energia."],
+  ["A Passagem","A transformação profunda e a transição inescapável. A morte de velhas formas para adubar o terreno do novo.","Finais definitivos e cortes radicais (um emprego, um relacionamento, um hábito). Aceite o luto e o desapego, pois esta limpeza é essencial para sua renovação."],
+  ["A Síntese","O equilíbrio alquímico. A mistura harmoniosa de opostos e a paciência para deixar o tempo agir como agente curador.","Pede moderação, meio-termo e calma. Não vá a extremos. Bom presságio para a saúde, harmonização de conflitos e reconciliações."],
+  ["As Correntes","O reino das sombras, dos desejos densos, da sexualidade, dos vícios e das ilusões de aprisionamento.","Alerta para relações tóxicas, obsessões, ambição desmedida ou dependências emocionais/financeiras. Lembre-se: as correntes estão soltas, você só está preso pelo próprio medo ou comodismo."],
+  ["O Colapso","O raio que destrói as fundações falsas. A crise inevitável que liberta a verdade aprisionada pelo orgulho.","Ruptura repentina de estruturas que já não serviam (divórcios repentinos, demissões, quebra de paradigmas). O choque é doloroso, mas traz libertação total."],
+  ["A Aurora","A luz da esperança brilhando após a tempestade. A renovação da fé, a inspiração celestial e a pura cura espiritual.","Um momento de grande proteção cósmica, alívio e otimismo. Deixe sua luz brilhar, invista em seus talentos e acredite no futuro. O pior já passou."],
+  ["O Labirinto","As águas profundas do inconsciente. O reino dos medos, das projeções, das paranoias e das emoções flutuantes.","Cuidado com ilusões, fofocas, traições ou autoenganos. As coisas não são o que parecem. Enfrente suas inseguranças e não deixe a ansiedade guiar seus passos."],
+  ["O Zênite","O triunfo absoluto da luz. A clareza, a vitalidade inesgotável, a alegria de viver e o sucesso radiante.","Excelente presságio. Confirmação de vitória, resolução de todos os problemas, saúde plena, energia infantil e sucesso público. Diga \"sim\" para a vida."],
+  ["O Chamado","O soar da trombeta para uma nova consciência. O momento de autoavaliação final, o despertar e a absolvição.","Uma vocação se apresenta. Perdoe os erros do passado (seus e dos outros) e abrace uma nova chance. Retorno de pessoas ou situações para um encerramento definitivo."],
+  ["O Cosmos","A totalidade, a integração do microcosmo com o macrocosmo e a conclusão gloriosa da longa jornada da alma.","O ápice da realização. Projetos concluídos com sucesso, viagens internacionais, expansão de limites e a sensação de estar exatamente onde deveria estar."]
+].map((a,i)=>({name:a[0], group:"Arcano Maior", groupTheme:null, cat:"major", numeral:toRoman(i), number:i, desc:a[1], read:a[2], special:false}));
+
+const ELEMENTS = [
+  {key:"agua", name:"Água", theme:"Emoção, Relacionamentos, Intuição", graus:[
+    ["O Vínculo","O nascimento do afeto e da atração.","Indica o início de um romance, uma nova amizade ou uma reconciliação promissora. Abra-se para a troca emocional."],
+    ["O Oásis","O equilíbrio entre a festa e o retiro.","Comemore as pequenas vitórias com quem você ama, mas saiba quando se afastar para recarregar as energias emocionais."],
+    ["A Saudade","O bálsamo das memórias curando a dor da perda.","Resgate a pureza do passado para curar tristezas presentes. O retorno de alguém antigo, ou a necessidade de perdoar uma decepção emocional."],
+    ["A Miragem","A intuição rompendo as ilusões reconfortantes.","Abandone um sonho que não tem base na realidade. Hora de deixar para trás uma relação ou ambiente que não preenche mais a sua alma."],
+    ["A Plenitude","O ápice da harmonia familiar e emocional.","Alegria duradoura, paz no lar e desejos profundos do coração sendo atendidos. Você chegou a um estado de contentamento absoluto."],
+    ["O Sonhador","O impulso romântico, sensível e idealista.","Uma pessoa amorosa e poética (ou essa energia em você). Siga a sua intuição, faça uma declaração, ou dedique-se a uma expressão artística."],
+    ["O Guardião das Marés","A maestria emocional, o conselheiro profundo.","Exerça a empatia e o acolhimento sem se perder nas emoções dos outros. Indica maturidade nos relacionamentos e capacidade de curar as próprias feridas."]]},
+  {key:"fogo", name:"Fogo", theme:"Ação, Criatividade, Vontade", graus:[
+    ["A Centelha","A ideia inicial, o planejamento e o ímpeto de mudar.","É o momento de dar o primeiro passo e sair da zona de conforto. Você tem o plano; agora precisa ter a ousadia de executá-lo."],
+    ["A Fogueira","A primeira expansão, o calor do apoio mútuo.","Indica boas parcerias, consolidação de um projeto e a chegada de bons resultados. Você está em um ambiente que incentiva e celebra o seu crescimento."],
+    ["A Forja","O atrito das competições lapidando o metal da vontade.","Haverá conflitos, oposição ou disputas de ego. Mantenha-se confiante; os desafios trarão reconhecimento público e vitória se você não recuar."],
+    ["O Ímpeto","A energia acelerada e a defesa inabalável do próprio espaço.","As coisas acontecerão muito rápido. Comunique-se com clareza, defenda suas posições e aproveite o momento para resolver pendências com velocidade."],
+    ["A Brasa","A resistência sob pressão extrema, carregando fardos.","Você está sobrecarregado, mas muito perto da linha de chegada. Aguente firme, mas delegue responsabilidades assim que o ciclo terminar."],
+    ["O Desbravador","O pioneiro enérgico, impaciente e passional.","Aja com coragem, entusiasmo e espírito de aventura. Uma viagem inesperada, uma mudança de rota ou uma atitude ousada trará excelentes resultados."],
+    ["O Soberano da Chama","A liderança magnética, o poder de inspiração.","Assuma o comando. Use o seu carisma e a sua autoconfiança para mobilizar pessoas. Seja a figura de autoridade visionária e generosa da situação."]]},
+  {key:"terra", name:"Terra", theme:"Matéria, Segurança, Concretização", graus:[
+    ["A Semente","O surgimento do recurso material aliado ao malabarismo diário.","Uma nova oportunidade de ganhos está disponível, mas exigirá adaptação, jogo de cintura e flexibilidade na gestão do tempo ou dinheiro."],
+    ["O Alicerce","A edificação cautelosa e a união de competências técnicas.","Trabalhe em equipe para construir algo sólido. Cuidado com a avareza; proteja seus bens, mas não paralise o fluxo financeiro pelo medo de perder."],
+    ["A Providência","O balanço da balança material: escassez e ajuda.","Se estiver em dificuldade, engula o orgulho e peça socorro (um empréstimo, um favor). Se estiver próspero, seja generoso e retribua as bênçãos ao mundo."],
+    ["O Ofício","A repetição metódica, o foco nos detalhes e na produção.","Concentre-se no trabalho e nos estudos práticos. Aprimore suas habilidades. O sucesso chegará não por sorte, mas pelo esforço diário contínuo e bem feito."],
+    ["O Legado","O conforto definitivo, a herança e o patrimônio acumulado.","Desfrute do conforto material, da aposentadoria ou dos lucros de um longo esforço. Indica segurança estrutural, enriquecimento e fortes bases familiares."],
+    ["O Construtor","O avanço pragmático, teimoso e eficiente.","Não procure atalhos. Faça o que precisa ser feito com método, lealdade e perseverança. Cada passo pragmático pavimentará um caminho duradouro."],
+    ["O Soberano da Terra","A abundância instintiva, o provedor rico e próspero.","Aja com visão administrativa e pragmatismo, garantindo o conforto, a saúde física e o sucesso financeiro. Administre seus recursos visando luxo e qualidade."]]},
+  {key:"ar", name:"Ar", theme:"Mente, Verdade, Conflito", graus:[
+    ["A Lucidez","O \"insight\" cortante que resolve impasses.","Tire as vendas. Use o intelecto frio para tomar a decisão que está sendo evitada. Uma conversa franca, lógica e direta resolverá a questão pendente."],
+    ["A Trégua","O descanso estratégico da mente, a pausa obrigatória para cura.","Pare de pensar excessivamente no problema. Você precisa descansar, meditar ou dormir para cicatrizar uma dor antes de voltar para a vida agitada."],
+    ["A Travessia","O abandono de vitórias inúteis em busca de paz.","Afaste-se da confusão. Aceite a perda, perdoe o agravante e mude fisicamente ou mentalmente de cenário. A paz é mais importante que estar certo."],
+    ["A Armadilha","As prisões criadas pelas crenças limitantes e pela ansiedade.","Você está refém dos seus próprios pensamentos. Pare de criar obstáculos imaginários. A saída é simples: encare o problema de frente e liberte-se."],
+    ["O Abismo","O fim inescapável da negação, o colapso dos esquemas mentais.","Aceite o pior cenário, chore, desabafe. A resistência só prolonga a dor mental. Quando você aceita o fundo do poço, a mente desocupa espaço e o renascimento começa."],
+    ["O Desafiante","A mente inquiridora, o discurso cortante, a pressa em debater.","Exija fatos e verdades. Esteja pronto para argumentar e cortar a manipulação alheia pela raiz. Cuidado apenas para não se tornar excessivamente agressivo ou frio."],
+    ["O Soberano do Ar","A imparcialidade suprema do intelecto refinado, o estratega.","Adote uma postura distanciada e analítica. Julgue a situação de forma ética, clara e sem sentimentalismos. Suas palavras têm o poder de sentenciar o futuro."]]}
+];
+const MINOR = [];
+ELEMENTS.forEach(el=>el.graus.forEach((g,i)=>MINOR.push({name:g[0], group:"Elemento "+el.name, groupTheme:el.theme, cat:el.key, numeral:toRoman(i+1), grau:i+1, desc:g[1], read:g[2], special:false})));
+
+const SPECIAL = [
+  {name:"A Paixão", group:"Carta Especial", groupTheme:null, cat:"special", numeral:null, special:true,
+    desc:"O magnetismo, o desejo absoluto e a necessidade de fusão.",
+    light:"O amor que devota, fortalece e gera milagres. A conexão íntima curadora, o carisma magnético. A força de dar a própria vida por algo sagrado.",
+    dark:"O ciúme possessivo, o apego tóxico e o vazio existencial. A obsessão, a chantagem emocional e a atração perigosa por algo que consumirá sua energia."},
+  {name:"A Ambição", group:"Carta Especial", groupTheme:null, cat:"special", numeral:null, special:true,
+    desc:"O instinto de ascensão, o orgulho e a fome de poder.",
+    light:"A superação admirável de limites, o ímpeto de vencer a miséria ou o ostracismo. A liderança que inspira e ergue os oprimidos, construindo um grande legado.",
+    dark:"A ganância insaciável, a tirania, e a política do \"os fins justificam os meios\". O ego que pisa nos outros e acaba governando, solitário, um império de cinzas."}
+];
+const DECK = MAJOR.concat(MINOR).concat(SPECIAL);
+DECK.forEach((c,i)=>c.id=i);
+ROOT.__ORACLE__.DECK = DECK;
+
+/* =====================================================================
+   APP (só roda no navegador)
+   ===================================================================== */
+if(typeof document === "undefined" || !document.getElementById("board")) return;
+
+const SPREADS = [
+  {id:"g2", label:"2 · Causa ou Consequência", desc:"Resposta binária para urgências. Depois de ver o Presente, o cartomante decide: investigar a Causa ou prever a Consequência.", branch:true, meio:[{label:"Situação Atual"}]},
+  {id:"g3", label:"3 · Linha do Tempo", desc:"Estrutura equilibrada e analítica: o agora, a raiz e a colheita.", branch:false, meio:[{label:"O status do agora"}], baixo:[{label:"A raiz da questão"}], cima:[{label:"A colheita que chega"}]},
+  {id:"g5", label:"5 · Ponto de Pressão", desc:"Cruz horizontal com foco analítico massivo no Presente.", branch:false, meio:[{label:"Situação aparente"},{label:"Obstáculo oculto"},{label:"Atitude mental"}], baixo:[{label:"O gatilho original"}], cima:[{label:"O veredito, se nada mudar"}]},
+  {id:"g7", label:"7 · Teia do Destino", desc:"A leitura máxima: um diamante 2-3-2 para cruzamento denso de dados.", branch:false, meio:[{label:"Corpo / Vida Material"},{label:"Mente / Emoção"},{label:"Alma / Essência"}], baixo:[{label:"A Herança"},{label:"O Fantasma"}], cima:[{label:"A Luz"},{label:"A Escuridão"}]}
+];
+const ROW_TITLE = {meio:"Presente", baixo:"Passado", cima:"Futuro"};
+const ROW_ORDER = ["cima","meio","baixo"];
+const state = {spread:SPREADS[1], rows:{meio:[],baixo:[],cima:[]}, pendingSecond:null, choiceMade:null};
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+const makeDrawn = (card,pos) => ({pos, card, polarity: card.special ? (Math.random()<.5?"luz":"escuridao") : null, revealed:false, revealStart:0});
+const totalCount = sp => sp.branch ? 2 : sp.meio.length + sp.baixo.length + sp.cima.length;
+
+function drawNewReading(sp){
+  const cards=shuffle(DECK).slice(0,totalCount(sp)); let i=0;
+  state.spread=sp; state.rows={meio:[],baixo:[],cima:[]}; state.pendingSecond=null; state.choiceMade=null;
+  sp.meio.forEach(p=>state.rows.meio.push(makeDrawn(cards[i++],p)));
+  if(sp.branch) state.pendingSecond=cards[i];
+  else { sp.baixo.forEach(p=>state.rows.baixo.push(makeDrawn(cards[i++],p))); sp.cima.forEach(p=>state.rows.cima.push(makeDrawn(cards[i++],p))); }
+  render();
+}
+const rowRevealed = rn => state.rows[rn].length>0 && state.rows[rn].every(d=>d.revealed);
+function rowUnlocked(rn){
+  if(rn==="meio") return true;
+  if(state.spread.branch) return rn==="baixo" ? state.choiceMade==="causa" : state.choiceMade==="consequencia";
+  if(rn==="baixo") return rowRevealed("meio");
+  return rowRevealed("meio") && rowRevealed("baixo");
+}
+const allRevealed = () => !state.pendingSecond && ["meio","baixo","cima"].every(rn=>state.rows[rn].every(d=>d.revealed));
+function makeChoice(kind){
+  const row=kind==="causa"?"baixo":"cima";
+  state.choiceMade=kind; state.rows[row].push(makeDrawn(state.pendingSecond,{label:kind==="causa"?"A Causa":"A Consequência"})); state.pendingSecond=null;
+  render();
+}
+const polLabel = p => p==="escuridao" ? "Escuridão" : "Luz";
+const meaning = d => d.card.special ? (d.polarity==="escuridao" ? d.card.dark : d.card.light) : d.card.read;
+function metaLine(card){ return card.special ? "Carta Especial · Dualidade Luz/Escuridão" : card.cat==="major" ? "Arcano Maior · "+card.numeral : card.group+" · Grau "+card.numeral+" · "+card.groupTheme; }
+
+function saveToHistory(){
+  try{
+    const list=JSON.parse(localStorage.getItem("tarot_history")||"[]"), cards=[];
+    ["meio","baixo","cima"].forEach(rn=>state.rows[rn].forEach(d=>cards.push(d.pos.label+": "+d.card.name+(d.polarity?" ("+polLabel(d.polarity)+")":""))));
+    list.unshift({date:new Date().toISOString(), spread:state.spread.label, cards});
+    localStorage.setItem("tarot_history",JSON.stringify(list.slice(0,30)));
+  }catch(e){}
+}
+
+/* ---------- Pintura animada dos canvas ---------- */
+const imgCache = {}, backCache = [];
+let budget = 0;
+const toImg = buf => new ImageData(new Uint8ClampedArray(buf.d), W, H);
+function frontImg(card,pol,f,force){
+  const k=card.id+"|"+(pol||"")+"|"+f;
+  if(!imgCache[k]){ if(!force && budget<=0) return null; budget--; imgCache[k]=toImg(renderFront(card,pol,f)); }
+  return imgCache[k];
+}
+function backImg(f){ if(!backCache[f]) backCache[f]=toImg(renderBack(f)); return backCache[f]; }
+function dissolve(bi,fi,step){
+  const out=new ImageData(W,H), o=out.data, a=bi.data, c=fi.data;
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const src=BAY[(((y>>2)&3)<<2)|((x>>2)&3)]<step?c:a, i=(y*W+x)*4; o[i]=src[i]; o[i+1]=src[i+1]; o[i+2]=src[i+2]; o[i+3]=src[i+3]; }
+  return out;
+}
+let live = [];
+function mount(cv,d,prio){ const e={cv, ctx:cv.getContext("2d"), d, key:"", prio:!!prio}; live.push(e); return e; }
+function paint(e,now){
+  if(!e.cv.offsetParent) return;
+  const d=e.d, f=Math.floor(now/500)%4; let key, img=null;
+  if(!d.revealed){ key="b"+f; if(key!==e.key) img=backImg(f); }
+  else {
+    const t=d.revealStart?now-d.revealStart:1e9;
+    if(t<680){ const st=Math.floor(t/40); key="d"+st+"|"+f+d.polarity; if(key!==e.key){ const fi=frontImg(d.card,d.polarity,f,true); img=dissolve(backImg(f),fi,st); } }
+    else { key="f"+f+d.polarity; if(key!==e.key) img=frontImg(d.card,d.polarity,f,e.prio); }
+  }
+  if(img){ e.ctx.putImageData(img,0,0); e.key=key; }
+}
+function loop(now){
+  budget=2; live=live.filter(e=>e.cv.isConnected);
+  live.sort((a,b)=>b.prio-a.prio).forEach(e=>paint(e,now));
+  requestAnimationFrame(loop);
+}
+
+/* ---------- Render da mesa ---------- */
+const $ = id => document.getElementById(id);
+const boardEl=$("board"), pickerEl=$("spreadPicker"), descEl=$("spreadDesc"), choiceEl=$("choicePanel"), infoEl=$("readingInfo"), hintEl=$("hint");
+
+function renderPicker(){
+  pickerEl.innerHTML="";
+  SPREADS.forEach(sp=>{ const b=document.createElement("button"); b.className="pbtn"+(sp.id===state.spread.id?" active":""); b.textContent=sp.label; b.onclick=()=>drawNewReading(sp); pickerEl.appendChild(b); });
+  descEl.textContent=state.spread.desc;
+}
+function makeCardEl(d,rn){
+  const unlocked=rowUnlocked(rn), slot=document.createElement("div"); slot.className="slot";
+  const lb=document.createElement("div"); lb.className="slot-label"; lb.textContent=d.pos.label; slot.appendChild(lb);
+  const cv=document.createElement("canvas"); cv.width=W; cv.height=H; cv.className="cv"+(unlocked?"":" locked");
+  cv.onclick=()=>{ if(!unlocked) return;
+    if(!d.revealed){ d.revealed=true; d.revealStart=performance.now(); render(); if(allRevealed()) saveToHistory(); }
+    else openZoom(d,false); };
+  slot.appendChild(cv); mount(cv,d,true);
+  const nm=document.createElement("div"); nm.className="slot-name"; nm.textContent=d.revealed?d.card.name:""; slot.appendChild(nm);
+  return slot;
+}
+function renderBoard(){
+  boardEl.innerHTML="";
+  ROW_ORDER.forEach(rn=>{ const es=state.rows[rn]; if(!es.length) return;
+    const blk=document.createElement("div"); blk.className="row-block";
+    const hd=document.createElement("div"); hd.className="row-header"; hd.textContent=ROW_TITLE[rn]; blk.appendChild(hd);
+    const wr=document.createElement("div"); wr.className="row-cards"; es.forEach(d=>wr.appendChild(makeCardEl(d,rn))); blk.appendChild(wr);
+    boardEl.appendChild(blk); });
+}
+function renderChoice(){
+  choiceEl.innerHTML="";
+  if(!state.spread.branch || !rowRevealed("meio") || state.choiceMade) return;
+  const pn=document.createElement("div"); pn.className="choice-panel";
+  pn.innerHTML="<p>O cartomante decide: investigar o Passado (Causa) ou prever o Futuro (Consequência)?</p>";
+  const rw=document.createElement("div"); rw.className="choice-row";
+  [["causa","Por quê · A Causa"],["consequencia","Para onde · A Consequência"]].forEach(([k,t])=>{ const b=document.createElement("button"); b.className="pbtn"; b.textContent=t; b.onclick=()=>makeChoice(k); rw.appendChild(b); });
+  pn.appendChild(rw); choiceEl.appendChild(pn);
+}
+function renderInfo(){
+  infoEl.innerHTML="";
+  ["meio","baixo","cima"].forEach(rn=>state.rows[rn].forEach(d=>{
+    if(!d.revealed) return;
+    const bx=document.createElement("div"); bx.className="card-detail"; bx.style.setProperty("--acc",ACCENT[d.card.cat]);
+    bx.innerHTML="<h3></h3><p class='meaning'></p>"+(d.card.groupTheme?"<div class='suitline'></div>":"");
+    bx.querySelector("h3").textContent=d.card.name;
+    if(d.polarity){ const t=document.createElement("span"); t.className="tagp"+(d.polarity==="escuridao"?" esc":""); t.textContent=polLabel(d.polarity); bx.querySelector("h3").appendChild(t); }
+    const strong=document.createElement("strong"); strong.textContent=ROW_TITLE[rn]+" — "+d.pos.label+": ";
+    const mp=bx.querySelector(".meaning"); mp.appendChild(strong); mp.appendChild(document.createTextNode(meaning(d)));
+    if(d.card.groupTheme) bx.querySelector(".suitline").textContent=d.card.group+" — "+d.card.groupTheme;
+    bx.onclick=()=>openZoom(d,false);
+    infoEl.appendChild(bx);
+  }));
+  let msg=null; const any=["meio","baixo","cima"].some(rn=>state.rows[rn].some(d=>d.revealed));
+  if(!rowRevealed("meio")) msg=any?"Abra as demais cartas do Presente antes de seguir.":"Toque nas lâminas do Presente para revelá-las.";
+  else if(state.spread.branch && !state.choiceMade) msg=null;
+  else if(state.rows.baixo.length && !rowRevealed("baixo")) msg="Agora abra a fileira do Passado.";
+  else if(state.rows.cima.length && !rowRevealed("cima")) msg="Por fim, abra a fileira do Futuro.";
+  hintEl.style.display=msg?"block":"none"; if(msg) hintEl.textContent=msg;
+}
+function render(){ renderPicker(); renderBoard(); renderChoice(); renderInfo(); }
+
+/* ---------- Zoom ---------- */
+const zoomCv=$("zoomCv"), zoomEntry=mount(zoomCv,{card:DECK[0],polarity:null,revealed:true},true);
+function openZoom(d,fromGallery){
+  const z={card:d.card, polarity:d.polarity, revealed:true, revealStart:0, pos:d.pos};
+  zoomEntry.d=z; zoomEntry.key=""; live.includes(zoomEntry)||live.push(zoomEntry);
+  const polRow=$("polRow"); polRow.innerHTML="";
+  const fill=()=>{
+    const info=$("zoomInfo"); info.innerHTML="";
+    const h=document.createElement("h3"); h.textContent=z.card.name; info.appendChild(h);
+    const m=document.createElement("div"); m.className="meta"; m.textContent=metaLine(z.card); info.appendChild(m);
+    if(z.pos && !fromGallery){ const p=document.createElement("p"); p.innerHTML="<strong></strong>"; p.firstChild.textContent="Posição: "+z.pos.label; info.appendChild(p); }
+    const p1=document.createElement("p"); p1.textContent=z.card.desc; info.appendChild(p1);
+    const p2=document.createElement("p");
+    if(z.card.special){ p2.textContent=polLabel(z.polarity)+": "+(z.polarity==="escuridao"?z.card.dark:z.card.light); }
+    else p2.textContent="Como ler: "+z.card.read;
+    info.appendChild(p2);
+  };
+  if(z.card.special && fromGallery){
+    ["luz","escuridao"].forEach(pl=>{ const b=document.createElement("button"); b.className="pbtn"+(z.polarity===pl?" active":""); b.textContent=polLabel(pl);
+      b.onclick=()=>{ z.polarity=pl; zoomEntry.key=""; [...polRow.children].forEach(c=>c.classList.remove("active")); b.classList.add("active"); fill(); }; polRow.appendChild(b); });
+  }
+  fill();
+  $("zoomOverlay").classList.add("open");
+}
+
+/* ---------- Galeria ---------- */
+let galleryBuilt=false;
+function buildGallery(){
+  if(galleryBuilt) return; galleryBuilt=true;
+  const body=$("galleryBody");
+  const groups=[["Arcanos Maiores",c=>c.cat==="major"],["Elemento Água",c=>c.cat==="agua"],["Elemento Fogo",c=>c.cat==="fogo"],["Elemento Terra",c=>c.cat==="terra"],["Elemento Ar",c=>c.cat==="ar"],["Cartas Especiais",c=>c.special]];
+  groups.forEach(([title,fn])=>{
+    const g=document.createElement("div"); g.className="gallery-group";
+    const h=document.createElement("h4"); h.textContent=title; g.appendChild(h);
+    const grid=document.createElement("div"); grid.className="gallery-grid";
+    DECK.filter(fn).forEach(card=>{
+      const it=document.createElement("div"); it.className="g-item";
+      const cv=document.createElement("canvas"); cv.width=W; cv.height=H; cv.className="cv";
+      const d={card, polarity:card.special?"luz":null, revealed:true, revealStart:0};
+      cv.onclick=()=>openZoom(d,true); mount(cv,d,false);
+      const sp=document.createElement("span"); sp.textContent=card.name;
+      it.appendChild(cv); it.appendChild(sp); grid.appendChild(it);
     });
-  }
+    g.appendChild(grid); body.appendChild(g);
+  });
+}
 
-  function renderChoicePanel(){
-    choicePanelEl.innerHTML = "";
-    if(!state.spread.branch) return;
-    if(!rowRevealed("meio") || state.choiceMade) return;
-    var panel = document.createElement("div");
-    panel.className = "choice-panel";
-    panel.innerHTML = '<p>O cartomante decide: investigar o Passado (Causa) ou prever o Futuro (Consequência)?</p>';
-    var row = document.createElement("div");
-    row.className = "choice-row";
-    var causaBtn = document.createElement("button");
-    causaBtn.className = "choice-btn";
-    causaBtn.textContent = "Por quê — A Causa";
-    causaBtn.onclick = function(){ makeChoice("causa"); };
-    var consBtn = document.createElement("button");
-    consBtn.className = "choice-btn";
-    consBtn.textContent = "Para onde — A Consequência";
-    consBtn.onclick = function(){ makeChoice("consequencia"); };
-    row.appendChild(causaBtn);
-    row.appendChild(consBtn);
-    panel.appendChild(row);
-    choicePanelEl.appendChild(panel);
-  }
+/* ---------- Histórico ---------- */
+function renderHistory(){
+  let list=[]; try{ list=JSON.parse(localStorage.getItem("tarot_history")||"[]"); }catch(e){}
+  const el=$("historyList"); el.innerHTML="";
+  if(!list.length){ el.innerHTML="<div class='empty-history'>Nenhuma leitura salva ainda.</div>"; return; }
+  list.forEach(item=>{
+    const d=new Date(item.date), row=document.createElement("div"); row.className="history-item";
+    const a=document.createElement("div"); a.className="h-date"; a.textContent=d.toLocaleDateString("pt-BR")+" "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+" · "+item.spread;
+    const b=document.createElement("div"); b.className="h-cards"; b.textContent=item.cards.join(" · ");
+    row.appendChild(a); row.appendChild(b); el.appendChild(row);
+  });
+}
 
-  function renderInfo(){
-    infoEl.innerHTML = "";
-    var any = false;
-    ["meio","baixo","cima"].forEach(function(rowName){
-      rowEntries(rowName).forEach(function(d){
-        if(!d.revealed) return;
-        any = true;
-        var isEscuridao = d.polarity === "escuridao";
-        var box = document.createElement("div");
-        box.className = "card-detail cat-" + d.card.cat;
-        box.innerHTML =
-          '<h3>' + d.card.name +
-            (d.polarity ? '<span class="orient' + (isEscuridao ? " rev" : "") + '">' + (isEscuridao ? "Escuridão" : "Luz") + '</span>' : '') +
-          '</h3>' +
-          '<p class="meaning"><strong>' + ROW_TITLE[rowName] + ' — ' + d.pos.label + ':</strong> ' + cardMeaning(d) + '</p>' +
-          (d.card.groupTheme ? '<div class="suitline">' + d.card.group + ' — ' + d.card.groupTheme + '</div>' : '');
-        infoEl.appendChild(box);
-      });
-    });
-    var msg = null;
-    if(!rowRevealed("meio")){
-      msg = any ? "Abra as demais cartas do Presente antes de seguir." : "Comece abrindo a fileira do Presente.";
-    }else if(state.spread.branch && !state.choiceMade){
-      msg = null; // painel de escolha já orienta o próximo passo
-    }else if(rowEntries("baixo").length && !rowRevealed("baixo")){
-      msg = "Agora abra a fileira do Passado.";
-    }else if(rowEntries("cima").length && !rowRevealed("cima")){
-      msg = "Por fim, abra a fileira do Futuro.";
-    }
-    hintEl.style.display = msg ? "block" : "none";
-    if(msg) hintEl.textContent = msg;
-  }
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>$(b.dataset.close).classList.remove("open"));
+document.querySelectorAll(".overlay").forEach(o=>o.onclick=e=>{ if(e.target===o) o.classList.remove("open"); });
+$("historyBtn").onclick=()=>{ renderHistory(); $("historyOverlay").classList.add("open"); };
+$("galleryBtn").onclick=()=>{ buildGallery(); $("galleryOverlay").classList.add("open"); };
+$("newReadingBtn").onclick=()=>drawNewReading(state.spread);
 
-  function render(){
-    renderSpreadPicker();
-    renderBoard();
-    renderChoicePanel();
-    renderInfo();
-  }
-
-  /* ---------- History modal ---------- */
-  var overlay = document.getElementById("historyOverlay");
-  var historyList = document.getElementById("historyList");
-
-  function renderHistory(){
-    var list = [];
-    try{ list = JSON.parse(localStorage.getItem("tarot_history") || "[]"); }catch(e){}
-    if(list.length === 0){
-      historyList.innerHTML = '<div class="empty-history">Nenhuma leitura salva ainda.</div>';
-      return;
-    }
-    historyList.innerHTML = list.map(function(item){
-      var d = new Date(item.date);
-      var dateStr = d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
-      return '<div class="history-item">' +
-        '<div class="h-date">' + dateStr + ' · ' + item.spread + '</div>' +
-        '<div class="h-cards">' + item.cards.join(" · ") + '</div>' +
-      '</div>';
-    }).join("");
-  }
-
-  document.getElementById("historyBtn").onclick = function(){
-    renderHistory();
-    overlay.classList.add("open");
-  };
-  document.getElementById("closeHistory").onclick = function(){
-    overlay.classList.remove("open");
-  };
-  overlay.onclick = function(e){
-    if(e.target === overlay) overlay.classList.remove("open");
-  };
-
-  document.getElementById("newReadingBtn").onclick = function(){
-    drawNewReading(state.spread);
-  };
-
-  /* ---------- Init ---------- */
-  drawNewReading(state.spread);
+drawNewReading(state.spread);
+requestAnimationFrame(loop);
 })();
 </script>
 </body>

@@ -33,6 +33,10 @@ A ordem de abertura é travada (não dá pra abrir o Futuro antes do Presente). 
 - **Grau 5** — Ponto de Pressão (cruz horizontal: 3 no Presente + 1 Passado + 1 Futuro)
 - **Grau 7** — A Teia do Destino (diamante 3-2-2: Presente/Passado/Futuro)
 
+## Arte 16-bit
+
+Todas as 52 lâminas e o verso são pixel art desenhada por código em `<canvas>` (grade nativa 90×160, 9:16, escala inteira sem interpolação) — nenhuma imagem externa. Cada carta tem cenário, divindade (sprite com contorno e rim light) e primeiro plano em silhueta, moldura chanfrada dourada (maiores) ou prata (menores), glifo de canto por elemento, numeral romano e rodapé em fonte pixel. Animação idle em 4 quadros de 500 ms, brilho pulsante e revelação em dissolve xadrez 4×4. O botão ▦ abre a galeria completa.
+
 ## O que já tem
 
 - Baralho completo de 52 cartas, com todos os textos originais
