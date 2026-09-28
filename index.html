@@ -117,17 +117,34 @@
     color:#2b1a05;
     flex-direction:column; padding:8px; text-align:center; gap:4px;
   }
-  .card-front.sombra{
+  .card-front.escuridao{
     background:linear-gradient(160deg,#2a1620,#150a12);
     border:1px solid var(--danger);
     color:#f3d8d8;
   }
   .card-front .name{font-family:Georgia, serif; font-weight:700; font-size:12.5px; line-height:1.15;}
   .card-front .tag{font-size:9px; letter-spacing:.5px; text-transform:uppercase; color:#7a5a1e;}
-  .card-front.sombra .tag{color:#c98a8a;}
+  .card-front.escuridao .tag{color:#c98a8a;}
   .empty-slot{
     width:100%; height:100%; border-radius:10px;
     border:1.5px dashed rgba(217,184,108,.3);
+  }
+  .card.locked{opacity:.35; pointer-events:none;}
+  .spread-desc{font-size:11px; color:var(--ink-dim); text-align:center; max-width:420px; margin:0 0 14px;}
+  .row-block{width:100%; display:flex; flex-direction:column; align-items:center; margin-bottom:14px;}
+  .row-header{font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:8px; opacity:.85;}
+  .row-cards{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+  .choice-panel{
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    margin:6px 0 16px; padding:14px; border:1px dashed rgba(217,184,108,.4); border-radius:12px;
+    max-width:420px;
+  }
+  .choice-panel p{margin:0; font-size:12px; color:var(--ink-dim); text-align:center;}
+  .choice-row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
+  .choice-btn{
+    background:linear-gradient(160deg, rgba(217,184,108,.2), rgba(217,184,108,.05));
+    border:1px solid rgba(217,184,108,.45); color:var(--gold-soft);
+    padding:10px 16px; border-radius:18px; font-size:13px; touch-action:manipulation; cursor:pointer;
   }
   .reading-info{
     width:100%; max-width:520px;
@@ -184,12 +201,14 @@
   <header>
     <button class="icon-btn" id="historyBtn" aria-label="Histórico">☰</button>
     <h1>✦ Oráculo das 52 Lâminas ✦</h1>
-    <p>Respire fundo e escolha sua tiragem</p>
+    <p>Formule sua pergunta em silêncio, depois escolha a tiragem</p>
   </header>
 
   <main>
     <div class="spreads" id="spreadPicker"></div>
-    <div class="board" id="board"></div>
+    <div class="spread-desc" id="spreadDesc"></div>
+    <div id="board"></div>
+    <div id="choicePanel"></div>
     <div class="reading-info" id="readingInfo"></div>
     <div class="hint" id="hint">Toque nas cartas para revelá-las</div>
     <div class="actions">
@@ -330,15 +349,52 @@
 
   var DECK = MAJOR.concat(MINOR).concat(SPECIAL); // 22 + 28 + 2 = 52
 
-  /* ---------- Spreads ---------- */
+  /* ---------- Spreads: números primos ≤ 7, Lei das Fileiras ----------
+     Meio = Presente (aberta 1ª) · Baixo = Passado (aberta 2ª) · Cima = Futuro (aberta 3ª)
+     A tiragem de Grau 2 é ramificada: a 2ª carta desce (Causa) ou sobe (Consequência). */
   var SPREADS = [
-    {id:"one", label:"Carta do Dia", count:1, positions:["Mensagem"]},
-    {id:"three", label:"Passado · Presente · Futuro", count:3, positions:["Passado","Presente","Futuro"]},
-    {id:"five", label:"Situação · Ação", count:5, positions:["Situação","Obstáculo","Conselho","Fator externo","Resultado"]}
+    {
+      id:"g2", num:2, label:"Grau 2 · Causa ou Consequência",
+      desc:"Resposta binária para urgências. Depois de ver o Presente, escolha investigar a Causa ou prever a Consequência.",
+      branch:true,
+      meio:[{label:"Situação Atual"}]
+    },
+    {
+      id:"g3", num:3, label:"Grau 3 · Linha do Tempo Direta",
+      desc:"Estrutura equilibrada e analítica: o agora, a raiz e a colheita.",
+      branch:false,
+      meio:[{label:"O status do agora"}],
+      baixo:[{label:"A raiz da questão"}],
+      cima:[{label:"A colheita que está chegando"}]
+    },
+    {
+      id:"g5", num:5, label:"Grau 5 · Ponto de Pressão",
+      desc:"Cruz horizontal com foco analítico massivo no presente.",
+      branch:false,
+      meio:[{label:"Situação aparente"},{label:"Obstáculo oculto"},{label:"Atitude mental"}],
+      baixo:[{label:"O gatilho original"}],
+      cima:[{label:"O veredito, se nada mudar"}]
+    },
+    {
+      id:"g7", num:7, label:"Grau 7 · A Teia do Destino",
+      desc:"A leitura máxima: um diamante 2-3-2 para cruzamento denso de dados.",
+      branch:false,
+      meio:[{label:"Corpo / Vida Material"},{label:"Mente / Estado Emocional"},{label:"Alma / Essência da Questão"}],
+      baixo:[{label:"A Herança"},{label:"O Fantasma"}],
+      cima:[{label:"A Luz"},{label:"A Escuridão"}]
+    }
   ];
 
+  var ROW_TITLE = {meio:"Presente", baixo:"Passado", cima:"Futuro"};
+  var ROW_ORDER = ["cima","meio","baixo"]; // ordem visual: futuro em cima, presente no meio, passado embaixo
+
   /* ---------- State ---------- */
-  var state = { spread: SPREADS[1], drawn: [] };
+  var state = {
+    spread: SPREADS[1],
+    rows: {meio:[], baixo:[], cima:[]},
+    pendingSecond: null,
+    choiceMade: null
+  };
 
   /* ---------- Helpers ---------- */
   function shuffle(arr){
@@ -350,28 +406,78 @@
     return a;
   }
 
+  function makeDrawn(card, pos){
+    return {
+      pos: pos,
+      card: card,
+      polarity: card.special ? (Math.random() < 0.5 ? "luz" : "escuridao") : null,
+      revealed: false
+    };
+  }
+
+  function totalCount(spread){
+    if(spread.branch) return 2;
+    return spread.meio.length + spread.baixo.length + spread.cima.length;
+  }
+
   function drawNewReading(spread){
-    var shuffled = shuffle(DECK);
+    var pool = shuffle(DECK);
+    var cards = pool.slice(0, totalCount(spread));
+    var i = 0;
+
     state.spread = spread;
-    state.drawn = [];
-    for(var i=0;i<spread.count;i++){
-      var card = shuffled[i];
-      state.drawn.push({
-        card: card,
-        polarity: card.special ? (Math.random() < 0.5 ? "luz" : "sombra") : null,
-        revealed: false
-      });
+    state.rows = {meio:[], baixo:[], cima:[]};
+    state.pendingSecond = null;
+    state.choiceMade = null;
+
+    spread.meio.forEach(function(pos){ state.rows.meio.push(makeDrawn(cards[i], pos)); i++; });
+
+    if(spread.branch){
+      state.pendingSecond = cards[i];
+    }else{
+      spread.baixo.forEach(function(pos){ state.rows.baixo.push(makeDrawn(cards[i], pos)); i++; });
+      spread.cima.forEach(function(pos){ state.rows.cima.push(makeDrawn(cards[i], pos)); i++; });
     }
     render();
   }
 
+  function rowEntries(rowName){ return state.rows[rowName]; }
+
+  function rowRevealed(rowName){
+    var entries = rowEntries(rowName);
+    return entries.length > 0 && entries.every(function(d){ return d.revealed; });
+  }
+
+  function rowUnlocked(rowName){
+    if(rowName === "meio") return true;
+    if(state.spread.branch){
+      if(rowName === "baixo") return state.choiceMade === "causa";
+      if(rowName === "cima") return state.choiceMade === "consequencia";
+    }
+    if(rowName === "baixo") return rowRevealed("meio");
+    if(rowName === "cima") return rowRevealed("meio") && rowRevealed("baixo");
+    return false;
+  }
+
   function allRevealed(){
-    return state.drawn.every(function(d){ return d.revealed; });
+    return ["meio","baixo","cima"].every(function(r){
+      var entries = rowEntries(r);
+      return entries.every(function(d){ return d.revealed; });
+    });
+  }
+
+  function makeChoice(kind){
+    var pos = kind === "causa" ? {label:"A Causa"} : {label:"A Consequência"};
+    var row = kind === "causa" ? "baixo" : "cima";
+    state.choiceMade = kind;
+    state.rows[row].push(makeDrawn(state.pendingSecond, pos));
+    state.pendingSecond = null;
+    render();
   }
 
   function cardMeaning(d){
     if(d.card.special){
-      return d.polarity === "sombra" ? d.card.dark : d.card.light;
+      return d.polarity === "escuridao" ? d.card.dark : d.card.light;
     }
     return d.card.text;
   }
@@ -379,13 +485,13 @@
   function saveToHistory(){
     try{
       var list = JSON.parse(localStorage.getItem("tarot_history") || "[]");
-      list.unshift({
-        date: new Date().toISOString(),
-        spread: state.spread.label,
-        cards: state.drawn.map(function(d){
-          return d.card.name + (d.polarity ? " (" + (d.polarity === "sombra" ? "Sombra" : "Luz") + ")" : "");
-        })
+      var cards = [];
+      ["meio","baixo","cima"].forEach(function(r){
+        state.rows[r].forEach(function(d){
+          cards.push(d.pos.label + ": " + d.card.name + (d.polarity ? " (" + (d.polarity === "escuridao" ? "Escuridão" : "Luz") + ")" : ""));
+        });
       });
+      list.unshift({ date: new Date().toISOString(), spread: state.spread.label, cards: cards });
       list = list.slice(0, 30);
       localStorage.setItem("tarot_history", JSON.stringify(list));
     }catch(e){ /* localStorage indisponível: ignora silenciosamente */ }
@@ -394,6 +500,8 @@
   /* ---------- Render ---------- */
   var boardEl = document.getElementById("board");
   var spreadPickerEl = document.getElementById("spreadPicker");
+  var spreadDescEl = document.getElementById("spreadDesc");
+  var choicePanelEl = document.getElementById("choicePanel");
   var infoEl = document.getElementById("readingInfo");
   var hintEl = document.getElementById("hint");
 
@@ -406,66 +514,121 @@
       btn.onclick = function(){ drawNewReading(s); };
       spreadPickerEl.appendChild(btn);
     });
+    spreadDescEl.textContent = state.spread.desc;
+  }
+
+  function makeCardEl(d, rowName){
+    var unlocked = rowUnlocked(rowName);
+    var isEscuridao = d.polarity === "escuridao";
+    var slot = document.createElement("div");
+    slot.className = "slot";
+
+    var label = document.createElement("div");
+    label.className = "slot-label";
+    label.textContent = d.pos.label;
+    slot.appendChild(label);
+
+    var cardEl = document.createElement("div");
+    cardEl.className = "card" + (d.revealed ? " flipped" : "") + (unlocked ? "" : " locked");
+    cardEl.innerHTML =
+      '<div class="card-inner">' +
+        '<div class="card-face card-back"></div>' +
+        '<div class="card-face card-front' + (isEscuridao ? " escuridao" : "") + '">' +
+          '<div class="tag">' + d.card.group + '</div>' +
+          '<div class="name">' + d.card.name + '</div>' +
+          (d.polarity ? '<div class="tag">' + (isEscuridao ? "Escuridão" : "Luz") + '</div>' : '') +
+        '</div>' +
+      '</div>';
+    cardEl.onclick = function(){
+      if(unlocked && !d.revealed){
+        d.revealed = true;
+        render();
+        if(allRevealed()) saveToHistory();
+      }
+    };
+    slot.appendChild(cardEl);
+    return slot;
   }
 
   function renderBoard(){
     boardEl.innerHTML = "";
-    state.drawn.forEach(function(d, idx){
-      var slot = document.createElement("div");
-      slot.className = "slot";
-
-      var label = document.createElement("div");
-      label.className = "slot-label";
-      label.textContent = state.spread.positions[idx] || "";
-      slot.appendChild(label);
-
-      var isSombra = d.polarity === "sombra";
-      var cardEl = document.createElement("div");
-      cardEl.className = "card" + (d.revealed ? " flipped" : "");
-      cardEl.innerHTML =
-        '<div class="card-inner">' +
-          '<div class="card-face card-back"></div>' +
-          '<div class="card-face card-front' + (isSombra ? " sombra" : "") + '">' +
-            '<div class="tag">' + d.card.group + '</div>' +
-            '<div class="name">' + d.card.name + '</div>' +
-            (d.polarity ? '<div class="tag">' + (isSombra ? "Sombra" : "Luz") + '</div>' : '') +
-          '</div>' +
-        '</div>';
-      cardEl.onclick = function(){
-        if(!d.revealed){
-          d.revealed = true;
-          render();
-          if(allRevealed()) saveToHistory();
-        }
-      };
-      slot.appendChild(cardEl);
-      boardEl.appendChild(slot);
+    ROW_ORDER.forEach(function(rowName){
+      var entries = rowEntries(rowName);
+      if(entries.length === 0) return;
+      var block = document.createElement("div");
+      block.className = "row-block";
+      var header = document.createElement("div");
+      header.className = "row-header";
+      header.textContent = ROW_TITLE[rowName];
+      block.appendChild(header);
+      var cardsWrap = document.createElement("div");
+      cardsWrap.className = "row-cards";
+      entries.forEach(function(d){ cardsWrap.appendChild(makeCardEl(d, rowName)); });
+      block.appendChild(cardsWrap);
+      boardEl.appendChild(block);
     });
+  }
+
+  function renderChoicePanel(){
+    choicePanelEl.innerHTML = "";
+    if(!state.spread.branch) return;
+    if(!rowRevealed("meio") || state.choiceMade) return;
+    var panel = document.createElement("div");
+    panel.className = "choice-panel";
+    panel.innerHTML = '<p>O cartomante decide: investigar o Passado (Causa) ou prever o Futuro (Consequência)?</p>';
+    var row = document.createElement("div");
+    row.className = "choice-row";
+    var causaBtn = document.createElement("button");
+    causaBtn.className = "choice-btn";
+    causaBtn.textContent = "Por quê — A Causa";
+    causaBtn.onclick = function(){ makeChoice("causa"); };
+    var consBtn = document.createElement("button");
+    consBtn.className = "choice-btn";
+    consBtn.textContent = "Para onde — A Consequência";
+    consBtn.onclick = function(){ makeChoice("consequencia"); };
+    row.appendChild(causaBtn);
+    row.appendChild(consBtn);
+    panel.appendChild(row);
+    choicePanelEl.appendChild(panel);
   }
 
   function renderInfo(){
     infoEl.innerHTML = "";
     var any = false;
-    state.drawn.forEach(function(d, idx){
-      if(!d.revealed) return;
-      any = true;
-      var isSombra = d.polarity === "sombra";
-      var box = document.createElement("div");
-      box.className = "card-detail";
-      box.innerHTML =
-        '<h3>' + d.card.name +
-          (d.polarity ? '<span class="orient' + (isSombra ? " rev" : "") + '">' + (isSombra ? "Sombra" : "Luz") + '</span>' : '') +
-        '</h3>' +
-        '<p class="meaning"><strong>' + (state.spread.positions[idx] || "") + ':</strong> ' + cardMeaning(d) + '</p>' +
-        (d.card.groupTheme ? '<div class="suitline">' + d.card.group + ' — ' + d.card.groupTheme + '</div>' : '');
-      infoEl.appendChild(box);
+    ["meio","baixo","cima"].forEach(function(rowName){
+      rowEntries(rowName).forEach(function(d){
+        if(!d.revealed) return;
+        any = true;
+        var isEscuridao = d.polarity === "escuridao";
+        var box = document.createElement("div");
+        box.className = "card-detail";
+        box.innerHTML =
+          '<h3>' + d.card.name +
+            (d.polarity ? '<span class="orient' + (isEscuridao ? " rev" : "") + '">' + (isEscuridao ? "Escuridão" : "Luz") + '</span>' : '') +
+          '</h3>' +
+          '<p class="meaning"><strong>' + ROW_TITLE[rowName] + ' — ' + d.pos.label + ':</strong> ' + cardMeaning(d) + '</p>' +
+          (d.card.groupTheme ? '<div class="suitline">' + d.card.group + ' — ' + d.card.groupTheme + '</div>' : '');
+        infoEl.appendChild(box);
+      });
     });
-    hintEl.style.display = any ? "none" : "block";
+    var msg = null;
+    if(!rowRevealed("meio")){
+      msg = any ? "Abra as demais cartas do Presente antes de seguir." : "Comece abrindo a fileira do Presente.";
+    }else if(state.spread.branch && !state.choiceMade){
+      msg = null; // painel de escolha já orienta o próximo passo
+    }else if(rowEntries("baixo").length && !rowRevealed("baixo")){
+      msg = "Agora abra a fileira do Passado.";
+    }else if(rowEntries("cima").length && !rowRevealed("cima")){
+      msg = "Por fim, abra a fileira do Futuro.";
+    }
+    hintEl.style.display = msg ? "block" : "none";
+    if(msg) hintEl.textContent = msg;
   }
 
   function render(){
     renderSpreadPicker();
     renderBoard();
+    renderChoicePanel();
     renderInfo();
   }
 
