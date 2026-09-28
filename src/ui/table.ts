@@ -227,6 +227,10 @@ export class TableView {
     box.append(el("div", "pos", `${ROW_TITLE[row]} · ${d.pos.label}`), title, el("p", "meaning", meaningOf(d)));
     if (d.card.groupTheme) box.append(el("div", "suitline", `${d.card.group} — ${d.card.groupTheme}`));
     box.onclick = () => this.openReader(this.revealed().indexOf(d), this.slots.get(d)?.cv);
+    box.tabIndex = 0;
+    box.setAttribute("role", "button");
+    box.setAttribute("aria-label", `${ROW_TITLE[row]}, ${d.pos.label}: ${d.card.name}. Abrir no leitor`);
+    box.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); box.click(); } };
     box.onpointerenter = () => this.slots.get(d)?.el.classList.add("linked");
     box.onpointerleave = () => this.slots.get(d)?.el.classList.remove("linked");
     box.style.setProperty("--i", String(i));

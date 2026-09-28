@@ -40,6 +40,9 @@ export class GalleryView {
         attachTilt(tilt);
         cv.setAttribute("aria-label", card.name);
         cv.onclick = () => this.zoom.open(list, index, cv);
+        cv.tabIndex = 0;
+        cv.setAttribute("role", "button");
+        cv.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); cv.click(); } };
         const item = el("div", "g-item");
         item.append(root, el("span", undefined, card.name));
         grid.append(item);

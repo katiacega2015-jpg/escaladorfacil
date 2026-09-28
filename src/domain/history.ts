@@ -19,7 +19,11 @@ export interface KeyValueStore {
 export function loadHistory(store: KeyValueStore): HistoryEntry[] {
   try {
     const raw = JSON.parse(store.getItem(KEY) ?? "[]") as unknown;
-    return Array.isArray(raw) ? (raw as HistoryEntry[]) : [];
+    if (!Array.isArray(raw)) return [];
+    // Descarta entradas corrompidas ou de formatos antigos em vez de quebrar a tela de histórico.
+    return raw.filter((e): e is HistoryEntry =>
+      typeof e === "object" && e !== null && typeof e.date === "string" && typeof e.spread === "string" &&
+      Array.isArray(e.cards) && e.cards.every((c: unknown) => typeof c === "string"));
   } catch {
     return [];
   }

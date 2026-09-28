@@ -25,4 +25,11 @@ describe("histórico", () => {
     store.setItem("tarot_history", "{não é json");
     expect(loadHistory(store)).toEqual([]);
   });
+
+  it("descarta entradas com formato inválido sem perder as boas", () => {
+    const store = memoryStore();
+    const good = { date: "2026-01-01T00:00:00.000Z", spread: "3", cards: ["a", "b"] };
+    store.setItem("tarot_history", JSON.stringify([good, null, 7, { date: 1 }, { date: "x", spread: "y", cards: "z" }, { ...good, cards: [1] }]));
+    expect(loadHistory(store)).toEqual([good]);
+  });
 });

@@ -35,6 +35,8 @@ src/
   ui/            DOM: mesa, leitor, galeria, histórico, animador de canvas
     layout.ts      escala das lâminas alinhada à grade de pixels, media queries
     motion.ts      distribuir, virar, brilho, inclinação 3D, gestos
+    dom.ts         pilha de janelas (z-index, inert, foco, Esc)
+    settings.ts    preferências de acessibilidade (salvas no aparelho)
   main.ts        monta tudo
 tests/           Vitest: baralho, regras de leitura, histórico, render
 tools/           scripts de desenvolvimento (folhas de contato)
@@ -65,6 +67,21 @@ Tiragens só em primos ≤ 7 (2, 3, 5, 7), em até 3 fileiras abertas nesta orde
 - **Atalhos (PC):** Espaço revela a próxima, 1–4 escolhem a tiragem, N embaralha, L abre o leitor, G baralho, H histórico, ◂ ▸ navegam no leitor, Esc fecha.
 - A escala das lâminas é sempre alinhada a pixels físicos (`src/ui/layout.ts`), para a pixel art não borrar.
 - Textos longos usam fonte serifada para leitura confortável; títulos e rótulos seguem na fonte pixel.
+
+## Acessibilidade
+
+Botão **Aa** (ou tecla A) abre o painel de acessibilidade. As escolhas valem na hora e ficam salvas no aparelho:
+
+- **Tamanho do texto:** pequeno, médio, grande ou extra grande. A arte em pixel não muda.
+- **Contraste alto:** textos secundários e bordas mais claros.
+- **Fonte das interpretações:** serifada ou simples.
+- **Movimento reduzido:** desliga viradas, voos, brilhos e inclinação. Também segue a preferência do sistema.
+
+Além disso:
+- O zoom de pinça do navegador é permitido.
+- Toda lâmina e interpretação é focável e abre com Enter.
+- As janelas empilham: a de cima sempre fica visível, e as de baixo ficam inertes. Tab fica preso na janela do topo, e Esc fecha só ela.
+- O foco volta a quem abriu a janela.
 
 ## Animações
 

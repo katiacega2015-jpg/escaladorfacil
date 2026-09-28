@@ -32,4 +32,6 @@ export const desktopQuery = "(min-width: 960px) and (min-height: 560px)";
 export const finePointerQuery = "(hover: hover) and (pointer: fine)";
 export const isDesktop = () => matchMedia(desktopQuery).matches;
 export const hasFinePointer = () => matchMedia(finePointerQuery).matches;
-export const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+/** Movimento reduzido: escolha do usuário no app ou preferência do sistema. */
+export const reducedMotion = () =>
+  document.documentElement.dataset.motion === "reduce" || matchMedia("(prefers-reduced-motion: reduce)").matches;

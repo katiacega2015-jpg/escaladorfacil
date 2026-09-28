@@ -53,7 +53,7 @@ export class Animator {
   private backs: ImageData[] = [];
   private budget = 0;
   /** Com "reduzir movimento" a lâmina não gira: só o clarão. */
-  readonly flipMs = reducedMotion() ? 0 : FLIP_MS;
+  get flipMs(): number { return reducedMotion() ? 0 : FLIP_MS; }
 
   start(): void {
     const tick = (now: number) => { this.tick(now); requestAnimationFrame(tick); };
