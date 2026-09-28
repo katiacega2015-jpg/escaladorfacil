@@ -16,3 +16,6 @@ capacitor.config.json.bak
 # Logs e ambiente
 *.log
 .env
+
+# Saída das folhas de contato de arte (npm run sheets)
+tools/out/
