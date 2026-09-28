@@ -32,7 +32,11 @@ src/
     render.ts      composição das camadas → frente e verso
   art/           bíblia visual: uma função por lâmina, por grupo
     majors.ts · agua.ts · fogo.ts · terra.ts · ar.ts · especiais.ts
-  ui/            DOM: mesa, zoom, galeria, histórico, animador de canvas
+  ui/            DOM: mesa, leitor, galeria, histórico, animador de canvas
+    layout.ts      escala das lâminas alinhada à grade de pixels, media queries
+    motion.ts      distribuir, virar, brilho, inclinação 3D, gestos
+    dom.ts         pilha de janelas (z-index, inert, foco, Esc)
+    settings.ts    preferências de acessibilidade (salvas no aparelho)
   main.ts        monta tudo
 tests/           Vitest: baralho, regras de leitura, histórico, render
 tools/           scripts de desenvolvimento (folhas de contato)
@@ -56,9 +60,36 @@ tools/           scripts de desenvolvimento (folhas de contato)
 
 Tiragens só em primos ≤ 7 (2, 3, 5, 7), em até 3 fileiras abertas nesta ordem: **Meio = Presente**, depois **Baixo = Passado**, por fim **Cima = Futuro**. No Grau 2 o cartomante escolhe, após o Presente, investigar a Causa (Passado) ou prever a Consequência (Futuro).
 
+## Celular × PC
+
+- **Celular:** coluna única, tiragens em faixa rolável, lâminas escaladas pela largura, barra fixa no rodapé (dica + Ler + Embaralhar). O leitor abre em tela cheia: arraste para os lados para passar as lâminas, para baixo para fechar.
+- **PC (≥ 960 px):** mesa à esquerda com a tiragem inteira na tela, painel de leitura fixo à direita, monte de cartas visível, inclinação 3D e reflexo ao passar o mouse, destaque cruzado entre lâmina e interpretação. Leitor lado a lado (carta grande + texto).
+- **Atalhos (PC):** Espaço revela a próxima, 1–4 escolhem a tiragem, N embaralha, L abre o leitor, G baralho, H histórico, ◂ ▸ navegam no leitor, Esc fecha.
+- A escala das lâminas é sempre alinhada a pixels físicos (`src/ui/layout.ts`), para a pixel art não borrar.
+- Textos longos usam fonte serifada para leitura confortável; títulos e rótulos seguem na fonte pixel.
+
+## Acessibilidade
+
+Botão **Aa** (ou tecla A) abre o painel de acessibilidade. As escolhas valem na hora e ficam salvas no aparelho:
+
+- **Tamanho do texto:** pequeno, médio, grande ou extra grande. A arte em pixel não muda.
+- **Contraste alto:** textos secundários e bordas mais claros.
+- **Fonte das interpretações:** serifada ou simples.
+- **Movimento reduzido:** desliga viradas, voos, brilhos e inclinação. Também segue a preferência do sistema.
+
+Além disso:
+- O zoom de pinça do navegador é permitido.
+- Toda lâmina e interpretação é focável e abre com Enter.
+- As janelas empilham: a de cima sempre fica visível, e as de baixo ficam inertes. Tab fica preso na janela do topo, e Esc fecha só ela.
+- O foco volta a quem abriu a janela.
+
+## Animações
+
+Distribuição saindo do monte, recolhimento ao embaralhar, virada 3D (a face troca quando a lâmina fica de perfil), clarão pontilhado + faixa de brilho ao pousar, anel de luz na cor da carta, aura pulsante na próxima lâmina liberada, tremida ao tocar uma trancada, zoom que voa da mesa até o leitor. Tudo respeita "reduzir movimento" do sistema.
+
 ## Arte 16-bit
 
-Cada lâmina tem cenário, divindade e primeiro plano em silhueta, moldura dourada (maiores) ou prata (menores), glifo do elemento, numeral romano e rodapé em fonte pixel. Animação idle em 4 quadros de 500 ms, brilho pulsante e revelação em dissolve xadrez 4×4. O botão ▦ abre a galeria.
+Cada lâmina tem cenário, divindade e primeiro plano em silhueta, moldura dourada (maiores) ou prata (menores), glifo do elemento, numeral romano e rodapé em fonte pixel. Animação idle em 4 quadros de 500 ms. O botão ▦ abre a galeria.
 
 ## Roadmap para APK (Capacitor)
 

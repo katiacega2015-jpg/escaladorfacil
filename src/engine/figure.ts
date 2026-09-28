@@ -88,6 +88,8 @@ export interface HumanOpts {
   sash?: Color;
   lips?: Color;
   brow?: Color;
+  /** Cabeça de perfil olhando para a direita (1) ou esquerda (-1). */
+  profile?: 1 | -1;
   /** Desenhado antes do corpo (atrás da figura). */
   back?: FigureHook;
   /** Desenhado depois de tudo (na frente da figura). */
@@ -269,6 +271,21 @@ function head(L: Layers, cx: number, T: number, o: HumanOpts): void {
     s.px(cx, hy + 3, shade(sk, 0.6));
   };
   const veil = o.veil ?? "#E0E0F0";
+  /** Rosto de perfil: nariz, lábios e queixo projetados para `d`, cabelo cobrindo a nuca, um olho. */
+  const profileFace = (d: 1 | -1) => {
+    const lips = o.lips ?? shade(mix(sk, "#B03040", 0.35), 0.8), dk = shade(sk, 0.8);
+    s.circ(cx - d, hy - 1, 7, hr);
+    s.ell(cx + d, hy + 1, 4, 5, sk);
+    for (const [dx, dy] of [[5, 0], [5, 1], [6, 2], [5, 3], [4, 4], [4, 5], [3, 6], [2, 6]] as const) s.px(cx + d * dx, hy + dy, sk);
+    s.px(cx + d * 4, hy + 4, lips); s.px(cx + d * 5, hy + 2, dk);
+    s.poly([[cx - d * 7, hy - 3], [cx - d * 2, hy - 8], [cx + d * 4, hy - 6], [cx + d * 5, hy - 3], [cx + d, hy - 3], [cx - d * 2, hy + 7], [cx - d * 7, hy + 5]], hr);
+    if (o.detail) for (const [dx, dy] of [[-4, -5], [-2, -6], [0, -7], [2, -6]] as const) s.px(cx + d * dx, hy + dy, mix(hr, "#FFFFFF", 0.3));
+    s.px(cx - d, hy + 1, dk); s.px(cx - d, hy + 2, dk);
+    s.px(cx + d * 3, hy, ey); s.px(cx + d * 2, hy, "#F4F0EA"); s.px(cx + d * 3, hy - 2, o.brow ?? shade(hr, 0.8)); s.px(cx + d * 4, hy - 2, o.brow ?? shade(hr, 0.8));
+    s.px(cx + d * 2, hy + 3, mix(sk, "#FF7A7A", 0.25)); s.px(cx, hy + 6, dk);
+    if (o.earrings) s.px(cx - d, hy + 4, o.earrings);
+    if (o.eyeGlow) gf.circ(cx + d * 3, hy, 1.5, o.eyeGlow, 0.5);
+  };
 
   switch (style) {
     case "ibis":
@@ -309,7 +326,8 @@ function head(L: Layers, cx: number, T: number, o: HumanOpts): void {
       break;
   }
 
-  hairBase(); eyes(); beard();
+  if (o.profile) profileFace(o.profile);
+  else { hairBase(); eyes(); beard(); }
   switch (style) {
     case "bald": s.circ(cx, hy - 3, 4, sk); s.ell(cx, hy + 1, 5, 5, sk); eyes(); break;
     case "conical": {

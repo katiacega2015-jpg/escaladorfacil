@@ -284,14 +284,15 @@ export const MAJOR_ART: Record<string, ArtFn> = {
     const runes = [["010", "010", "111"], ["101", "110", "101"], ["100", "110", "101"], ["111", "010", "010"], ["110", "101", "110"], ["101", "010", "101"]];
     for (let i = 0; i < 10; i++) {
       const x = (r() * 78 + 6) | 0, y = (r() * 80 + 14) | 0, g = runes[i % 6]!, c = (i + f) % 4 === 0 ? "#E0F6FF" : "#7FD4FF";
+      if (Math.abs(x - 45) < 16 && y > 36 && y < 76) continue;
       for (let j = 0; j < 3; j++) for (let k = 0; k < 3; k++) if (g[j]![k] === "1") gf.px(x + k, y + j - SW[f], c);
       gf.line(x + 1, y + 4 - SW[f], x + 1 + SW[(i + f) % 4]!, y + 9, "#BEE9E8", 0.3);
       gf.blob(x + 1, y + 1, 4, 4, "#7FD4FF", 1, 0.2);
     }
 
     human(L, {
-      T: 42, B: 130, detail: true, skin: "#D8B89A", robe: "#5a6064", trim: "#8A9098", pattern: "diamonds", patternCol: "#464c52",
-      hair: "#D8D8D8", beard: "#E8E8E8", beardLong: true, head: "hat_wide", hatCol: "#3e4348", oneEye: "#7FD4FF", armR: "hold", r: "spear", armL: "down",
+      T: 42, B: 130, detail: true, skin: "#C8946E", robe: "#5a6064", trim: "#8A9098", pattern: "diamonds", patternCol: "#464c52",
+      hair: "#A8A8B0", beard: "#C8C8D0", beardLong: true, head: "hat_wide", hatCol: "#3e4348", oneEye: "#7FD4FF", armR: "hold", r: "spear", armL: "down",
       back: (L, { cx, T, B }) => {
         const w = SW[L.f];
         L.s.poly([[cx - 10, T + 15], [cx + 10, T + 15], [cx + 19 + w, B], [cx - 19 + w, B]], "#2a3038");
@@ -299,7 +300,13 @@ export const MAJOR_ART: Record<string, ArtFn> = {
       },
       front: (L, { cx, T }, h) => {
         const s = L.s, hy = T + 7;
-        for (let k = 0; k < 6; k++) s.line(cx - 4 + k * 2, hy + 4, cx - 3 + k * 1.2, hy + 14, "#C8C8C8");
+        // Rosto do ancião: sobrancelhas grossas, nariz, órbita vazia sob o tapa-olho, bigode sobre a barba.
+        s.line(cx - 4, hy - 2, cx - 1, hy - 2, "#E8E8F0"); s.line(cx + 1, hy - 2, cx + 4, hy - 2, "#E8E8F0");
+        s.px(cx - 3, hy - 1, "#8A5A40"); s.px(cx - 2, hy + 1, "#A8704E");
+        s.px(cx, hy + 1, "#A8704E"); s.px(cx, hy + 2, "#8A5A40"); s.px(cx + 1, hy + 2, "#A8704E");
+        s.line(cx + 1, hy - 3, cx + 5, hy + 1, "#2a2a30");
+        s.line(cx - 4, hy + 3, cx - 1, hy + 3, "#E0E0E8"); s.line(cx + 1, hy + 3, cx + 4, hy + 3, "#E0E0E8"); s.px(cx - 5, hy + 4, "#E0E0E8"); s.px(cx + 5, hy + 4, "#E0E0E8");
+        for (let k = 0; k < 6; k++) s.line(cx - 4 + k * 2, hy + 5, cx - 3 + k * 1.2, hy + 14, k % 2 ? "#9A9AA4" : "#B0B0B8");
         for (let i = -10; i <= 10; i++) s.px(cx + i, T + 15 + Math.round(Math.abs(i) / 4), i % 2 ? "#8a7a60" : "#a89878");
         s.ell(cx, T + 16, 10, 2, "#7a6a50", 0.8);
         s.rect(cx - 12, hy - 5, 25, 1, "#5a6068");
@@ -308,18 +315,20 @@ export const MAJOR_ART: Record<string, ArtFn> = {
       },
     });
     const bigRaven = (x: number, y: number, sg: 1 | -1) => {
-      gb.blob(x, y - 2, 9, 7, "#7FD4FF", 1, 0.3);
-      s.ell(x, y, 4, 2.5, "#07070e"); s.circ(x + sg * 3, y - 3, 2.5, "#07070e");
-      s.poly([[x + sg * 5, y - 4], [x + sg * 8, y - 2], [x + sg * 5, y - 2]], "#5a5a62");
-      s.px(x + sg * 3, y - 4, "#9AD8FF"); s.line(x - sg * 1, y - 1, x + sg * 2, y - 1, "#2a3050");
-      s.poly([[x - sg * 3, y], [x - sg * 8, y + 3], [x - sg * 6, y + 1]], "#07070e");
-      if (f % 2) s.poly([[x, y - 2], [x - sg * 5, y - 8], [x - sg * 2, y - 2]], "#12121e");
+      gb.blob(x, y - 2, 11, 9, "#7FD4FF", 1, 0.4 + p * 0.05);
+      s.ell(x, y, 5, 3, "#0a0a14"); s.circ(x + sg * 4, y - 4, 3, "#0a0a14");
+      s.line(x - sg * 3, y - 2, x + sg * 3, y - 1, "#3A4A7A"); s.line(x - sg * 4, y, x + sg * 2, y + 1, "#26304e");
+      s.poly([[x + sg * 6, y - 5], [x + sg * 10, y - 3], [x + sg * 6, y - 3]], "#8A8A96"); s.px(x + sg * 7, y - 4, "#C8C8D0");
+      s.px(x + sg * 4, y - 5, "#FFFFFF"); s.px(x + sg * 5, y - 5, "#9AD8FF");
+      s.poly([[x - sg * 4, y], [x - sg * 10, y + 4], [x - sg * 8, y + 1]], "#0a0a14"); s.line(x - sg * 5, y + 1, x - sg * 9, y + 3, "#3A4A7A");
+      s.line(x - 1, y + 3, x - 1, y + 5, "#2a2a30"); s.line(x + 1, y + 3, x + 1, y + 5, "#2a2a30");
+      if (f % 2) { s.poly([[x, y - 2], [x - sg * 6, y - 10], [x - sg * 2, y - 2]], "#12121e"); s.line(x - sg, y - 3, x - sg * 5, y - 9, "#3A4A7A"); }
     };
-    bigRaven(31, 57, -1); bigRaven(59, 57, 1);
+    bigRaven(30, 56, -1); bigRaven(60, 56, 1);
     mist(fg, 124, 3, "#9AB0A8", 0.35, f); grass(fg, r, 134, 20, "#06100a");
   },
 
-  /** Radha e Krishna no bosque sob eclipse total; a luz divide a lâmina em azul e ouro. */
+  /** Radha e Krishna de perfil, quase se tocando, no bosque sob eclipse total; a luz divide a lâmina em azul e ouro. */
   "O Pacto": L => {
     const { b, gb, s, gf, fg, r, f } = L, p = pulse(f);
     splitSky(b, (x, y) => x - 45 + (y - 80) * 0.6, ["#0a1a48", "#2a5ab0"], ["#3a2208", "#D8A030"]);
@@ -334,28 +343,31 @@ export const MAJOR_ART: Record<string, ArtFn> = {
     b.grad(0, 118, W, H - 118, "#1a2a1a", "#0a140a", 4);
     particles(gf, r, 8, "#8AB0FF", f, 1, 30, 120, 3); particles(gf, r, 8, "#FFD34E", f, 1, 30, 120, 3);
 
+    // De perfil, um diante do outro; as mãos quase se tocam e a faísca salta entre os dedos.
     human(L, {
-      cx: 29, T: 46, B: 130, detail: true, skin: "#3B7BD4", robe: "#F7D070", trim: "#C8102E", pattern: "dots", patternCol: "#C8102E",
+      cx: 29, T: 46, B: 130, detail: true, profile: 1, skin: "#3B7BD4", robe: "#F7D070", trim: "#C8102E", pattern: "dots", patternCol: "#C8102E",
       hair: "#0a0a1a", head: "crown", gem: "#2AA060", necklace: "#FFFFFF", bracelets: "#F7D070", earrings: "#F7D070", armL: "chest", armR: "fwd",
       front: (L, { cx, T }) => {
         const s = L.s, hy = T + 7;
-        s.line(cx + 1, hy + 4, cx + 20, hy + 6, "#8a5a2a"); s.px(cx + 20, hy + 6, "#F7D070"); for (let k = 0; k < 3; k++) s.px(cx + 8 + k * 3, hy + 5, "#3a2010");
+        s.line(cx - 9, T + 32, cx + 5, T + 20, "#8a5a2a", 1, 2); s.px(cx - 9, T + 32, "#F7D070"); s.px(cx + 5, T + 20, "#F7D070");
+        for (let k = 0; k < 3; k++) s.px(cx - 5 + k * 3, T + 29 - k * 3, "#3a2010");
         s.line(cx + 1, hy - 8, cx + 4, hy - 20, "#2AA060");
         s.ell(cx + 4, hy - 21, 2.5, 3, "#2AA060"); s.circ(cx + 4, hy - 21, 1.5, "#F7D070"); s.px(cx + 4, hy - 21, "#1A3AB0");
-        for (let k = 0; k < 5; k++) L.gf.px(cx + 22 + k * 3, hy + 3 - ((k + L.f) % 3) * 2, "#FFF3B0", 0.8);
+        for (let k = 0; k < 4; k++) L.gf.px(cx - 12 - k * 2, T + 30 - ((k + L.f) % 3) * 3 - k * 3, "#FFF3B0", 0.8);
       },
     });
     human(L, {
-      cx: 61, T: 48, B: 130, detail: true, skin: "#E0A878", robe: "#F4A300", trim: "#C8102E", pattern: "diamonds", patternCol: "#C8102E",
-      hairLong: true, hair: "#140a06", necklace: "#F7D070", bracelets: "#F7D070", earrings: "#F7D070", sash: "#C8102E", armL: "fwd", armR: "chest",
+      cx: 63, T: 48, B: 130, detail: true, profile: -1, skin: "#E0A878", robe: "#F4A300", trim: "#C8102E", pattern: "diamonds", patternCol: "#C8102E",
+      hairLong: true, hair: "#140a06", necklace: "#F7D070", bracelets: "#F7D070", earrings: "#F7D070", sash: "#C8102E", armL: "fwd", armR: "chest", r: "lotus",
       front: (L, { cx, T }) => {
         const s = L.s, hy = T + 7;
-        s.poly([[cx - 8, hy - 3], [cx - 3, hy - 8], [cx + 3, hy - 8], [cx + 8, hy - 3], [cx + 11, hy + 20], [cx + 7, hy + 20], [cx + 5, hy - 2], [cx - 5, hy - 2], [cx - 7, hy + 20], [cx - 11, hy + 20]], "#FF8A2A", 0.45);
-        s.px(cx, hy - 3, "#C8102E");
+        s.poly([[cx + 8, hy - 3], [cx + 3, hy - 8], [cx - 3, hy - 8], [cx - 6, hy - 4], [cx - 2, hy - 3], [cx + 4, hy + 4], [cx + 7, hy + 20], [cx + 11, hy + 20]], "#FF8A2A", 0.5);
+        s.px(cx - 2, hy - 3, "#C8102E");
       },
     });
+    gf.blob(46, 71, 4 + p, 3 + p, "#FFFFFF", 1, 0.5 + p * 0.1); gf.px(46, 71, "#FFFFFF");
     for (let t = 0; t <= 24; t++) {
-      const x = 36 + t * 0.75, y = 64 + Math.sin((Math.PI * t) / 24) * 12;
+      const x = 37 + t * 0.75, y = 64 + Math.sin((Math.PI * t) / 24) * 16;
       s.circ(x, y, 1, t % 3 === 0 ? "#FFFFFF" : t % 3 === 1 ? "#FF9A1A" : "#FFD34E");
       if (t % 6 === 3) { s.line(x, y + 1, x, y + 4, "#FF9A1A"); s.px(x, y + 5, "#C8102E"); }
     }
@@ -439,27 +451,35 @@ export const MAJOR_ART: Record<string, ArtFn> = {
       armor: "#F7D070", head: "crown", gem: "#C8102E", hairLong: true, hairLen: 38, hair: "#140a06", necklace: "#F7D070", bracelets: "#F7D070", earrings: "#F7D070",
       armL: "down", armR: "low",
       back: (L, { cx, T }) => {
-        const s = L.s, sk = "#D8A070";
-        const fan: [number, number, string][] = [[205, 24, "trident"], [235, 25, "conch"], [262, 24, "bow"], [298, 24, "sword"], [325, 25, "chakra"], [340, 22, "lotus"]];
-        for (const [deg, len, wp] of fan) {
-          const an = (deg * Math.PI) / 180, sx = cx + (deg > 270 ? 7 : -7), sy = T + 19;
-          const hx = Math.round(cx + Math.cos(an) * len), hy = Math.round(T + 20 + Math.sin(an) * len * 0.9);
-          s.line(sx, sy, hx, hy, sk, 1, 3); s.line(sx + (hx - sx) * 0.6, sy + (hy - sy) * 0.6, sx + (hx - sx) * 0.66, sy + (hy - sy) * 0.66, "#F7D070", 1, 3);
-          s.rect(hx - 1, hy - 1, 3, 3, sk);
-          if (wp === "trident") { s.line(hx, hy - 12, hx, hy + 8, "#C8D0D8"); s.line(hx - 2, hy - 10, hx + 2, hy - 10, "#C8D0D8"); s.px(hx - 2, hy - 12, "#C8D0D8"); s.px(hx + 2, hy - 12, "#C8D0D8"); }
-          else if (wp === "conch") { s.ell(hx - 2, hy - 3, 3, 2, "#F4F0E8"); s.px(hx - 3, hy - 3, "#C8B8A8"); }
-          else if (wp === "bow") { for (let t = -6; t <= 6; t++) s.px(hx - 2 - Math.round(Math.cos((t / 6) * 1.2) * 3), hy + t, "#8a5a2a"); s.line(hx, hy - 6, hx, hy + 6, "#E0E0E0"); }
-          else if (wp === "sword") { s.line(hx, hy, hx + 2, hy - 11, "#E8EEF4"); s.line(hx - 2, hy, hx + 2, hy, "#F7D070"); }
-          else if (wp === "chakra") { s.ring(hx + 2, hy - 3, 3, "#F7D070", 1, 1); s.px(hx + 2, hy - 3, "#FFF3B0"); L.gf.blob(hx + 2, hy - 3, 5, 5, "#FFD08a", 1, 0.2 + pulse(L.f) * 0.08); }
-          else { s.circ(hx + 1, hy - 3, 2, "#F28AB2"); s.px(hx + 1, hy - 4, "#FFE0F0"); }
+        // Braços em leque, baixos e serenos: mudras de proteção e bênção, lótus, concha e rosário.
+        const s = L.s, sk = "#D8A070", hy = T + 7;
+        L.gb.ring(cx, hy, 12, "#F7D070", 0.9, 1); L.gb.ring(cx, hy, 9, "#F7D070", 0.5, 1);
+        for (let k = 0; k < 8; k++) { const an = (k * Math.PI) / 4 + L.f * 0.2; L.gb.line(cx + Math.cos(an) * 9, hy + Math.sin(an) * 9, cx + Math.cos(an) * 12, hy + Math.sin(an) * 12, "#FFE08a", 0.8); }
+        L.gb.blob(cx, hy, 15, 15, "#FFD08a", 1, 0.18 + pulse(L.f) * 0.06);
+        const fan: [number, number, string][] = [[138, 27, "lotus"], [160, 29, "conch"], [184, 27, "rosary"], [354, 27, "abhaya"], [18, 29, "varada"], [40, 26, "lotus"]];
+        for (const [deg, len, it] of fan) {
+          const right = deg < 90 || deg > 270, an = (deg * Math.PI) / 180, sx = cx + (right ? 7 : -7), sy = T + 19;
+          const hx = Math.round(cx + Math.cos(an) * len), hy2 = Math.round(T + 22 + Math.sin(an) * len * 0.9);
+          s.line(sx, sy, hx, hy2, sk, 1, 3); s.line(sx + (hx - sx) * 0.62, sy + (hy2 - sy) * 0.62, sx + (hx - sx) * 0.68, sy + (hy2 - sy) * 0.68, "#F7D070", 1, 3);
+          s.rect(hx - 1, hy2 - 1, 3, 3, sk);
+          if (it === "lotus") { s.circ(hx, hy2 - 3, 2, "#F28AB2"); s.px(hx - 2, hy2 - 4, "#FFD1E3"); s.px(hx + 2, hy2 - 4, "#FFD1E3"); s.px(hx, hy2 - 5, "#FFD1E3"); }
+          else if (it === "conch") { s.ell(hx, hy2 - 3, 3, 2, "#F4F0E8"); s.px(hx - 2, hy2 - 3, "#C8B8A8"); s.px(hx + 2, hy2 - 4, "#C8B8A8"); }
+          else if (it === "rosary") for (let q = 0; q < 6; q++) s.px(hx - 2 + (q % 3) * 2, hy2 + 2 + (q >> 1), q % 2 ? "#8a3a1a" : "#C87A3A");
+          else { s.rect(hx - 1, hy2 - 4, 3, 3, sk); s.px(hx, hy2 - 1, "#C8102E"); L.gf.blob(hx, hy2 - 2, 4, 4, "#FFE08a", 1, 0.3); }
         }
       },
       front: (L, { cx, T }) => { L.s.px(cx, T + 4, "#C8102E"); L.s.line(cx - 6, T + 32, cx + 6, T + 32, "#C8102E"); },
     });
-    tiger(58, 118);
-    gf.blob(52, 94, 6, 5, "#FFE08a", 1, 0.25 + p * 0.06);
-    fg.poly([[70, 137], [72, 126], [76, 137]], "#4a4460"); fg.line(73, 124, 73, 137, "#C8D0D8");
-    fg.ell(12, 134, 7, 3, "#6a6a8a"); fg.ring(12, 133, 4, "#F7D070", 1, 1);
+    tiger(56, 116);
+    gf.blob(52, 96, 6, 5, "#FFE08a", 1, 0.25 + p * 0.06);
+    // As armas recolhidas em paz: tridente e espada cravados na neve, arco e aljava deitados.
+    s.line(8, 76, 8, 124, "#C8D0D8"); s.rect(5, 78, 7, 1, "#C8D0D8"); s.line(5, 78, 5, 73, "#C8D0D8"); s.line(11, 78, 11, 73, "#C8D0D8"); s.line(8, 78, 8, 70, "#E8EEF4");
+    s.rect(7, 90, 3, 2, "#F7D070"); gb.blob(8, 74, 6, 6, "#FFE08a", 1, 0.25);
+    s.line(82, 94, 82, 120, "#E8EEF4"); s.line(83, 95, 83, 119, "#A8B0B8"); s.rect(79, 116, 7, 2, "#F7D070"); s.rect(81, 118, 3, 5, "#6a3a1a");
+    for (let t = -9; t <= 9; t++) s.px(14 + t, 126 - Math.round(Math.cos((t / 9) * 1.3) * 4), "#8a5a2a");
+    s.line(5, 126, 23, 126, "#E0E0E0");
+    s.rect(24, 122, 9, 4, "#6a3a1a"); for (let q = 0; q < 3; q++) s.line(25 + q * 3, 122, 27 + q * 3, 118, "#F4F0E8");
+    fg.ell(12, 134, 7, 3, "#6a6a8a");
     fg.rect(0, 135, W, 2, "#E8EEF8");
   },
 
@@ -566,15 +586,21 @@ export const MAJOR_ART: Record<string, ArtFn> = {
     b.grad(0, 112, W, H - 112, "#3a2a1a", "#1a120a", 3);
     for (let y = 113; y < H; y += 4) { const sh = (y - 112) * 0.4; for (let x = -10; x < W + 10; x += 8) b.rect(Math.round(45 + (x - 45) * (1 + sh * 0.05)), y, 4, 2, ((x / 8 + y / 4) | 0) % 2 ? "#4a3620" : "#2a1e12"); }
 
+    // Duas balanças gigantes de bronze: travessão acima das asas, correntes atrás delas, pratos em prumo embaixo.
     const scale = (x: number) => {
-      const by = 96;
-      b.rect(x, by, 2, 114 - by, "#B87333"); b.rect(x - 1, 110, 4, 3, "#8a5a2a"); b.circ(x + 1, by - 1, 2, "#F7D070");
-      b.rect(x - 9, by + 1, 20, 2, "#D89050"); b.rect(x - 9, by + 1, 20, 1, "#F0B070");
-      for (const dx of [-8, 10]) { b.line(x + dx, by + 3, x + dx - 3, by + 11, "#8a5a2a"); b.line(x + dx, by + 3, x + dx + 3, by + 11, "#8a5a2a"); b.ell(x + dx, by + 12, 5, 1.5, "#B87333"); }
-      b.circ(x - 8, by + 9, 2, "#B01A2A"); b.px(x - 9, by + 8, "#FF5A6A");
-      b.line(x + 9, by + 10, x + 12, by + 3, "#FFFFFF"); b.px(x + 11, by + 5, "#E0E0E0"); b.px(x + 10, by + 7, "#E0E0E0");
+      const top = 40, by = 98;
+      b.rect(x, top, 3, 114 - top, "#B87333"); b.rect(x, top, 1, 114 - top, "#E0A060"); b.rect(x - 3, 110, 9, 4, "#8a5a2a"); b.rect(x - 2, 108, 7, 2, "#B87333");
+      b.circ(x + 1, top - 2, 3, "#F7D070"); b.px(x, top - 3, "#FFF3B0");
+      b.rect(x - 13, top + 1, 29, 2, "#D89050"); b.rect(x - 13, top + 1, 29, 1, "#F0B070"); b.circ(x - 13, top + 2, 1.5, "#F7D070"); b.circ(x + 15, top + 2, 1.5, "#F7D070");
+      for (const dx of [-12, 14]) {
+        for (let y = top + 4; y < by + 2; y += 2) b.px(x + dx - 3 + Math.round(((y - top) / (by - top)) * 0), y, "#8a5a2a"), b.px(x + dx + 3, y, "#8a5a2a");
+        b.ell(x + dx, by + 3, 7, 2, "#B87333"); b.ell(x + dx, by + 2, 6, 1, "#F0B070");
+      }
+      b.circ(x - 12, by, 2.5, "#B01A2A"); b.px(x - 13, by - 1, "#FF5A6A");
+      b.line(x + 13, by + 1, x + 16, by - 7, "#FFFFFF"); b.px(x + 15, by - 4, "#E0E0E0"); b.px(x + 14, by - 2, "#E0E0E0");
+      gb.blob(x + 1, by, 12, 6, "#FFD050", 1, 0.12 + p * 0.04);
     };
-    scale(12); scale(76);
+    scale(14); scale(74);
 
     human(L, {
       T: 46, B: 132, detail: true, skin: "#B07A4A", robe: "#F0EDE4", trim: "#40C0C0", pattern: "stripes", patternCol: "#E0DCD0",
@@ -648,15 +674,23 @@ export const MAJOR_ART: Record<string, ArtFn> = {
     b.rect(0, 86, W, 4, "#0e0e1c");
     b.grad(0, 90, W, 30, "#06080f", "#010206", 3);
     for (let i = 0; i < 14; i++) { const x = ((r() * W + f * 3) | 0) % W, y = 92 + ((r() * 26) | 0); b.rect(x, y, 3 + (i % 3), 1, "#C8D0E0", 0.55); }
-    b.poly([[4, 96], [30, 96], [34, 90], [32, 94], [26, 99], [8, 99], [2, 94], [0, 90]], "#B8862B");
-    b.line(4, 95, 30, 95, "#F7D070"); b.rect(14, 88, 8, 6, "#6a4a1a");
-    b.circ(18, 83, 4, "#FFD34E"); b.circ(17, 82, 2, "#FFF3B0"); gb.blob(18, 83, 10, 8, "#FFD34E", 1, 0.35 + p * 0.06);
-    for (let y = 100; y < 112; y += 2) b.px(18 + SW[(y + f) % 4]!, y, "#FFD34E", 0.6);
+    // Barca solar de papiro: proa e popa em umbela, cabine com o disco solar, remo de leme e reflexo prateado.
+    const bob = f === 1 ? 1 : 0, hull: [number, number][] = [[5, 80], [7, 88], [11, 96], [18, 101], [30, 101], [37, 97], [41, 90], [43, 83], [44, 88], [40, 94], [30, 95], [18, 95], [10, 92], [6, 86]];
+    const hb = hull.map(([x, y]) => [x, y + bob] as [number, number]);
+    b.poly(hb, "#B8862B"); b.line(10, 96 + bob, 38, 96 + bob, "#F7D070"); b.line(14, 100 + bob, 32, 100 + bob, "#6a4a1a");
+    for (const x of [9, 15, 31, 38]) b.line(x, 93 + bob, x, 99 + bob, "#6a4a1a");
+    for (const [x, y] of [[5, 80], [43, 83]] as const) { for (let k = -2; k <= 2; k++) b.line(x, y + bob, x + k * 1.5, y - 4 + bob, "#8ACF6A"); b.px(x, y - 5 + bob, "#F7D070"); }
+    b.rect(16, 89 + bob, 11, 7, "#6a4a1a"); b.rect(15, 88 + bob, 13, 2, "#F7D070"); b.rect(18, 91 + bob, 7, 5, "#2a1a0a");
+    b.circ(21, 83 + bob, 4, "#FFD34E"); b.circ(20, 82 + bob, 2, "#FFF3B0"); b.px(21, 78 + bob, "#C8102E"); b.px(20, 79 + bob, "#F7D070");
+    gb.blob(21, 83, 12, 10, "#FFD34E", 1, 0.35 + p * 0.06);
+    b.line(38, 92 + bob, 42, 106, "#8a6a3a"); b.rect(41, 103, 2, 4, "#B8862B");
+    for (const [x, y] of hull) if (y > 92) b.px(x, 202 - y, "#C8D0E0", 0.25);
+    for (let y = 103; y < 116; y += 2) { const w = 14 - (y - 103); b.line(22 - w + SW[(y + f) % 4]!, y, 22 + w + SW[(y + f) % 4]!, y, y % 4 ? "#C8D0E0" : "#FFD34E", 0.3); }
     mist(b, 84, 3, "#8A8AA0", 0.25, f);
     b.grad(0, 120, W, H - 120, "#1a1a14", "#0a0a08", 3);
 
     human(L, {
-      T: 40, B: 128, tunic: true, detail: true, skin: "#3a2a1f", legs: "#3a2a1f", robe: "#F0EDE4", trim: "#F7D070", pattern: "stripes", patternCol: "#D8D4C8",
+      T: 40, B: 120, tunic: true, detail: true, skin: "#3a2a1f", legs: "#3a2a1f", robe: "#F0EDE4", trim: "#F7D070", pattern: "stripes", patternCol: "#D8D4C8",
       collar: "#F7D070", bare: true, bareArms: true, bracelets: "#F7D070", head: "jackal", armL: "fwd", l: "ankh", armR: "hold", r: "jar",
       front: (L, { cx, T }) => {
         const s = L.s, hy = T + 7;
@@ -920,10 +954,18 @@ export const MAJOR_ART: Record<string, ArtFn> = {
     s.line(26, 98, 64, 98, "#FFF3B0");
     for (const wx of [30, 60]) { s.ring(wx, 120, 7, "#B8862B", 1, 2); s.circ(wx, 120, 2, "#F7D070"); for (let k = 0; k < 8; k++) { const an = (k * Math.PI) / 4 + f * 0.4; s.line(wx, 120, wx + Math.cos(an) * 5, 120 + Math.sin(an) * 5, "#B8862B"); } }
 
-    for (const [x, y, rad] of [[6, 122, 7], [84, 124, 7], [22, 132, 5], [70, 132, 5]] as const) {
-      fg.line(x, 137, x, y, "#1a4a1a", 1, 2); fg.ell(x + (x < 45 ? 4 : -4), y + 8, 4, 2, "#2a6a2a");
-      for (let k = 0; k < 12; k++) { const an = (k * Math.PI) / 6; fg.line(x, y, x + Math.cos(an) * rad, y + Math.sin(an) * rad, "#FFD34E"); }
-      fg.circ(x, y, rad * 0.45, "#5a3a10"); fg.px(x - 1, y - 1, "#8a5a20");
+    // Girassóis gigantescos no primeiro plano, voltados para o sol.
+    for (const [x, y, rad] of [[9, 110, 10], [82, 113, 10], [24, 128, 6], [66, 129, 6]] as const) {
+      fg.line(x, 140, x + (x < 45 ? 2 : -2), y + rad - 2, "#1a4a1a", 1, rad > 8 ? 3 : 2);
+      fg.poly([[x, y + rad + 6], [x + (x < 45 ? 9 : -9), y + rad + 2], [x + (x < 45 ? 5 : -5), y + rad + 9]], "#2a6a2a");
+      for (let k = 0; k < 16; k++) {
+        const an = (k * Math.PI) / 8 + (k % 2) * 0.1, rr = rad + (k % 2 ? -1 : 1);
+        fg.line(x + Math.cos(an) * rad * 0.4, y + Math.sin(an) * rad * 0.4, x + Math.cos(an) * rr, y + Math.sin(an) * rr, k % 2 ? "#F0B020" : "#FFE066", 1, rad > 8 ? 2 : 1);
+        fg.px(x + Math.cos(an) * (rr - 1), y + Math.sin(an) * (rr - 1), "#FFF3B0");
+      }
+      fg.circ(x, y, rad * 0.5, "#5a3a10");
+      for (let i = -rad; i <= rad; i++) for (let j = -rad; j <= rad; j++) if (i * i + j * j < rad * rad * 0.2 && (i + j) % 2 === 0) fg.px(x + i, y + j, "#8a5a20");
+      fg.px(x - 1, y - 2, "#C8902A");
     }
   },
 
