@@ -12,45 +12,74 @@
 </head>
 <body>
 <div id="app">
-  <header>
-    <button class="icon-btn left" id="galleryBtn" aria-label="Galeria do baralho">▦</button>
-    <h1>Oráculo das 52 Lâminas</h1>
-    <p>Formule sua pergunta em silêncio, depois escolha a tiragem</p>
-    <button class="icon-btn right" id="historyBtn" aria-label="Histórico">☰</button>
+  <header class="topbar">
+    <button class="icon-btn" id="galleryBtn" aria-label="Galeria do baralho" title="Baralho (G)">▦<span>Baralho</span></button>
+    <div class="brand">
+      <h1>Oráculo das 52 Lâminas</h1>
+      <p>Formule sua pergunta em silêncio, depois escolha a tiragem</p>
+    </div>
+    <button class="icon-btn" id="historyBtn" aria-label="Histórico" title="Histórico (H)">☰<span>Histórico</span></button>
   </header>
-  <main>
-    <div class="spreads" id="spreadPicker"></div>
+
+  <section class="table-col" aria-label="Mesa">
+    <nav class="spreads" id="spreadPicker" aria-label="Tiragens"></nav>
     <div class="spread-desc" id="spreadDesc"></div>
-    <div id="board"></div>
-    <div id="choicePanel"></div>
-    <div class="hint" id="hint"></div>
+    <div class="stage" id="stage">
+      <div class="deck-pile" id="deckPile" aria-hidden="true"></div>
+      <div id="board"></div>
+      <div id="choicePanel"></div>
+    </div>
+  </section>
+
+  <aside class="reading-col" aria-label="Interpretações">
+    <div class="reading-head">
+      <h2>A Leitura</h2>
+      <span id="readingProgress"></span>
+    </div>
+    <p class="spread-side" id="spreadDescSide"></p>
+    <p class="reading-empty" id="readingEmpty">As interpretações surgem aqui conforme as lâminas se abrem, na ordem do Assentar: Presente, Passado, Futuro.</p>
     <div class="reading-info" id="readingInfo"></div>
-    <div class="actions"><button class="pbtn big" id="newReadingBtn">Embaralhar de novo</button></div>
-  </main>
+    <div class="keys">Espaço revela · 1–4 tiragens · L lê · N embaralha · G baralho · H histórico · ◂ ▸ no leitor · Esc fecha</div>
+  </aside>
+
+  <div class="dock">
+    <div class="hint" id="hint" aria-live="polite"></div>
+    <div class="actions">
+      <button class="pbtn" id="readBtn" title="Ler a tiragem carta a carta (L)">Ler ▸</button>
+      <button class="pbtn big" id="newReadingBtn" title="Embaralhar de novo (N)">Embaralhar</button>
+    </div>
+  </div>
 </div>
 
 <div class="overlay" id="zoomOverlay">
-  <div class="sheet">
-    <button class="pbtn close-btn" data-close="zoomOverlay">✕</button>
-    <div class="zoom-wrap">
-      <canvas class="cv zoom" id="zoomCv" width="90" height="160"></canvas>
-      <div class="pol-row" id="polRow"></div>
-      <div class="zoom-info" id="zoomInfo"></div>
+  <div class="sheet zoom-sheet" role="dialog" aria-modal="true" aria-label="Lâmina">
+    <button class="pbtn close-btn" data-close="zoomOverlay" aria-label="Fechar">✕</button>
+    <div class="zoom-grid">
+      <div class="zoom-stage" id="zoomStage">
+        <button class="nav-btn" id="zoomPrev" aria-label="Anterior">‹</button>
+        <div class="zoom-card" id="zoomCard"><canvas class="cv zoom" id="zoomCv" width="90" height="160"></canvas></div>
+        <button class="nav-btn" id="zoomNext" aria-label="Próxima">›</button>
+      </div>
+      <div class="zoom-side" id="zoomSide">
+        <div class="zoom-count" id="zoomCount"></div>
+        <div class="pol-row" id="polRow"></div>
+        <div class="zoom-info" id="zoomInfo"></div>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="overlay" id="galleryOverlay">
-  <div class="sheet">
-    <button class="pbtn close-btn" data-close="galleryOverlay">✕</button>
+  <div class="sheet wide" role="dialog" aria-modal="true" aria-label="Baralho">
+    <button class="pbtn close-btn" data-close="galleryOverlay" aria-label="Fechar">✕</button>
     <h2>O Baralho · 52 Lâminas</h2>
     <div id="galleryBody"></div>
   </div>
 </div>
 
 <div class="overlay" id="historyOverlay">
-  <div class="sheet">
-    <button class="pbtn close-btn" data-close="historyOverlay">✕</button>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Histórico">
+    <button class="pbtn close-btn" data-close="historyOverlay" aria-label="Fechar">✕</button>
     <h2>Histórico de leituras</h2>
     <div id="historyList"></div>
   </div>
