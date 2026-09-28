@@ -1,0 +1,18 @@
+# Node / build tooling (futuro Capacitor)
+node_modules/
+dist/
+www/
+.DS_Store
+
+# Capacitor / Android / iOS (gerados na etapa de empacotamento)
+/android/
+/ios/
+*.keystore
+*.jks
+local.properties
+.gradle/
+capacitor.config.json.bak
+
+# Logs e ambiente
+*.log
+.env
